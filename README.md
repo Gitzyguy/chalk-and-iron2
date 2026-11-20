@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.3.0
+Version 3.3.3
 
 ## What it does
 
@@ -48,6 +48,7 @@ Every file must sit at the top level of the repository. If the icons are missing
 4. Wait 1 to 2 minutes. Then open `https://<username>.github.io/chalk-and-iron/` in Chrome on your phone.
 5. Tap **⋮ > Install app**.
 6. In the app, go to **Settings > Restore** and pick your history file (`chalk-and-iron-history-v*.json`).
+7. To add another of your programs, go to **Program > + Add program > Your programs**.
 
 **Do not upload your history or backup files to GitHub.** A public repository would show your data to anyone.
 
@@ -79,6 +80,11 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.3.3**
+  - Your 4 programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) can be added with one tap from **Program > + Add program**; no file needed.
+  - Older "Curls" history folded into one "Barbell Curls" exercise.
+- **3.3.1**
+  - Fixed: changing your training max now updates today's workout even if you started it on an older version.
 - **3.3.0**
   - Help guide.
   - Check for updates button.
