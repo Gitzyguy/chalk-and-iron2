@@ -2,14 +2,14 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.3.3
+Version 3.4.0
 
 ## What it does
 
 - **Workout screen**
   - Fills in today's weights from your training max or your last session.
   - Shows the plates to load per side, using only plates you own.
-  - Rest timer, warmup sets, AMRAP sets.
+  - Rest timer that adjusts to how hard the set felt (Easy, Hard, Fail), warmup sets, AMRAP sets.
   - Change your training max mid-workout and the remaining sets update.
 - **Programs**
   - Your own programs: HulkFit Plan A v2, HulkFit Plan B v2, Bodybuilder 5/3/1 No Leg Press, GreySkull LP Phraks.
@@ -80,6 +80,9 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.4.0**
+  - Effort-based rest timer: tap Easy, Hard or Fail after a set (defaults: warmups 1:00; main lifts 1:30 / 3:00 / 5:00; accessories 0:45 / 1:00 / 1:30). Editable in Settings. A missed AMRAP starts on Fail. Effort is saved with each set.
+  - Form videos play inside the app in YouTube's privacy mode.
 - **3.3.3**
   - Your 4 programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) can be added with one tap from **Program > + Add program**; no file needed.
   - Older "Curls" history folded into one "Barbell Curls" exercise.
