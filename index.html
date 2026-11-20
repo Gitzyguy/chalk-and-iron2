@@ -149,7 +149,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.3.0';
+const APP_VERSION = '3.3.1';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -1662,7 +1662,10 @@ const actions = {
 function refreshLiveTm(p, exId) {
   if (!S.live || p.id !== S.active) return;
   const ps = pos(), fresh = buildEntries(p, p.days[ps.day], ps.week);
+  /* nothing checked off yet: just rebuild today from the new numbers */
+  if (!S.live.ex.some(e => e.sets.some(x => x.done))) { const note = S.live.note, started = S.live.started; S.live = null; const nl = buildLive(); nl.note = note; nl.started = started; S.live = nl; L = nl; return; }
   S.live.ex.forEach(e => {
+    if (!e.kind) e.kind = e.main ? 'main' : 'reps';   // workouts started on versions before 3.2
     if (e.ex !== exId || !(e.kind === 'main' || TM_TYPES[e.kind])) return;
     const f = fresh.find(x => x.ex === exId && x.kind === e.kind); if (!f) return;
     e.sets = e.sets.map((st, i) => st.done || !f.sets[i] ? st : f.sets[i]);
@@ -1781,7 +1784,7 @@ document.addEventListener('visibilitychange', () => {
 async function boot() {
   try { S = normalize(await store.get(STATE_KEY)); }
   catch (e) { S = blankState(); }
-  if (S.live) { L = S.live; if (L.started) keepAwake(true); }
+  if (S.live) { S.live.ex.forEach(e => { if (!e.kind) e.kind = e.main ? 'main' : 'reps'; }); L = S.live; if (L.started) keepAwake(true); }
   render();
   if (navigator.storage && navigator.storage.persist) {
     try { const p = await navigator.storage.persist(); const el = $('#persistInfo'); if (el && p) el.textContent = 'Storage is protected from automatic clearing. Still keep a backup file somewhere safe.'; } catch (e) {}
