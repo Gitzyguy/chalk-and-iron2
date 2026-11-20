@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.4.1
+Version 3.6.0
 
 ## What it does
 
@@ -80,6 +80,21 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.6.0**
+  - Cable exercises show the plates to stack on the pulley's loading pin (starts at 0), for example 25 lb = 10 · 10 · 2.5 · 2.5 on pin. Which plates fit the pin is in Settings.
+  - The bar button on each exercise picks barbell, hex, EZ, pulley pin, another bar weight or no plates, for this workout only or always.
+  - Dumbbell weights round to 5 lb PowerBlock steps (5 to 90).
+- **3.5.0**
+  - Bigger text on the Workout screen; the next set is highlighted.
+  - Plates build on what is already on the bar from the set before (155 to 180 adds plates instead of stripping the bar).
+  - Bar button on each exercise: barbell, hex, EZ, another weight, or no bar. Suggested weights round to what you can load.
+  - Rest timer starts on Easy, and switches to Fail by itself when you get fewer reps than the target.
+  - Louder beep with a volume setting and a Test button. If the phone was locked when rest ended, it beeps when you come back.
+  - Finished sets lock (tap Edit to change one), and the screen scrolls to the next set.
+  - Typing a weight in one set fills it into the sets after it. Exercises with no weight on file say so.
+  - Program items have a Next workout weight and a Starting weight, so programs without training maxes can be adjusted.
+  - History: weights stand out as bold chips, and each workout in the list shows its top set.
+  - Form videos use the regular YouTube player, with an Open in the YouTube app button for when YouTube asks you to sign in.
 - **3.4.1**
   - Fixed: the plates to load were cut off on narrow phone screens. They now show in full on their own line under each set.
 - **3.4.0**

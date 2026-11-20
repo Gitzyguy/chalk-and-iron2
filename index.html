@@ -23,7 +23,7 @@
   --mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;overscroll-behavior-y:contain}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;overscroll-behavior-y:contain}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 #app{max-width:520px;margin:0 auto;min-height:100vh;padding:calc(10px + var(--safe-t)) 14px calc(150px + var(--safe-b))}
@@ -38,10 +38,10 @@ button{cursor:pointer}
 .top .pill{max-width:46vw}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
 .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);font-weight:700}
-h1{font-size:24px;margin:2px 0 2px;letter-spacing:.01em;text-transform:uppercase}
+h1{font-size:26px;margin:2px 0 2px;letter-spacing:.01em;text-transform:uppercase}
 h2{font-size:17px;margin:0}
 h3{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:20px 2px 8px}
-.sub{color:var(--dim);font-size:13px}
+.sub{color:var(--dim);font-size:14px}
 .row{display:flex;align-items:center;gap:8px}
 .between{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:10px 14px;font-weight:600;font-size:14px;min-height:42px}
@@ -53,20 +53,25 @@ h3{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
 a.btn{color:var(--text)}
 .dayin{flex:1;font-weight:700;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font-size:15px}
 .link{background:none;border:none;color:var(--rust);padding:4px 0;font-weight:600}
-.exname{background:none;border:none;padding:0;text-align:left;font-weight:700;font-size:17px;color:var(--text);display:flex;align-items:center;gap:6px}
+.exname{background:none;border:none;padding:0;text-align:left;font-weight:700;font-size:19px;color:var(--text);display:flex;align-items:center;gap:6px}
 .exname:after{content:"\203A";color:var(--dim);font-size:20px;line-height:1}
 .tag{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:5px;background:var(--rust-dim);color:#fff;text-transform:uppercase}
 .tag.up{background:#2f5a3a}.tag.gold{background:#6b5016}
-.meta{font-size:12.5px;color:var(--dim);margin:4px 0 8px;line-height:1.4}
-.set{display:grid;grid-template-columns:34px 1fr 64px 52px 40px;gap:6px;align-items:center;padding:6px 0;border-top:1px dashed var(--line)}
+.meta{font-size:14px;color:var(--dim);margin:4px 0 8px;line-height:1.5}
+.chipbtn{border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:3px 10px;font-size:13px;font-weight:600;color:var(--text);margin-left:6px}
+.set{display:grid;grid-template-columns:30px minmax(0,1fr) 70px 54px 46px;gap:6px;align-items:center;padding:8px 4px;margin:0 -4px;border-top:1px dashed var(--line);border-radius:8px}
+.set.next{background:rgba(210,85,26,.10);box-shadow:inset 3px 0 0 var(--rust)}
+.set.done .num[readonly]{background:transparent;border-color:transparent;color:var(--dim)}
 .set.warm{opacity:.72}
-.set .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;font-weight:700}
-.set .tgt{font-size:14px;min-width:0}
-.set .tgt b{font-family:var(--mono)}
-.set .plates{grid-column:2/-1;font-size:12.5px;color:var(--text);opacity:.8;font-family:var(--mono);margin-top:-2px;white-space:normal;line-height:1.35}
-.num{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 4px;text-align:center;font-family:var(--mono);font-size:15px}
+.set .lbl{font-size:12px;color:var(--dim);text-transform:uppercase;font-weight:700}
+.set .tgt{font-size:17px;min-width:0}
+.set .tgt b{font-family:var(--mono);font-size:19px}
+.set .tgt b.need{color:var(--gold)}
+.set .plates{grid-column:2/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14.5px;color:var(--text);opacity:.85;font-family:var(--mono);margin-top:-2px;white-space:normal;line-height:1.35}
+.set .plates .link{font-family:var(--font);font-size:14px;padding:2px 0 2px 10px}
+.num{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 4px;text-align:center;font-family:var(--mono);font-size:18px}
 .num:focus,.field input:focus,.field select:focus,textarea:focus{outline:2px solid var(--rust);outline-offset:-1px}
-.chk{width:40px;height:40px;border-radius:9px;border:1.5px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent}
+.chk{width:46px;height:46px;border-radius:9px;border:1.5px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent}
 .chk.on{background:var(--green);border-color:var(--green);color:#10140f}
 .exfoot{display:flex;gap:8px;margin-top:8px}
 .field{margin-bottom:10px}
@@ -115,8 +120,12 @@ nav button.on{color:var(--rust)}
 .stat{background:var(--panel2);border-radius:9px;padding:9px 10px}
 .stat .v{font-family:var(--mono);font-size:17px;font-weight:700}
 .stat .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
-.hist-sets{font-family:var(--mono);font-size:13px;line-height:1.6}
-.hist-sets .a{color:var(--gold)}
+.hist-sets{margin-top:6px;line-height:1}
+.hs{display:inline-block;background:var(--panel2);border:1px solid #44454c;border-radius:7px;padding:5px 8px;margin:3px 5px 3px 0;font-family:var(--mono);font-size:14px;color:var(--dim);white-space:nowrap}
+.hs b{color:#fff;font-size:16.5px}
+.hs.a{border-color:var(--gold);background:rgba(217,164,65,.12)}.hs.a b{color:var(--gold)}
+.hs.top{border-color:var(--rust)}
+.hl{color:var(--gold);font-weight:700;font-family:var(--mono)}
 .chart{width:100%;height:auto;display:block}
 .chart text{fill:var(--dim);font-size:10px;font-family:var(--mono)}
 .edrow{display:grid;grid-template-columns:1fr 46px 46px 46px 30px;gap:5px;align-items:center;margin-bottom:6px}
@@ -144,7 +153,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 </head>
 <body>
 <div id="app"></div>
-<div id="rest"><div class="in"><div class="bar" id="restBar"></div><div class="time" id="restTime">0:00<small>rest</small></div><div class="eff" id="restEff"><button data-eff="easy">Easy</button><button data-eff="hard">Hard</button><button data-eff="fail">Fail</button></div><button class="btn sm" data-act="restAdd">+30</button><button class="btn sm" data-act="restSkip">Skip</button></div></div>
+<div id="rest"><div class="in"><div class="bar" id="restBar"></div><div class="time" id="restTime">0:00</div><div class="eff" id="restEff"><button data-eff="easy">Easy</button><button data-eff="hard">Hard</button><button data-eff="fail">Fail</button></div><button class="btn sm" data-act="restAdd">+30</button><button class="btn sm" data-act="restSkip">Skip</button></div></div>
 <nav><div class="in" id="nav"></div></nav>
 <div class="toast" id="toast"></div>
 <script>
@@ -152,7 +161,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.4.1';
+const APP_VERSION = '3.6.0';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -223,8 +232,10 @@ function defaultSettings() {
   return {
     bars: {barbell:45, ez:15, hex:45},
     plates: {iron:{'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2}, bumper:{'45':2,'35':2,'25':2,'15':2,'10':2}},
-    rest: {warm:60, main:{easy:90, hard:180, fail:300}, acc:{easy:45, hard:60, fail:90}, def:'hard'},
-    warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null
+    pin: {'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2},
+    rest: {warm:60, main:{easy:90, hard:180, fail:300}, acc:{easy:45, hard:60, fail:90}, def:'easy'},
+    warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null,
+    lockDone: true, autoNext: true, volume: 'loud'
   };
 }
 function blankState() {
@@ -247,6 +258,9 @@ function normalize(st) {
   out.settings.rest = {warm:r0.warm != null ? r0.warm : dr.warm, def:r0.def || dr.def,
     main:Object.assign({}, dr.main, typeof r0.main === 'object' ? r0.main : {}), acc:Object.assign({}, dr.acc, typeof r0.acc === 'object' ? r0.acc : {})};
   if (!out.settings.plates || !out.settings.plates.iron) out.settings.plates = defaultSettings().plates;
+  if (!st || !st.settings || !st.settings.pin) out.settings.pin = Object.assign({}, out.settings.plates.iron);
+  /* 3.5: rest timer starts on Easy by default (older versions saved Hard) */
+  if (!out.settings.mig35) { if (out.settings.rest.def === 'hard') out.settings.rest.def = 'easy'; out.settings.mig35 = 1; }
   const bd = st && st.body && !Array.isArray(st.body) ? st.body : {};
   out.body = Object.assign(defaultBody(), bd);
   ['weights', 'waist', 'intake', 'phases'].forEach(k => { if (!Array.isArray(out.body[k])) out.body[k] = []; });
@@ -290,54 +304,116 @@ function exHistory(exId) {
 function lastPerformance(exId) { const h = exHistory(exId); return h.length ? h[0] : null; }
 
 /* ---------- weights and plates ---------- */
-function barWeight(ex) { const k = PLATE_EQUIP[ex && ex.equip]; return k ? (S.settings.bars[k] || 45) : 0; }
+/* An exercise can pick its own bar (ex.bar): a weight, or 0 for no bar. Otherwise the bar comes from its equipment. */
+/* How an exercise is loaded. A choice for today (e.bar on the workout entry) beats the exercise's
+   own choice (ex.bar), which beats its equipment. Values: a bar weight (plates per side), 'pin'
+   (pulley loading pin: plates stacked on one pin, starts at 0), or 0 (no plates). */
+function rigOf(ex, e) {
+  const v = e && e.bar != null ? e.bar : ex && ex.bar != null ? ex.bar : ex && ex.equip === 'cable' ? 'pin' : PLATE_EQUIP[ex && ex.equip] ? (S.settings.bars[PLATE_EQUIP[ex.equip]] || 45) : 0;
+  if (v === 'pin') return {mode:'pin', base:0, m:1};
+  return +v > 0 ? {mode:'side', base:+v, m:2} : null;
+}
+function barWeight(ex, e) { const r = rigOf(ex, e); return r && r.mode === 'side' ? r.base : 0; }
+const POWERBLOCK = {step:5, min:5, max:90};
+/* Nearest weight you can actually load: bar and plates, pulley pin plates, or PowerBlock steps. */
+function loadable(w, ex, e) {
+  if (w == null) return w;
+  const r = rigOf(ex, e);
+  if (!r) return ex && ex.equip === 'dumbbell' && w > 0 ? Math.min(POWERBLOCK.max, Math.max(POWERBLOCK.min, Math.round(w / POWERBLOCK.step) * POWERBLOCK.step)) : w;
+  if (w <= r.base) return r.base;
+  const c = plateCombo(w, ex, e); return c ? c.total : w;
+}
 function roundLoad(w) { const r = S.settings.round || 5; return Math.round(w / r) * r; }
-/* Best per-side plate combo from owned pairs. Floor lifts start with a bumper so bar height is right. */
-function plateCombo(total, ex) {
-  const bar = barWeight(ex);
-  if (!bar) return null;
-  const perSide = (total - bar) / 2;
-  if (perSide <= 0) return {plates:[], total:bar, exact: total <= bar ? total === bar : false};
+/* Plates you own: pairs (one per side) for a bar, single iron plates for the pulley pin. */
+function plateInv(mode) {
   const inv = [];
-  for (const kind of ['bumper', 'iron']) {
+  if (mode === 'pin') { const p = S.settings.pin || {}; for (const w in p) for (let i = 0; i < (p[w] || 0); i++) inv.push({w:+w, kind:'iron'}); }
+  else for (const kind of ['bumper', 'iron']) {
     const p = S.settings.plates[kind] || {};
     for (const w in p) { const pairs = Math.floor((p[w] || 0) / 2); for (let i = 0; i < pairs; i++) inv.push({w:+w, kind}); }
   }
-  const unit = 0.25;
-  const target = Math.round(perSide / unit);
-  const floor = !!(ex && ex.floor);
-  /* bounded knapsack over individual plates: cost = plate count, tie-break bumpers on floor lifts */
+  return inv.sort((a, b) => b.w - a.w);
+}
+const PU = 0.25;
+/* bounded knapsack over single plates: fewest plates for each reachable per-side load */
+function knap(inv, target, floor) {
   const best = new Map(); best.set(0, {cost:0, pick:[]});
-  inv.sort((a, b) => b.w - a.w);
   for (const pl of inv) {
-    const wu = Math.round(pl.w / unit);
+    const wu = Math.round(pl.w / PU);
     const pen = floor ? (pl.kind === 'iron' ? 0.01 : 0) : (pl.kind === 'bumper' ? 0.01 : 0);
-    const entries = [...best.entries()];
-    for (const [s, v] of entries) {
+    for (const [s, v] of [...best.entries()]) {
       const ns = s + wu; if (ns > target + 400) continue;
-      const nc = v.cost + 1 + pen;
-      const cur = best.get(ns);
+      const nc = v.cost + 1 + pen, cur = best.get(ns);
       if (!cur || nc < cur.cost) best.set(ns, {cost:nc, pick:v.pick.concat(pl)});
     }
   }
+  return best;
+}
+function orderPlates(pick, floor) {
+  pick = pick.slice().sort((a, b) => b.w - a.w || (a.kind === 'bumper' ? -1 : 1));
+  if (floor) { const fb = pick.findIndex(p => p.kind === 'bumper'); if (fb > 0) { const [b] = pick.splice(fb, 1); pick.unshift(b); } }
+  return pick;
+}
+/* Best per-side plate combo from owned pairs (fewest plates). Floor lifts start with a bumper so bar height is right. */
+function plateCombo(total, ex, e) {
+  const r = rigOf(ex, e);
+  if (!r) return null;
+  const bar = r.base, pin = r.mode === 'pin';
+  const perSide = (total - bar) / r.m;
+  if (perSide <= 0) return {plates:[], total:bar, exact: total <= bar ? total === bar : false, pin};
+  const target = Math.round(perSide / PU), floor = !pin && !!(ex && ex.floor), best = knap(plateInv(r.mode), target, floor);
   let pickKey = null;
   if (best.has(target)) pickKey = target;
   else { let d = Infinity; for (const k of best.keys()) { const dd = Math.abs(k - target); if (dd < d || (dd === d && k < pickKey)) { d = dd; pickKey = k; } } }
-  let pick = best.get(pickKey).pick.slice().sort((a, b) => b.w - a.w || (a.kind === 'bumper' ? -1 : 1));
-  if (floor) {
-    const firstBumper = pick.findIndex(p => p.kind === 'bumper');
-    if (firstBumper > 0) { const [b] = pick.splice(firstBumper, 1); pick.unshift(b); }
-  }
-  const achieved = bar + 2 * pickKey * unit;
-  return {plates:pick, total:achieved, exact: pickKey === target};
+  return {plates:orderPlates(best.get(pickKey).pick, floor), total:bar + r.m * pickKey * PU, exact: pickKey === target, pin};
 }
-function plateText(total, ex) {
-  const c = plateCombo(total, ex);
+/* Every distinct way to load exactly this many units per side (up to a few more plates than the fewest). */
+function plateOptions(target, floor, mode) {
+  const inv = plateInv(mode), out = new Map();
+  const units = inv.map(p => Math.round(p.w / PU));
+  const go = (i, left, pick) => {
+    if (left === 0) { const key = pick.map(p => p.kind[0] + p.w).sort().join(','); if (!out.has(key)) out.set(key, orderPlates(pick, floor)); return; }
+    if (i >= inv.length || pick.length >= 9) return;
+    if (units[i] <= left) go(i + 1, left - units[i], pick.concat(inv[i]));
+    go(i + 1, left, pick);
+  };
+  go(0, target, []);
+  return [...out.values()];
+}
+/* Plates for every set of one exercise, planned together: the fewest plate swaps across the whole
+   exercise (you keep what is on the bar and add to it), then the fewest plates. Iron is used on
+   bench, squat and press; bumpers only on floor lifts or when there is no other way. */
+function plateChain(e, ex) {
+  const r = rigOf(ex, e); if (!r) return [];
+  const bar = r.base, pin = r.mode === 'pin', floor = !pin && !!(ex && ex.floor);
+  const cands = e.sets.map(s => {
+    const w = s.w != null ? s.w : s.tw; if (!w) return null;
+    const perSide = (w - bar) / r.m;
+    if (perSide <= 0) return [{plates:[], total:bar, exact:w === bar, pin}];
+    const opts = Math.abs(perSide / PU - Math.round(perSide / PU)) < 1e-9 ? plateOptions(Math.round(perSide / PU), floor, r.mode) : [];
+    return opts.length ? opts.map(pl => ({plates:pl, total:w, exact:true, pin})) : [plateCombo(w, ex, e)];
+  });
+  const nodeCost = c => c.plates.length * 0.6 + c.plates.reduce((a, p) => a + (!floor && p.kind === 'bumper' ? 3 : 0), 0) + (floor && c.plates.length && c.plates[0].kind !== 'bumper' ? 3 : 0);
+  const swap = (a, b) => { let k = 0; while (k < a.length && k < b.length && a[k].w === b[k].w && a[k].kind === b[k].kind) k++; return (a.length - k) + (b.length - k); };
+  /* Viterbi over the sets */
+  let prev = [{c:{plates:[]}, cost:0, path:[]}];
+  cands.forEach(list => {
+    if (!list) { prev = prev.map(x => ({c:x.c, cost:x.cost, path:x.path.concat(null)})); return; }
+    prev = list.map(c => {
+      let bestX = null, bc = Infinity;
+      for (const x of prev) { const v = x.cost + swap(x.c.plates, c.plates); if (v < bc) { bc = v; bestX = x; } }
+      return {c, cost:bc + nodeCost(c), path:bestX.path.concat(c)};
+    });
+  });
+  return prev.reduce((a, x) => x.cost < a.cost ? x : a).path;
+}
+function plateFmt(c) {
   if (!c) return '';
-  if (!c.plates.length) return 'empty bar';
-  const t = c.plates.map(p => (p.kind === 'bumper' ? 'B' : '') + fmtW(p.w)).join(' · ') + ' /side';
+  if (!c.plates.length) return c.pin ? 'empty pin' : 'empty bar';
+  const t = c.plates.map(p => (p.kind === 'bumper' ? 'B' : '') + fmtW(p.w)).join(' · ') + (c.pin ? ' on pin' : ' /side');
   return c.exact ? t : t + ' (=' + fmtW(c.total) + ')';
 }
+function plateText(total, ex) { return plateFmt(plateCombo(total, ex)); }
 
 /* =========================================================================
    Exercise library (matched to a home gym: rack, barbell, hex bar, EZ bar,
@@ -648,8 +724,8 @@ function buildSets531(p, exId, week) {
   const sets = [];
   if (!tm) return sets;
   const bar = barWeight(ex) || 45;
-  if (S.settings.warmups && !wv.deload) WARMUP.forEach(([pct, reps], i) => sets.push({lbl:'W' + (i + 1), tw:Math.max(bar, roundLoad(tm * pct)), tr:reps, warm:true, pct}));
-  wv.sets.forEach(([pct, reps, amrap], i) => sets.push({lbl:String(i + 1), tw:Math.max(bar, roundLoad(tm * pct)), tr:reps, amrap:!!amrap, pct}));
+  if (S.settings.warmups && !wv.deload) WARMUP.forEach(([pct, reps], i) => sets.push({lbl:'W' + (i + 1), tw:loadable(Math.max(bar, roundLoad(tm * pct)), ex), tr:reps, warm:true, pct}));
+  wv.sets.forEach(([pct, reps, amrap], i) => sets.push({lbl:String(i + 1), tw:loadable(Math.max(bar, roundLoad(tm * pct)), ex), tr:reps, amrap:!!amrap, pct}));
   return sets;
 }
 /* Ramp-up warmups for straight-set barbell work: empty bar, then about 40/60/80% of the working weight. */
@@ -666,6 +742,7 @@ function rampWarmups(ex, work) {
 function suggestion(item) {
   const ex = S.exercises[item.ex];
   const hist = exHistory(item.ex), last = hist[0];
+  if (item.next) return {w:item.next, up:false, last, set:true};
   if (!last) return {w:item.start != null ? item.start : null, up:false, last:null};
   const inc = item.inc != null ? item.inc : ex && ex.inc != null ? ex.inc : DEFAULT_INC[ex ? ex.equip : 'dumbbell'];
   const step = inc > 0 ? inc : 2.5;
@@ -684,7 +761,7 @@ function suggestion(item) {
     const missed = h => h.sets.some(s => s.r < item.max);
     if (w2 === w && missed(last) && missed(hist[1])) return {w:Math.max(barWeight(ex) || 0, Math.floor(w * 0.9 / step) * step), up:false, last, reset:true};
   }
-  return {w:w || null, up:false, last};
+  return {w:w || (item.start != null ? item.start : null), up:false, last};
 }
 const liveSet = (s) => Object.assign(s, {w:s.tw, r:null, done:false});
 /* Turn one program day into today's list of exercises and sets. */
@@ -700,13 +777,14 @@ function buildEntries(p, d, week) {
     if (type === 'fsl' || type === 'bbb') {
       if (deload) continue;                       // supplemental work is skipped on deload weeks
       const pct = type === 'fsl' ? WAVE[week].sets[0][0] : (it.pct || 0.5);
-      const tw = tm ? Math.max(bar, roundLoad(tm * pct)) : null;
+      const tw = tm ? loadable(Math.max(bar, roundLoad(tm * pct)), exo) : null;
       const sets = [];
       for (let i = 0; i < it.sets; i++) sets.push(liveSet({lbl:String(i + 1), tw, tr:it.max, amrap:!!it.amrap && i === it.sets - 1, pct}));
       ex.push({ex:it.ex, kind:type, main:false, supp:true, pct, min:it.max, max:it.max, sets});
       continue;
     }
     const sg = suggestion(it);
+    if (sg.w) sg.w = loadable(sg.w, exo);
     const n = deload && S.settings.deloadAcc ? Math.max(1, Math.ceil(it.sets / 2)) : it.sets;
     const sets = it.warm ? rampWarmups(exo, sg.w).map(liveSet) : [];
     for (let i = 0; i < n; i++) sets.push(liveSet({lbl:String(i + 1), tw:sg.w, tr:it.max, trMin:it.min, amrap:!!it.amrap && i === n - 1}));
@@ -760,19 +838,31 @@ function stopRest() { clearInterval(rest.h); rest.end = 0; $('#rest').classList.
 function tickRest() {
   if (!rest.end) return;
   const left = Math.max(0, Math.ceil((rest.end - Date.now()) / 1000));
-  $('#restTime').innerHTML = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0') + '<small>rest</small>';
+  $('#restTime').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
   $('#restBar').style.width = (100 * left / rest.total) + '%';
-  if (left <= 0) { stopRest(); restDone(); }
+  if (left <= 0) { stopRest(); if (document.visibilityState === 'hidden') { rest.missed = true; if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]); } else restDone(); }
 }
 let audioCtx = null;
+const VOLUME = {normal:.3, loud:.6, max:1};
+/* Called on a tap so the phone lets the app play sound later. */
+function primeAudio() {
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
+}
+/* Two bursts of three square-wave beeps: much louder than a sine tone at the same volume. Follows the phone's media volume. */
 function beep() {
   try {
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    [0, .22, .44].forEach(t => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(.18, audioCtx.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + t + .18); o.start(audioCtx.currentTime + t); o.stop(audioCtx.currentTime + t + .2); });
+    primeAudio();
+    const v = VOLUME[S.settings.volume] || VOLUME.loud, t0 = audioCtx.currentTime + .05;
+    [0, .28, .56, 1.1, 1.38, 1.66].forEach(t => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'square'; o.frequency.value = t < 1 ? 1050 : 1320;
+      o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(.0001, t0 + t); g.gain.exponentialRampToValueAtTime(v, t0 + t + .01); g.gain.setValueAtTime(v, t0 + t + .19); g.gain.exponentialRampToValueAtTime(.0001, t0 + t + .22);
+      o.start(t0 + t); o.stop(t0 + t + .24);
+    });
   } catch (e) {}
 }
 function restDone() {
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]);
   if (S.settings.sound) beep();
   toast('Rest done. Next set.');
 }
@@ -834,54 +924,71 @@ function viewToday() {
   if (main) {
     const top = main.sets.filter(s => !s.warm).slice(-1)[0];
     const ex = S.exercises[main.ex];
-    if (top && top.tw && barWeight(ex)) h += plateVis(top.tw, ex) + `<div class="small mono">${fmtW(top.tw)} lb top set · ${esc(plateText(top.tw, ex))}</div>`;
+    const ch = plateChain(main, ex), tc = ch[main.sets.indexOf(top)];
+    if (top && top.tw && tc) h += plateVis(tc) + `<div class="small mono">${fmtW(top.tw)} lb top set · ${esc(plateFmt(tc))}</div>`;
     if (p.wave) h += `<button class="btn sm mt" data-act="editTm" data-ex="${esc(main.ex)}">${p.tm[main.ex] ? esc(exName(main.ex)) + ' training max ' + fmtW(p.tm[main.ex]) + ' · Change' : 'Set ' + esc(exName(main.ex)) + ' training max'}</button>`;
   }
   h += `</div>`;
-  L.ex.forEach((e, ei) => { h += exerciseCard(e, ei, p); });
+  const nx = nextOpen(L, 0, -1);
+  L.ex.forEach((e, ei) => { h += exerciseCard(e, ei, p, nx); });
   h += `<button class="btn block" data-act="addExToday">+ Add exercise to today</button>
     <div class="field mt"><label>Notes</label><textarea rows="2" data-in="liveNote" placeholder="How did it feel?">${esc(L.note || '')}</textarea></div>
     <button class="btn primary block" data-act="finish">Finish workout</button>
     <button class="btn ghost block mt" data-act="discard">Discard progress</button>`;
   return h;
 }
-function plateVis(total, ex) {
-  const c = plateCombo(total, ex); if (!c) return '';
+/* first set not checked off, starting after set si of exercise ei */
+function nextOpen(L, ei, si) {
+  for (let a = ei; a < L.ex.length; a++) for (let b = a === ei ? si + 1 : 0; b < L.ex[a].sets.length; b++) if (!L.ex[a].sets[b].done) return {ei:a, si:b};
+  return null;
+}
+function plateVis(c) {
+  if (!c) return '';
   const H = {45:44, 35:40, 25:35, 15:44, 10:44, 5:24, 2.5:18}, W = {45:9, 35:8, 25:7, 15:6, 10:5, 5:5, 2.5:4};
   return `<div class="platevis"><div class="sl"></div>${c.plates.map(pl => `<div class="p ${pl.kind === 'bumper' ? 'b' : ''}" style="height:${pl.kind === 'bumper' ? 44 : (H[pl.w] || 18)}px;width:${W[pl.w] || 5}px"></div>`).join('')}</div>`;
 }
-function exerciseCard(e, ei, p) {
+function exerciseCard(e, ei, p, nx) {
   const ex = S.exercises[e.ex] || {name:'Unknown', equip:'dumbbell'};
   let h = `<div class="card"><div class="between"><button class="exname" data-act="openEx" data-ex="${esc(e.ex)}">${esc(ex.name)}</button>`;
   if (e.main) h += `<span class="tag">Main</span>`;
   else if (e.up) h += `<span class="tag up">Go up</span>`;
   else if (e.reset) h += `<span class="tag gold">Reset</span>`;
   h += `</div>`;
+  const rg = rigOf(ex, e);
+  const barBtn = ex.equip === 'bodyweight' && ex.bar == null && e.bar == null ? '' : `<button class="chipbtn" data-act="pickBar" data-ex="${esc(e.ex)}" data-ei="${ei}">${rg ? (rg.mode === 'pin' ? 'Pulley pin' : 'Bar ' + fmtW(rg.base) + ' lb') : 'No plates'}${e.bar != null ? ' (today)' : ''}</button>`;
   const tmLink = () => { const tm = p.tm[e.ex]; return `<button class="link" data-act="editTm" data-ex="${esc(e.ex)}">${tm ? 'Training max ' + fmtW(tm) + ' lb · change' : 'Set training max'}</button>`; };
   if (e.kind === 'main' || e.kind === '531') {
-    h += `<div class="meta">${tmLink()}${lastLine(e.ex)}</div>`;
+    h += `<div class="meta">${tmLink()}${barBtn}${lastLine(e.ex)}</div>`;
   } else if (e.kind === 'fsl' || e.kind === 'bbb') {
-    h += `<div class="meta">${e.sets.length} × ${e.max} at ${Math.round(e.pct * 100)}% of training max (${e.kind === 'fsl' ? 'First Set Last' : 'supplemental'}) · ${tmLink()}</div>`;
+    h += `<div class="meta">${e.sets.length} × ${e.max} at ${Math.round(e.pct * 100)}% of training max (${e.kind === 'fsl' ? 'First Set Last' : 'supplemental'}) · ${tmLink()}${barBtn}</div>`;
   } else {
     const nWork = e.sets.filter(x => !x.warm).length;
-    h += `<div class="meta">${nWork} × ${e.min === e.max ? e.max : e.min + '-' + e.max} reps${e.sets.some(x => x.amrap) ? ', last set as many as you can' : ''}${e.up ? ' · hit the top of the range last time, so the weight goes up' : ''}${e.cut ? ' · deload week: half the sets' : ''}${e.reset ? ' · missed reps twice at this weight, so it drops about 10%' : ''}${e.est ? ' · weight estimated from your last session at a different rep range' : ''}${lastLine(e.ex)}</div>`;
+    const noW = ex.equip !== 'bodyweight' && e.sets.some(x => !x.warm && !x.tw);
+    h += `<div class="meta">${nWork} × ${e.min === e.max ? e.max : e.min + '-' + e.max} reps${e.sets.some(x => x.amrap) ? ', last set as many as you can' : ''}${e.up ? ' · hit the top of the range last time, so the weight goes up' : ''}${e.cut ? ' · deload week: half the sets' : ''}${e.reset ? ' · missed reps twice at this weight, so it drops about 10%' : ''}${e.est ? ' · weight estimated from your last session at a different rep range' : ''}${noW ? ' · <b style="color:var(--gold)">no weight on file yet: type it in set 1 and the other sets fill in</b>' : ''}${barBtn}${lastLine(e.ex)}</div>`;
   }
+  const chain = plateChain(e, ex), lock = S.settings.lockDone;
   e.sets.forEach((s, si) => {
-    const tgt = s.tw != null ? `<b>${fmtW(s.tw)}</b> × ${s.amrap ? s.tr + '+' : (s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr)}` : `${s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr} reps`;
-    const pt = (s.tw && barWeight(ex)) ? `<div class="plates">${esc(plateText(s.w != null ? s.w : s.tw, ex))}</div>` : '';
-    h += `<div class="set ${s.warm ? 'warm' : ''}"><div class="lbl">${esc(s.lbl)}</div><div class="tgt">${tgt}${s.amrap ? ' <span class="tag">AMRAP</span>' : ''}</div>
-      <input class="num" type="number" inputmode="decimal" step="any" data-in="w" data-ei="${ei}" data-si="${si}" value="${s.w != null ? fmtW(s.w) : ''}" placeholder="lb" aria-label="weight">
-      <input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? 'reps' : s.tr}" aria-label="reps">
-      <button class="chk ${s.done ? 'on' : ''}" data-act="check" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button>${pt}</div>`;
+    const bwt = ex.equip === 'bodyweight';
+    const wtxt = s.tw != null && (s.tw || !bwt) ? `<b>${fmtW(s.tw)}</b>` : (bwt ? '<b>BW</b>' : '<b class="need">?</b>');
+    const reps = s.amrap ? s.tr + '+' : (s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr);
+    const tgt = `${wtxt} × ${reps}`;
+    const locked = s.done && lock && !s.edit, ro = locked ? ' readonly tabindex="-1"' : '';
+    const isNext = nx && nx.ei === ei && nx.si === si;
+    const pc = chain[si] ? `<span class="pt">${esc(plateFmt(chain[si]))}</span>` : (s.done && lock ? '<span class="pt"></span>' : '');
+    const edit = s.done && lock ? `<button class="link" data-act="editSet" data-ei="${ei}" data-si="${si}">${s.edit ? 'Done editing' : 'Edit'}</button>` : '';
+    h += `<div class="set ${s.warm ? 'warm' : ''} ${s.done ? 'done' : ''} ${isNext ? 'next' : ''}" data-row="${ei}-${si}"><div class="lbl">${esc(s.lbl)}</div><div class="tgt">${tgt}${s.amrap ? ' <span class="tag">AMRAP</span>' : ''}</div>
+      <input class="num" type="number" inputmode="decimal" step="any" data-in="w" data-ei="${ei}" data-si="${si}" value="${s.w != null ? fmtW(s.w) : ''}" placeholder="lb" aria-label="weight"${ro}>
+      <input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? 'reps' : s.tr}" aria-label="reps"${ro}>
+      <button class="chk ${s.done ? 'on' : ''}" data-act="${locked ? 'lockedTap' : 'check'}" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button>${pc || edit ? `<div class="plates">${pc}${edit}</div>` : ''}</div>`;
   });
   h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
   return h;
 }
+const setChips = (sets, opts) => sets.map(s => `<span class="hs ${s.amrap ? 'a' : ''}">${s.w ? `<b>${fmtW(s.w)}</b>×${s.r}` : `<b>${s.r}</b> reps`}${s.amrap ? '+' : ''}</span>`).join('');
 function lastLine(exId) {
   const l = lastPerformance(exId);
   if (!l) return '';
-  const sets = l.sets.map(s => (s.w ? fmtW(s.w) + '×' : '') + s.r).join(', ');
-  return `<br>Last (${fmtShort(l.session.date)}): <span class="mono">${esc(sets)}</span>`;
+  return `<div class="hist-sets"><span style="font-size:13px">Last (${esc(fmtShort(l.session.date))}):</span> ${setChips(l.sets)}</div>`;
 }
 function backupBanner() {
   const st = S.settings, n = S.dirtySinceBackup || 0;
@@ -899,7 +1006,9 @@ function viewHistory() {
     h += `<div class="card list">`;
     S.sessions.slice(0, histLimit).forEach(s => {
       const sets = s.ex.reduce((n, e) => n + e.sets.filter(x => !x.warm).length, 0);
-      h += `<button class="it" data-act="openSession" data-id="${esc(s.id)}"><div class="grow"><div class="t">${esc(s.day)}</div><div class="s">${esc(fmtShort(s.date))} · ${esc(s.program)} · ${sets} sets${s.dur ? ' · ' + s.dur + ' min' : ''}</div></div><span class="sub">›</span></button>`;
+      const f = s.ex[0], top = f ? f.sets.filter(x => !x.warm).reduce((a, x) => (x.w || 0) > (a ? a.w || 0 : -1) ? x : a, null) : null;
+      const topTxt = top && top.w ? `<div class="s"><span style="color:var(--text)">${esc(exName(f.ex))}</span> <span class="hl">${fmtW(top.w)}×${top.r}${top.amrap ? '+' : ''}</span></div>` : '';
+      h += `<button class="it" data-act="openSession" data-id="${esc(s.id)}"><div class="grow"><div class="t">${esc(s.day)}</div>${topTxt}<div class="s">${esc(fmtShort(s.date))} · ${esc(s.program)} · ${sets} sets${s.dur ? ' · ' + s.dur + ' min' : ''}</div></div><span class="sub">›</span></button>`;
     });
     h += `</div>`;
     if (S.sessions.length > histLimit) h += `<button class="btn block" data-act="more">Show more</button>`;
@@ -950,6 +1059,7 @@ function viewProgram() {
     });
     h += `</div>`;
   }
+  if (!mains.length) h += `<div class="small" style="margin:6px 2px 0">This program has no training maxes: weights come from your last session. To change one, tap the exercise below and set <b>Next workout weight</b>, or type the weight in set 1 on the Workout screen.</div>`;
   h += `<h3>Days</h3>`;
   p.days.forEach((d, di) => {
     h += `<div class="card daycard"><div class="hdr"><input class="dayin" data-in="dayName" data-di="${di}" value="${esc(d.name)}">
@@ -957,7 +1067,7 @@ function viewProgram() {
       ${p.wave || d.main ? `<div class="field"><label>Main lift (5/3/1 wave)</label><div class="row"><button class="btn" style="justify-content:flex-start;flex:1" data-act="pickMain" data-di="${di}">${d.main ? esc(exName(d.main)) : 'None'}</button>${d.main ? `<button class="ib" data-act="clearMain" data-di="${di}" aria-label="clear">✕</button>` : ''}</div></div>` : ''}
       <div class="edhead"><span>Exercise (tap for options)</span><span>Sets</span><span>Min</span><span>Max</span><span></span></div>`;
     d.items.forEach((it, ii) => {
-      const tl = {'531':'5/3/1 wave', fsl:'First Set Last', bbb:Math.round((it.pct || .5) * 100) + '% of TM'}[it.type] || (it.amrap ? 'last set AMRAP' : '');
+      const tl = ({'531':'5/3/1 wave', fsl:'First Set Last', bbb:Math.round((it.pct || .5) * 100) + '% of TM'}[it.type] || (it.amrap ? 'last set AMRAP' : '')) + (it.next ? ' · next ' + fmtW(it.next) + ' lb' : '');
       h += `<div class="edrow"><button class="nm" data-act="itemOpts" data-di="${di}" data-ii="${ii}">${esc(exName(it.ex))}${tl ? `<span class="small" style="display:block">${esc(tl)}</span>` : ''}</button>
         <input class="num" type="number" inputmode="numeric" data-in="itSets" data-di="${di}" data-ii="${ii}" value="${it.sets}">
         <input class="num" type="number" inputmode="numeric" data-in="itMin" data-di="${di}" data-ii="${ii}" value="${it.min}">
@@ -988,6 +1098,8 @@ function viewSettings() {
     });
     h += `</div>`;
   }
+  h += `</div><h3>Pulley pin plates</h3><div class="card"><div class="small" style="margin-bottom:8px">Iron plates that fit on the pulley's loading pin (single plates, not pairs). Set a size to 0 if it does not fit.</div><div class="plategrid">`;
+  Object.keys(st.pin).sort((a, b) => b - a).forEach(w => { h += `<div class="field"><label>${fmtW(+w)} lb</label><input class="num" type="number" inputmode="numeric" data-in="pinPlate" data-w="${w}" value="${st.pin[w]}"></div>`; });
   h += `</div><h3>Bars</h3><div class="card grid3">${['barbell', 'hex', 'ez'].map(k => `<div class="field"><label>${EQUIP[k]}</label><input class="num" type="number" inputmode="decimal" data-in="bar" data-k="${k}" value="${st.bars[k]}"></div>`).join('')}</div>`;
   const rs = st.rest, rin = (k, t) => `<input class="num" type="number" inputmode="numeric" data-in="rest" data-k="${k}" data-t="${t}" value="${rs[k][t]}">`;
   h += `<h3>Rest timer (seconds)</h3><div class="card"><div class="small" style="margin-bottom:8px">After each set, tap Easy, Hard or Fail on the timer bar and the rest changes to match. An AMRAP set short of its target starts on Fail.</div>
@@ -1000,7 +1112,10 @@ function viewSettings() {
     ${swRow('warmups', 'Warmup sets', '40/50/60% of training max before main lifts (skipped on deload).')}
     ${swRow('deloadAcc', 'Lighter accessories on deload', 'Deload week (5/3/1 week 4) cuts accessory sets in half.')}
     ${swRow('awake', 'Keep screen on', 'Screen stays awake while a workout is in progress.')}
-    ${swRow('sound', 'Beep when rest is done', 'Phone also vibrates.')}
+    ${swRow('sound', 'Beep when rest is done', 'Phone also vibrates. Uses your media volume. If the screen was locked, it beeps when you come back to the app.')}
+    <div class="toggle"><div><b>Beep volume</b><div class="small">Turn the phone's media volume up too.</div></div><div class="row"><select data-in="volume" class="num" style="width:96px">${['normal', 'loud', 'max'].map(v => `<option ${st.volume === v ? 'selected' : ''} value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select><button class="btn sm" data-act="testBeep">Test</button></div></div>
+    ${swRow('lockDone', 'Lock finished sets', 'Checked sets cannot be changed by accident. Tap Edit under a set to change it.')}
+    ${swRow('autoNext', 'Jump to the next set', 'After you check a set, the screen scrolls to the next one.')}
     <div class="toggle"><div><b>Round main lift weights to</b><div class="small">Smallest jump you can load.</div></div><select data-in="round" class="num" style="width:80px">${[2.5, 5, 10].map(v => `<option ${st.round === v ? 'selected' : ''} value="${v}">${v} lb</option>`).join('')}</select></div></div>`;
   if (S.active) h += `<h3>Exercises</h3><div class="card"><div class="small">Combine two exercises that are really the same. History is merged into the one you keep.</div><button class="btn block mt" data-act="mergeOpen">Merge exercises</button></div>`;
   h += `<h3>Danger zone</h3><div class="card"><button class="btn danger block" data-act="resetAll">Erase all data on this phone</button></div>
@@ -1063,7 +1178,7 @@ function openExercise(exId) {
     h += `<div class="card list">`;
     hist.slice(0, 150).forEach(hh => {
       h += `<div class="it" style="display:block"><div class="between"><b>${esc(fmtShort(hh.session.date))}</b><span class="small">${esc(hh.session.day)}</span></div>
-        <div class="hist-sets">${hh.sets.map(s => `<span class="${s.amrap ? 'a' : ''}">${s.w ? fmtW(s.w) + '×' : ''}${s.r}${s.amrap ? '+' : ''}</span>`).join(' &nbsp; ')}</div></div>`;
+        <div class="hist-sets">${setChips(hh.sets)}</div></div>`;
     });
     h += `</div>`;
   }
@@ -1176,6 +1291,35 @@ function tmReviewSheet(p, cycle) {
     bg.querySelector('#tmSave').addEventListener('click', () => {
       bg.querySelectorAll('[data-tmnew]').forEach(i => { const v = num(i.value); if (v) p.tm[i.dataset.tmnew] = v; });
       save(); closeSheet(bg); render(); toast('Training maxes updated.');
+    });
+  });
+}
+/* Pick how an exercise is loaded: for this workout only, or always for this exercise. */
+function barSheet(exId, ei) {
+  const ex = S.exercises[exId], b = S.settings.bars, e = L && L.ex[ei] && L.ex[ei].ex === exId ? L.ex[ei] : null;
+  const name = r => r ? (r.mode === 'pin' ? 'pulley pin' : fmtW(r.base) + ' lb bar') : 'no plates';
+  let scope = e ? 'today' : 'always';
+  const opts = [['Barbell', b.barbell], ['Hex bar', b.hex], ['EZ bar', b.ez], ['Pulley pin (starts at 0, plates on one pin)', 'pin'], ['No plates (dumbbells, bodyweight)', 0]];
+  sheet(`<div class="hd"><h2>${esc(ex.name)}</h2><button class="x" data-act="close">✕</button></div>
+    <p class="sub"><b style="color:var(--text)">Today: ${name(rigOf(ex, e))}</b>${e && e.bar != null ? ' (changed for today)' : ''} · Always: ${name(rigOf(ex))}</p>
+    ${e ? `<div class="seg" id="bsScope"><button data-sc="today" class="on">This workout only</button><button data-sc="always">Always for this exercise</button></div>` : ''}
+    <div class="card list">${opts.map(([n, w]) => `<button class="it" data-bar="${w}"><div class="grow"><div class="t">${esc(n)}</div>${+w ? `<div class="s">${fmtW(w)} lb</div>` : ''}</div></button>`).join('')}</div>
+    <div class="row"><div class="field" style="flex:1;margin:0"><label>Other bar weight (lb)</label><input id="barC" class="num" type="number" inputmode="decimal" step="any" placeholder="e.g. 35"></div><button class="btn" id="barCGo" style="align-self:flex-end">Use</button></div>
+    ${ex.bar != null || (e && e.bar != null) ? '<button class="btn ghost block mt" data-bar="default">Back to the default</button>' : ''}
+    <div class="small mt">Plates and suggested weights use this, rounded to weights you can actually load. Bar weights and pulley pin plates are in Settings.</div>`, bg => {
+    const apply = v => {
+      if (v === 'default') { delete ex.bar; if (L) L.ex.forEach(x => { if (x.ex === exId) delete x.bar; }); }
+      else if (scope === 'today' && e) L.ex.forEach(x => { if (x.ex === exId) x.bar = v; });
+      else { ex.bar = v; if (L) L.ex.forEach(x => { if (x.ex === exId) delete x.bar; }); }
+      const Lv = L || S.live;
+      if (Lv) Lv.ex.forEach(x => { if (x.ex === exId) x.sets.forEach(st => { if (!st.done && st.tw) { st.tw = loadable(st.tw, ex, x); st.w = st.tw; } }); });
+      if (L) touchLive(true); else save(true);
+      closeSheet(bg); render(); toast(v === 'default' ? 'Back to the default.' : (scope === 'today' && e ? 'For this workout: ' : 'Always: ') + name(rigOf(ex, scope === 'today' && e ? {bar:v} : null)) + '.');
+    };
+    bg.addEventListener('click', ev => {
+      const sc = ev.target.closest('[data-sc]'); if (sc) { scope = sc.dataset.sc; bg.querySelectorAll('[data-sc]').forEach(x => x.classList.toggle('on', x === sc)); return; }
+      const t = ev.target.closest('[data-bar]'); if (t) { const d = t.dataset.bar; return apply(d === 'default' ? 'default' : d === 'pin' ? 'pin' : +d); }
+      if (ev.target.id === 'barCGo') { const v = num(bg.querySelector('#barC').value); if (!v || v < 5 || v > 100) return toast('Enter a bar weight in lb.'); apply(v); }
     });
   });
 }
@@ -1509,22 +1653,23 @@ function ytId(url) {
 function videoSheet(exId) {
   const ex = S.exercises[exId], id = ytId(ex.video);
   sheet(`<div class="hd"><h2>${esc(ex.name)}</h2><button class="x" data-act="close">✕</button></div>
-    <div style="position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#000"><iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1" title="${esc(ex.name)} form video" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
-    ${ex.notes ? `<div class="card small mt" style="white-space:pre-wrap">${esc(ex.notes)}</div>` : ''}
-    <a class="btn block mt" style="text-decoration:none" href="${esc(ex.video)}" target="_blank" rel="noopener">Open in YouTube instead</a>`);
+    <a class="btn primary block" style="text-decoration:none;margin-bottom:10px" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">Open in the YouTube app</a>
+    <div style="position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;background:#000"><iframe src="https://www.youtube.com/embed/${id}?rel=0&playsinline=1" title="${esc(ex.name)} form video" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+    <div class="small mt">If YouTube asks you to sign in to prove you are not a bot, use the button above instead. It opens the video in the YouTube app, signed in as you.</div>
+    ${ex.notes ? `<div class="card small mt" style="white-space:pre-wrap">${esc(ex.notes)}</div>` : ''}`);
 }
 
 /* ---------- help and updates ---------- */
 const HELP = [
   ['Getting around', `<p><b>Workout</b> is today's session. <b>History</b> lists every workout and every exercise with charts. <b>Body</b> tracks weight, phases and calories. <b>Program</b> is where you pick and edit programs. <b>Settings</b> has plates, bars, timers, backup and updates. The <b>?</b> at the top opens this guide from any screen.</p>`],
-  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom. Tap <b>Easy</b>, <b>Hard</b> or <b>Fail</b> to set the rest for how the set felt (times are in Settings), or +30 / Skip. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
+  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b>; tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
   ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you hit the target reps on its AMRAP sets.</p>`],
   ['Weeks, days and cycles', `<p>5/3/1 runs 4 weeks: 5s, 3s, 5/3/1 and a deload. Finishing a workout moves you to the next day. Tap <b>Change</b> on the Workout screen to jump to any week, day or cycle, for example to skip a deload or redo a missed day.</p>`],
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
   ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ Add program</b> lists your own programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) and well known programs (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
-  ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows start with a bumper so the bar sits at the right height. Set your barbell, hex bar and EZ bar weights in Settings.</p>`],
+  ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows start with a bumper so the bar sits at the right height. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0 (Settings, Pulley pin plates). Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
   ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. A weekly waist measurement is optional but the best check on fat loss.</p>`],
-  ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app in YouTube's privacy mode. YouTube can still show ads on some videos; YouTube Premium is the only way to remove them completely. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
+  ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app. If YouTube asks you to sign in or prove you are not a bot, tap <b>Open in the YouTube app</b> instead. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
   ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p>`],
   ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
   ['Troubleshooting', `<p><b>Weights look wrong:</b> check the training max and the bar weight in Settings. <b>Wrong day:</b> use Change on the Workout screen. <b>Something odd after an update:</b> close the app fully and reopen. <b>Before anything risky:</b> Back up now.</p>`]
@@ -1642,6 +1787,7 @@ function freshProgram() {
   S.programs[id] = {id, name:'5/3/1', wave:true, days:['Press', 'Deadlift', 'Bench', 'Squat'].map((n, i) => ({name:n, main:ids[i], items:[]})), tm:{}, tmInc:{[ids[0]]:5, [ids[1]]:10, [ids[2]]:5, [ids[3]]:10}};
   S.pos[id] = {week:0, day:0, cycle:1}; S.active = id;
 }
+const missedSet = s => s.r != null && s.tr ? (s.amrap ? s.r < s.tr : s.r < (s.trMin || s.tr)) : false;
 function curLiveSet(el) { const e = L.ex[+el.dataset.ei]; return {e, s:e.sets[+el.dataset.si]}; }
 function saveWorkout() {
   const p = prog(), ps = pos();
@@ -1651,6 +1797,8 @@ function saveWorkout() {
     S.sessions.unshift({id:uid('s'), date:Date.now(), programId:p.id, program:p.name, day:p.days[ps.day].name, week:p.wave ? ps.week : null, cycle:ps.cycle,
       dur:L.started ? Math.max(1, Math.round((Date.now() - L.started) / 60000)) : null, note:(L.note || '').trim(), ex});
     S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
+    const logged = new Set(ex.map(e => e.ex));
+    p.days[ps.day].items.forEach(it => { if (it.next && logged.has(it.ex)) delete it.next; });
   }
   const finishedCycle = ps.cycle;
   let cycleDone = false;
@@ -1685,18 +1833,26 @@ const actions = {
   delSession: el => { if (!confirm('Delete this workout from history?')) return; S.sessions = S.sessions.filter(s => s.id !== el.dataset.id); save(); closeSheet(); render(); },
   check: el => {
     const {e, s} = curLiveSet(el);
-    s.done = !s.done;
+    s.done = !s.done; s.edit = false;
+    primeAudio();
     if (s.done) {
       if (s.w == null && s.tw != null) s.w = s.tw;
       if (s.r == null) s.r = s.tr;
-      const ex = S.exercises[e.ex];
       const isLast = L.ex.indexOf(e) === L.ex.length - 1 && e.sets.indexOf(s) === e.sets.length - 1;
-      const missed = s.amrap ? s.r < s.tr : (s.r != null && s.tr && s.r < (s.trMin || s.tr));
-      if (!isLast) startRest(s.warm ? 'warm' : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, missed ? 'fail' : null);
+      if (!isLast) startRest(s.warm ? 'warm' : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, missedSet(s) ? 'fail' : null);
       if (s.amrap && s.r != null && s.w) toast('Estimated max ' + Math.round(e1rm(s.w, s.r)) + ' lb');
     }
     touchLive(true); render();
+    if (s.done && S.settings.autoNext) {
+      const n = nextOpen(L, +el.dataset.ei, +el.dataset.si) || nextOpen(L, 0, -1);
+      const row = n && document.querySelector(`[data-row="${n.ei}-${n.si}"]`);
+      if (row) requestAnimationFrame(() => row.scrollIntoView({block:'center', behavior:'smooth'}));
+    }
   },
+  lockedTap: () => toast('Finished sets are locked. Tap Edit under the set to change it.', 2600),
+  editSet: el => { const {s} = curLiveSet(el); s.edit = !s.edit; touchLive(true); render(); },
+  pickBar: el => barSheet(el.dataset.ex, +el.dataset.ei),
+  testBeep: () => { primeAudio(); beep(); if (navigator.vibrate) navigator.vibrate([400, 150, 400]); },
   addSet: el => { const e = L.ex[+el.dataset.ei]; const last = e.sets[e.sets.length - 1] || {lbl:'0', tr:10}; e.sets.push({lbl:String(e.sets.filter(s => !s.warm).length + 1), tw:last.tw, tr:last.tr, trMin:last.trMin, w:last.w != null ? last.w : last.tw, r:null, done:false}); touchLive(); render(); },
   delSet: el => { const e = L.ex[+el.dataset.ei]; if (e.sets.length > 1) { e.sets.pop(); touchLive(); render(); } },
   removeExToday: el => { L.ex.splice(+el.dataset.ei, 1); touchLive(); render(); },
@@ -1810,12 +1966,14 @@ function itemSheet(p, di, ii) {
     <div class="field" id="isPctF"><label>% of training max</label><input class="num" id="isPct" type="number" inputmode="decimal" value="${Math.round((it.pct || .5) * 100)}"></div>
     <div class="toggle"><div><b>Last set as many reps as possible</b><div class="small">Linear programs like GreySkull use this.</div></div><button class="sw ${it.amrap ? 'on' : ''}" id="isAmrap" data-act="flip"></button></div>
     <div class="toggle"><div><b>Warmup sets</b><div class="small">Empty bar, then about 40/60/80% of the working weight.</div></div><button class="sw ${it.warm ? 'on' : ''}" id="isWarm" data-act="flip"></button></div>
-    <div class="field mt"><label>Weight step when you hit the top of the range (lb)</label><input class="num" id="isInc" type="number" inputmode="decimal" step="any" placeholder="exercise default (${S.exercises[it.ex] ? S.exercises[it.ex].inc : 5})" value="${it.inc != null ? it.inc : ''}"></div>
+    <div class="grid2 mt" id="isWts"><div class="field"><label>Next workout weight (one time)</label><input class="num" id="isNext" type="number" inputmode="decimal" step="any" placeholder="auto" value="${it.next != null ? fmtW(it.next) : ''}"></div>
+      <div class="field"><label>Starting weight (no history)</label><input class="num" id="isStart" type="number" inputmode="decimal" step="any" placeholder="none" value="${it.start != null ? fmtW(it.start) : ''}"></div></div>
+    <div class="field"><label>Weight step when you hit the top of the range (lb)</label><input class="num" id="isInc" type="number" inputmode="decimal" step="any" placeholder="exercise default (${S.exercises[it.ex] ? S.exercises[it.ex].inc : 5})" value="${it.inc != null ? it.inc : ''}"></div>
     <div class="grid2"><button class="btn" id="isUp" ${ii === 0 ? 'disabled' : ''}>Move up</button><button class="btn danger" id="isDel">Remove</button></div>
     <button class="btn primary block mt" id="isGo">Save</button>`;
   sheet(draw(), bg => {
     const help = {reps:'Pick a rep range. When every set reaches the top of the range, the next workout adds one weight step.', '531':'Uses the 5/3/1 weekly percentages of this lift\'s training max, with an AMRAP top set.', fsl:'Repeats the first working set percentage of the week for extra sets (5x5 is classic). Skipped on deload weeks.', bbb:'Sets of a fixed percentage of the training max, like Boring But Big 5x10 at 50-60%. Skipped on deload weeks.'};
-    const sync = () => { const t = bg.querySelector('#isType').value; bg.querySelector('#isHelp').textContent = help[t]; bg.querySelector('#isPctF').style.display = t === 'bbb' ? '' : 'none'; bg.querySelector('#isNums').style.display = t === '531' ? 'none' : ''; };
+    const sync = () => { const t = bg.querySelector('#isType').value; bg.querySelector('#isHelp').textContent = help[t]; bg.querySelector('#isPctF').style.display = t === 'bbb' ? '' : 'none'; bg.querySelector('#isNums').style.display = t === '531' ? 'none' : ''; bg.querySelector('#isWts').style.display = t === 'reps' ? '' : 'none'; };
     sync(); bg.querySelector('#isType').addEventListener('change', sync);
     bg.querySelector('#isSwap').addEventListener('click', () => { closeSheet(bg); pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); itemSheet(p, di, ii); }); });
     bg.querySelector('#isUp').addEventListener('click', () => { if (ii < 1) return; [d.items[ii - 1], d.items[ii]] = [d.items[ii], d.items[ii - 1]]; closeSheet(bg); progChanged(p); });
@@ -1828,6 +1986,8 @@ function itemSheet(p, di, ii) {
       it.amrap = bg.querySelector('#isAmrap').classList.contains('on') || undefined;
       it.warm = bg.querySelector('#isWarm').classList.contains('on') || undefined;
       const inc = num(bg.querySelector('#isInc').value); it.inc = inc != null ? inc : undefined;
+      const nx = num(bg.querySelector('#isNext').value), stw = num(bg.querySelector('#isStart').value);
+      it.next = t === 'reps' && nx ? nx : undefined; it.start = t === 'reps' && stw != null ? stw : undefined;
       if (TM_TYPES[t] && p.tmInc[it.ex] == null) p.tmInc[it.ex] = /dead|squat/i.test(exName(it.ex)) ? 10 : 5;
       closeSheet(bg); progChanged(p); toast('Saved.');
     });
@@ -1839,8 +1999,21 @@ function progChanged(p, noRender) {
 }
 
 const inputs = {
-  w: el => { const {s} = curLiveSet(el); s.w = num(el.value); touchLive(); const pt = el.parentNode.querySelector('.plates'); const e = L.ex[+el.dataset.ei]; if (pt && s.w) pt.textContent = plateText(s.w, S.exercises[e.ex]); },
-  r: el => { const {s} = curLiveSet(el); s.r = el.value === '' ? null : parseInt(el.value); touchLive(); },
+  w: el => {
+    const {e, s} = curLiveSet(el), ei = +el.dataset.ei, si = +el.dataset.si, old = s.w;
+    s.w = num(el.value);
+    /* straight sets: the sets after this one at the same target follow the new weight */
+    if (!s.warm && e.kind !== 'main' && e.kind !== '531' && s.w) e.sets.forEach((x, i) => {
+      if (i > si && !x.warm && !x.done && x.tw === s.tw && (x.w == null || x.w === old)) { x.w = s.w; const inp = document.querySelector(`[data-row="${ei}-${i}"] input[data-in=w]`); if (inp) inp.value = fmtW(s.w); }
+    });
+    touchLive();
+    const ch = plateChain(e, S.exercises[e.ex]);
+    ch.forEach((c, i) => { const pt = document.querySelector(`[data-row="${ei}-${i}"] .pt`); if (pt && c) pt.textContent = plateFmt(c); });
+  },
+  r: el => {
+    const {s} = curLiveSet(el); s.r = el.value === '' ? null : parseInt(el.value); touchLive();
+    if (s.done && rest.end && rest.set === s && rest.tier && missedSet(s) && rest.tier !== 'fail') setEffort('fail');
+  },
   bwDate: el => { bodyLogDate = el.value; render(); },
   liveNote: el => { L.note = el.value; touchLive(); },
   exSearch: el => { exSearch = el.value; $('#exList').innerHTML = exerciseListHtml(); },
@@ -1852,10 +2025,12 @@ const inputs = {
   itMin: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].items[+el.dataset.ii].min = Math.max(1, parseInt(el.value) || 1); progChanged(p, true); },
   itMax: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].items[+el.dataset.ii].max = Math.max(1, parseInt(el.value) || 1); progChanged(p, true); },
   plate: el => { S.settings.plates[el.dataset.k][el.dataset.w] = Math.max(0, parseInt(el.value) || 0); save(); },
+  pinPlate: el => { S.settings.pin[el.dataset.w] = Math.max(0, parseInt(el.value) || 0); save(); },
   bar: el => { const v = num(el.value); if (v != null) { S.settings.bars[el.dataset.k] = v; save(); } },
   rest: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest[el.dataset.k][el.dataset.t] = v; save(); } },
   restWarm: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.warm = v; save(); } },
   restDef: el => { S.settings.rest.def = el.value; save(); },
+  volume: el => { S.settings.volume = el.value; save(); },
   round: el => { S.settings.round = +el.value; if (S.live && !liveStarted(S.live)) S.live = null; save(); },
   sw: el => { const s = S.sessions.find(x => x.id === el.dataset.sid); const v = num(el.value); if (s && v != null) { s.ex[+el.dataset.ei].sets[+el.dataset.si].w = v; save(); } },
   sr: el => { const s = S.sessions.find(x => x.id === el.dataset.sid); const v = parseInt(el.value); if (s && v >= 0) { s.ex[+el.dataset.ei].sets[+el.dataset.si].r = v; save(); } }
@@ -1878,7 +2053,7 @@ document.addEventListener('change', e => {
 window.addEventListener('pagehide', () => { if (S) save(true); });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { if (S) save(true); }
-  else { tickRest(); if (S && S.live) keepAwake(true); }
+  else { tickRest(); if (rest.missed) { rest.missed = false; restDone(); } if (S && S.live) keepAwake(true); }
 });
 
 /* ---------- boot ---------- */
