@@ -148,7 +148,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.1.0';
+const APP_VERSION = '3.2.0';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -220,7 +220,7 @@ function defaultSettings() {
     bars: {barbell:45, ez:15, hex:45},
     plates: {iron:{'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2}, bumper:{'45':2,'35':2,'25':2,'15':2,'10':2}},
     rest: {main:180, acc:90, warm:60},
-    warmups: true, awake: true, sound: true, round: 5, lastBackup: null
+    warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null
   };
 }
 function blankState() {
@@ -254,6 +254,7 @@ function normalize(st) {
     if (!out.pos[id]) out.pos[id] = {week:0, day:0, cycle:1};
   }
   if (out.active && !out.programs[out.active]) out.active = Object.keys(out.programs)[0] || null;
+  seedLibrary(out);
   return out;
 }
 
@@ -332,11 +333,242 @@ function plateText(total, ex) {
   return c.exact ? t : t + ' (=' + fmtW(c.total) + ')';
 }
 
+/* =========================================================================
+   Exercise library (matched to a home gym: rack, barbell, hex bar, EZ bar,
+   adjustable dumbbells, adjustable bench, cable with low and high pulley,
+   chin-up bar, dip station, ab wheel). Cues are short reminders, not a course.
+   ========================================================================= */
+const LIB_VERSION = 1;
+const LIBRARY = [
+  // barbell
+  ['Squat', 'barbell', 0, 'Bar on upper back, brace hard, sit down between your heels, knees track over toes, drive up through mid-foot.'],
+  ['Front Squat', 'barbell', 0, 'Bar on front delts, elbows high, stay upright, sit straight down, keep elbows up out of the hole.'],
+  ['Pause Squat', 'barbell', 0, 'Squat to depth, hold 2 seconds without relaxing, then drive up. Use about 10-15% less than normal squats.'],
+  ['Bench Press', 'barbell', 0, 'Shoulder blades pinched, feet planted, bar to lower chest, press up and slightly back over the shoulders.'],
+  ['Close-Grip Bench Press', 'barbell', 0, 'Hands about shoulder width, elbows tucked, touch lower chest. Builds triceps and lockout.'],
+  ['Incline Bench Press', 'barbell', 0, 'Bench at about 30 degrees, bar to upper chest, elbows slightly tucked.'],
+  ['Floor Press', 'barbell', 0, 'Lie on the floor in the rack, lower until upper arms touch, pause, press. Easy on the shoulders.'],
+  ['Overhead Press', 'barbell', 0, 'Squeeze glutes, bar from front delts straight up, move your head back then through once the bar passes your face.'],
+  ['Push Press', 'barbell', 0, 'Short knee dip, drive with the legs, press to lockout. Lets you handle more than a strict press.'],
+  ['Deadlift', 'barbell', 1, 'Bar over mid-foot, take the slack out, chest up, push the floor away, finish with hips through. Hex bar counts here too.'],
+  ['Romanian Deadlift', 'barbell', 0, 'Start standing, soft knees, push hips back until you feel the hamstrings, keep the bar close, stand tall.'],
+  ['Rack Pull', 'barbell', 0, 'Bar on safeties just below the knee, same setup as a deadlift. Builds the top half and upper back.'],
+  ['Barbell Row', 'barbell', 1, 'Hinge to about 45 degrees, pull the bar to your lower ribs, control it down. Do not swing.'],
+  ['Pendlay Row', 'barbell', 1, 'Torso near flat, each rep starts dead on the floor, explode to the chest.'],
+  ['Good Mornings', 'barbell', 0, 'Bar on back, soft knees, hinge until torso is near parallel, keep back flat, drive hips forward.'],
+  ['Barbell Hip Thrust', 'barbell', 0, 'Upper back on the bench, bar over hips (use a pad), drive up until hips are level, squeeze glutes at the top.'],
+  ['Barbell Shrug', 'barbell', 0, 'Arms straight, shoulders straight up toward ears, pause, lower slowly. No rolling.'],
+  ['Barbell Curls', 'ez', 0, 'Elbows pinned at your sides, curl without swinging, lower under control.'],
+  // hex and EZ bar
+  ['Hex Bar RDL', 'hex', 0, 'Stand tall with the hex bar, push hips back with soft knees, feel the hamstrings, stand up.'],
+  ['Hex Bar Shrug', 'hex', 0, 'Neutral grip lets you go heavy. Shoulders straight up, pause at the top.'],
+  ['Skull Crushers', 'ez', 0, 'Upper arms angled slightly back, lower the bar to just behind your forehead, extend without flaring elbows.'],
+  ['Preacher Curls', 'ez', 0, 'Arms over the bench pad, lower until almost straight, curl without lifting the elbows.'],
+  ['EZ Bar Reverse Curl', 'ez', 0, 'Overhand grip on the EZ bar, elbows still. Hits forearms and brachialis.'],
+  // dumbbells
+  ['Dumbbell Bench Press', 'dumbbell', 0, 'Shoulder blades back, lower until a good stretch, press up and slightly in.'],
+  ['Incline DB Press', 'dumbbell', 0, 'Bench at 30 degrees, elbows about 45 degrees from the body, stretch at the bottom.'],
+  ['Dumbbell Fly', 'dumbbell', 0, 'Slight bend in the elbows, open wide to a stretch, hug a tree back up.'],
+  ['Dumbbell Shoulder Press', 'dumbbell', 0, 'Seated with back support, press from shoulder height to just short of lockout.'],
+  ['Arnold Press', 'dumbbell', 0, 'Start palms facing you, rotate as you press so palms face forward at the top.'],
+  ['Side Lateral Raise', 'dumbbell', 0, 'Slight lean forward, lead with the elbows, raise to shoulder height, lower slowly.'],
+  ['Rear Delt DB Raise', 'dumbbell', 0, 'Hinge forward or chest on incline bench, raise out to the sides with soft elbows, squeeze the rear shoulders.'],
+  ['One-Arm DB Row', 'dumbbell', 0, 'Hand and knee on the bench, pull the dumbbell to your hip, let it stretch at the bottom.'],
+  ['Chest-Supported DB Row', 'dumbbell', 0, 'Chest on an incline bench, row both dumbbells, no momentum possible.'],
+  ['Dumbbell Pullover', 'dumbbell', 0, 'Across or along the bench, lower one dumbbell behind your head with soft elbows, pull back over the chest.'],
+  ['Dumbbell Curl', 'dumbbell', 0, 'Palms up, elbows at sides, curl and squeeze, lower slowly.'],
+  ['Hammer Curl', 'dumbbell', 0, 'Palms facing each other, curl without swinging. Builds forearms and arm thickness.'],
+  ['Incline DB Curl', 'dumbbell', 0, 'Lie back on an incline bench, arms hang straight down, curl without moving the elbows forward.'],
+  ['Concentration Curl', 'dumbbell', 0, 'Seated, elbow braced on the inner thigh, slow curl and squeeze.'],
+  ['DB Overhead Tricep Extension', 'dumbbell', 0, 'One dumbbell held with both hands overhead, lower behind the head, extend.'],
+  ['Goblet Squat', 'dumbbell', 0, 'Hold one dumbbell at the chest, sit down between your knees, stay upright.'],
+  ['Bulgarian Split Squat', 'dumbbell', 0, 'Rear foot on the bench, most weight on the front leg, drop straight down, drive through the front heel.'],
+  ['Dumbbell Lunges', 'dumbbell', 0, 'Long step, back knee toward the floor, push back up through the front foot.'],
+  ['DB Step-Up', 'dumbbell', 0, 'Whole foot on the bench, drive up with the top leg, do not push off the bottom foot.'],
+  ['Single Leg RDL (DB)', 'dumbbell', 0, 'Stand on one leg, hinge with a flat back as the other leg goes back, feel the hamstring, stand tall.'],
+  ['Standing DB Calf Raise', 'dumbbell', 0, 'Dumbbell in one hand, balls of the foot on a plate, full stretch, pause at the top.'],
+  ['Dumbbell Shrug', 'dumbbell', 0, 'Arms straight, shoulders up toward the ears, pause, lower slowly.'],
+  ["Farmer's Carry", 'dumbbell', 0, 'Heavy dumbbells or hex bar, stand tall, short quick steps. Log the weight; reps = steps or seconds.'],
+  // cable (low and high pulley)
+  ['Cable Row', 'cable', 0, 'Low pulley, sit tall, pull to the stomach, squeeze the shoulder blades, let it stretch forward.'],
+  ['Kneeling Cable Pulldown', 'cable', 0, 'High pulley, kneel facing the cable, pull the handle to your upper chest, elbows down and back. Lat pulldown substitute.'],
+  ['Straight-Arm Pulldown', 'cable', 0, 'High pulley with bar or rope, arms nearly straight, sweep down to your thighs using the lats.'],
+  ['Face Pulls', 'cable', 0, 'High pulley with rope, pull toward your forehead, elbows high, finish with hands beside the ears.'],
+  ['Cable Lateral Raise', 'cable', 0, 'Low pulley, cable across the body, raise to shoulder height. Constant tension.'],
+  ['Cable Fly', 'cable', 0, 'Single pulley, one arm at a time: from high for lower chest, from low for upper chest.'],
+  ['Cable Curl', 'cable', 0, 'Low pulley with bar or rope, elbows pinned, curl and squeeze.'],
+  ['Tricep Pushdown', 'cable', 0, 'High pulley, elbows pinned at your sides, push down to lockout, control the way up.'],
+  ['Tricep Pushdown (Rope)', 'cable', 0, 'High pulley with rope, split the rope apart at the bottom.'],
+  ['Tricep Pushdown (Straight Bar)', 'cable', 0, 'High pulley with straight bar, elbows pinned, full lockout.'],
+  ['Overhead Tricep Extension (Rope)', 'cable', 0, 'Face away from a low or high pulley, rope behind the head, extend forward and up. Big stretch on the long head.'],
+  ['Cable Pull-Through', 'cable', 0, 'Low pulley with rope between the legs, hinge back, then drive hips forward and squeeze glutes.'],
+  ['Cable Glute Kickback', 'cable', 0, 'Low pulley with ankle strap, kick straight back, squeeze the glute, no lower back arch.'],
+  ['Cable Crunch', 'cable', 0, 'Kneel under the high pulley with rope, curl your ribs toward your hips. Hips stay still.'],
+  ['Cable Woodchop', 'cable', 0, 'High pulley, rotate from high to low across the body, arms long, turn through the trunk.'],
+  ['Cable Leg Curl', 'cable', 0, 'Low pulley with ankle strap, standing or lying, curl the heel to the glute.'],
+  ['Lying Leg Curls', 'cable', 0, 'Lying face down, curl the heels to the glutes, lower slowly.'],
+  ['Standing Leg Curls', 'cable', 0, 'One leg at a time, curl the heel up, keep hips still.'],
+  ['Leg Extension', 'cable', 0, 'Extend to lockout, squeeze the quads, lower slowly.'],
+  // bodyweight
+  ['Chinups', 'bodyweight', 0, 'Palms facing you, chest to the bar, full hang at the bottom. Add weight in the weight box when it gets easy.'],
+  ['Pull-ups', 'bodyweight', 0, 'Palms facing away, pull your chest toward the bar, full hang at the bottom.'],
+  ['Dips', 'bodyweight', 0, 'Slight forward lean, lower until shoulders are just below elbows, press to lockout.'],
+  ['Push Up', 'bodyweight', 0, 'Body in a straight line, chest to the floor, elbows about 45 degrees.'],
+  ['Inverted Row', 'bodyweight', 0, 'Bar in the rack at waist height, hang under it, pull your chest to the bar, body straight.'],
+  ['Hanging Leg Raises', 'bodyweight', 0, 'Hang from the bar, raise legs by curling the pelvis up, no swinging.'],
+  ['Ab Wheel', 'bodyweight', 0, 'From knees, roll out with a flat back and tucked hips, pull back with the abs.'],
+  ['Plank', 'bodyweight', 0, 'Forearms down, body straight, squeeze glutes. Log seconds as reps.'],
+  ['Side Plank', 'bodyweight', 0, 'On one forearm, hips high. Log seconds as reps.'],
+  ['Hyperextensions', 'bodyweight', 0, 'Hips on the pad, hinge down, rise until body is straight. Hold a plate for weight.']
+];
+function seedLibrary(st) {
+  if ((st.libVersion || 0) >= LIB_VERSION) return;
+  const byName = {};
+  Object.values(st.exercises).forEach(e => { byName[e.name.trim().toLowerCase()] = e; });
+  for (const [name, equip, floor, cue] of LIBRARY) {
+    const ex = byName[name.toLowerCase()];
+    if (ex) { if (!ex.notes) ex.notes = cue; continue; }
+    let id = 'x_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (st.exercises[id]) id = id + '_lib';
+    st.exercises[id] = {id, name, equip, inc:DEFAULT_INC[equip], floor:!!floor, notes:cue, video:''};
+  }
+  st.libVersion = LIB_VERSION;
+}
+
+/* =========================================================================
+   Program templates. Each one follows the published structure of a well known
+   program, adjusted only where your equipment needs a substitute (noted).
+   Item fields: [exercise, sets, minReps, maxReps, options]
+   options: t = type ('531', 'fsl', 'bbb'), pct, a = last set AMRAP, w = warmups, inc = weight step
+   ========================================================================= */
+const T = (ex, sets, min, max, o) => Object.assign({ex, sets, min, max}, o || {});
+const TEMPLATES = [
+  {id:'bbb', name:'5/3/1 Boring But Big', days:4, style:'Strength + size', wave:true,
+   desc:'Jim Wendler\'s best known 5/3/1 variant. Main lift on the 5/3/1 wave, then 5 sets of 10 of the same lift at 50% of training max, plus one assistance exercise. High volume, simple, great for size.',
+   plan:[
+     {name:'Press', main:'Overhead Press', items:[T('Overhead Press', 5, 10, 10, {t:'bbb', pct:.5}), T('Chinups', 5, 6, 10)]},
+     {name:'Deadlift', main:'Deadlift', items:[T('Deadlift', 5, 10, 10, {t:'bbb', pct:.5}), T('Hanging Leg Raises', 5, 10, 15)]},
+     {name:'Bench', main:'Bench Press', items:[T('Bench Press', 5, 10, 10, {t:'bbb', pct:.5}), T('One-Arm DB Row', 5, 8, 10)]},
+     {name:'Squat', main:'Squat', items:[T('Squat', 5, 10, 10, {t:'bbb', pct:.5}), T('Lying Leg Curls', 5, 8, 10)]}]},
+  {id:'fsl', name:'5/3/1 First Set Last', days:4, style:'Strength', wave:true,
+   desc:'Main lift on the 5/3/1 wave, then 5x5 at the first working set weight, then push, pull and single leg or core work. Less fatigue than BBB, good while cutting.',
+   plan:[
+     {name:'Press', main:'Overhead Press', items:[T('Overhead Press', 5, 5, 5, {t:'fsl'}), T('Chinups', 3, 6, 10), T('Dips', 3, 8, 15)]},
+     {name:'Deadlift', main:'Deadlift', items:[T('Deadlift', 5, 5, 5, {t:'fsl'}), T('Hanging Leg Raises', 3, 10, 15), T('Hyperextensions', 3, 10, 15)]},
+     {name:'Bench', main:'Bench Press', items:[T('Bench Press', 5, 5, 5, {t:'fsl'}), T('One-Arm DB Row', 3, 8, 12), T('Face Pulls', 3, 15, 20)]},
+     {name:'Squat', main:'Squat', items:[T('Squat', 5, 5, 5, {t:'fsl'}), T('Bulgarian Split Squat', 3, 8, 12), T('Ab Wheel', 3, 8, 12)]}]},
+  {id:'triumvirate', name:'5/3/1 Triumvirate', days:4, style:'Strength + size', wave:true,
+   desc:'The original 5/3/1 template: main lift plus two assistance exercises of 5 sets each. Leg press is swapped for Bulgarian split squats since you have no leg press.',
+   plan:[
+     {name:'Press', main:'Overhead Press', items:[T('Dips', 5, 10, 15), T('Chinups', 5, 6, 10)]},
+     {name:'Deadlift', main:'Deadlift', items:[T('Good Mornings', 5, 10, 12), T('Hanging Leg Raises', 5, 10, 15)]},
+     {name:'Bench', main:'Bench Press', items:[T('Dumbbell Bench Press', 5, 10, 15), T('One-Arm DB Row', 5, 8, 10)]},
+     {name:'Squat', main:'Squat', items:[T('Bulgarian Split Squat', 5, 10, 12), T('Lying Leg Curls', 5, 8, 10)]}]},
+  {id:'beginner531', name:'5/3/1 for Beginners', days:3, style:'Full body strength', wave:true,
+   desc:'Three full body days, two main lifts each on the 5/3/1 wave, both followed by First Set Last 5x5, then push, pull and core. The original skips the deload most cycles; use Change on the workout screen to skip week 4 if you feel fresh.',
+   plan:[
+     {name:'Squat + Bench', main:'Squat', items:[T('Bench Press', 0, 0, 0, {t:'531'}), T('Squat', 5, 5, 5, {t:'fsl'}), T('Bench Press', 5, 5, 5, {t:'fsl'}), T('Dips', 3, 10, 15), T('Chinups', 3, 6, 10), T('Hanging Leg Raises', 3, 10, 15)]},
+     {name:'Deadlift + Press', main:'Deadlift', items:[T('Overhead Press', 0, 0, 0, {t:'531'}), T('Deadlift', 5, 5, 5, {t:'fsl'}), T('Overhead Press', 5, 5, 5, {t:'fsl'}), T('Push Up', 3, 10, 20), T('One-Arm DB Row', 3, 8, 12), T('Ab Wheel', 3, 8, 12)]},
+     {name:'Bench + Squat', main:'Bench Press', items:[T('Squat', 0, 0, 0, {t:'531'}), T('Bench Press', 5, 5, 5, {t:'fsl'}), T('Squat', 5, 5, 5, {t:'fsl'}), T('Dips', 3, 10, 15), T('Chinups', 3, 6, 10), T('Bulgarian Split Squat', 3, 8, 12)]}]},
+  {id:'gzclp', name:'GZCLP (4 day)', days:4, style:'Strength, linear', wave:false,
+   desc:'Cody Lefever\'s linear program: T1 heavy 5x3 with an AMRAP last set, T2 3x10, T3 3x15 with an AMRAP last set. Add weight every session you hit all reps. When a T1 lift stalls, the original moves to 6x2 then 10x1; change sets and reps in Program when that happens. Lat pulldown is a kneeling cable pulldown.',
+   plan:[
+     {name:'Day 1: Squat', items:[T('Squat', 5, 3, 3, {a:1, w:1, inc:5}), T('Bench Press', 3, 10, 10, {inc:5}), T('Kneeling Cable Pulldown', 3, 15, 15, {a:1})]},
+     {name:'Day 2: Press', items:[T('Overhead Press', 5, 3, 3, {a:1, w:1, inc:5}), T('Deadlift', 3, 10, 10, {inc:10}), T('One-Arm DB Row', 3, 15, 15, {a:1})]},
+     {name:'Day 3: Bench', items:[T('Bench Press', 5, 3, 3, {a:1, w:1, inc:5}), T('Squat', 3, 10, 10, {inc:5}), T('Kneeling Cable Pulldown', 3, 15, 15, {a:1})]},
+     {name:'Day 4: Deadlift', items:[T('Deadlift', 5, 3, 3, {a:1, w:1, inc:10}), T('Overhead Press', 3, 10, 10, {inc:5}), T('One-Arm DB Row', 3, 15, 15, {a:1})]}]},
+  {id:'5x5', name:'5x5 Linear (StrongLifts style)', days:2, style:'Beginner strength', wave:false,
+   desc:'Two alternating workouts, three days a week (A, B, A then B, A, B). Add 5 lb every session you get all 5x5 (deadlift 10 lb). Best for building a base or coming back from a long break.',
+   plan:[
+     {name:'Workout A', items:[T('Squat', 5, 5, 5, {w:1, inc:5}), T('Bench Press', 5, 5, 5, {w:1, inc:5}), T('Barbell Row', 5, 5, 5, {w:1, inc:5})]},
+     {name:'Workout B', items:[T('Squat', 5, 5, 5, {w:1, inc:5}), T('Overhead Press', 5, 5, 5, {w:1, inc:5}), T('Deadlift', 1, 5, 5, {w:1, inc:10})]}]},
+  {id:'phul', name:'PHUL (Power Hypertrophy Upper Lower)', days:4, style:'Strength + size', wave:false,
+   desc:'Two heavy days (3-5 reps) and two volume days (8-12 reps), each body part twice a week. Leg press is replaced with Bulgarian split squats and lat pulldown with a kneeling cable pulldown.',
+   plan:[
+     {name:'Upper Power', items:[T('Bench Press', 3, 3, 5, {w:1}), T('Incline DB Press', 3, 6, 10), T('Barbell Row', 3, 3, 5, {w:1}), T('Kneeling Cable Pulldown', 3, 6, 10), T('Overhead Press', 2, 5, 8), T('Barbell Curls', 2, 6, 10), T('Skull Crushers', 2, 6, 10)]},
+     {name:'Lower Power', items:[T('Squat', 3, 3, 5, {w:1}), T('Deadlift', 3, 3, 5, {w:1, inc:10}), T('Bulgarian Split Squat', 3, 10, 15), T('Lying Leg Curls', 3, 6, 10), T('Standing DB Calf Raise', 4, 6, 10)]},
+     {name:'Upper Hypertrophy', items:[T('Incline Bench Press', 3, 8, 12, {w:1}), T('Dumbbell Fly', 3, 8, 12), T('Cable Row', 3, 8, 12), T('One-Arm DB Row', 3, 8, 12), T('Side Lateral Raise', 3, 8, 12), T('Incline DB Curl', 3, 8, 12), T('Tricep Pushdown (Rope)', 3, 8, 12)]},
+     {name:'Lower Hypertrophy', items:[T('Front Squat', 3, 8, 12, {w:1}), T('Dumbbell Lunges', 3, 8, 12), T('Leg Extension', 3, 10, 15), T('Lying Leg Curls', 3, 10, 15), T('Standing DB Calf Raise', 4, 8, 12)]}]},
+  {id:'ul', name:'Upper / Lower Hypertrophy', days:4, style:'Muscle growth', wave:false,
+   desc:'Evidence based upper/lower split: each muscle twice a week at about 10-16 hard sets, mostly 6-15 reps, double progression on everything.',
+   plan:[
+     {name:'Upper A', items:[T('Bench Press', 4, 6, 8, {w:1}), T('One-Arm DB Row', 4, 8, 12), T('Dumbbell Shoulder Press', 3, 8, 12), T('Chinups', 3, 6, 10), T('Cable Lateral Raise', 3, 12, 15), T('Barbell Curls', 3, 8, 12), T('Tricep Pushdown (Rope)', 3, 10, 15)]},
+     {name:'Lower A', items:[T('Squat', 4, 6, 8, {w:1}), T('Romanian Deadlift', 3, 8, 10), T('Bulgarian Split Squat', 3, 8, 12), T('Lying Leg Curls', 3, 10, 15), T('Standing DB Calf Raise', 4, 10, 15), T('Hanging Leg Raises', 3, 10, 15)]},
+     {name:'Upper B', items:[T('Overhead Press', 4, 6, 8, {w:1}), T('Incline DB Press', 3, 8, 12), T('Cable Row', 3, 8, 12), T('Kneeling Cable Pulldown', 3, 10, 12), T('Face Pulls', 3, 15, 20), T('Hammer Curl', 3, 10, 12), T('Skull Crushers', 3, 8, 12)]},
+     {name:'Lower B', items:[T('Deadlift', 3, 4, 6, {w:1, inc:10}), T('Front Squat', 3, 6, 10, {w:1}), T('Dumbbell Lunges', 3, 10, 12), T('Leg Extension', 3, 12, 15), T('Cable Pull-Through', 3, 12, 15), T('Ab Wheel', 3, 8, 12)]}]},
+  {id:'bro', name:'Bodybuilding Split (4 day)', days:4, style:'Muscle growth', wave:false,
+   desc:'Classic body part split: chest and triceps, back and biceps, legs, shoulders and arms. Each muscle hit hard once a week, arms twice.',
+   plan:[
+     {name:'Chest & Triceps', items:[T('Bench Press', 4, 6, 10, {w:1}), T('Incline DB Press', 3, 8, 12), T('Cable Fly', 3, 12, 15), T('Dips', 3, 8, 12), T('Skull Crushers', 3, 8, 12), T('Tricep Pushdown (Rope)', 3, 12, 15)]},
+     {name:'Back & Biceps', items:[T('Barbell Row', 4, 6, 10, {w:1}), T('Chinups', 4, 6, 10), T('One-Arm DB Row', 3, 8, 12), T('Straight-Arm Pulldown', 3, 12, 15), T('Barbell Curls', 3, 8, 12), T('Hammer Curl', 3, 10, 12)]},
+     {name:'Legs', items:[T('Squat', 4, 6, 10, {w:1}), T('Romanian Deadlift', 3, 8, 10), T('Bulgarian Split Squat', 3, 10, 12), T('Leg Extension', 3, 12, 15), T('Lying Leg Curls', 3, 10, 15), T('Standing DB Calf Raise', 4, 12, 15)]},
+     {name:'Shoulders & Arms', items:[T('Overhead Press', 4, 6, 10, {w:1}), T('Arnold Press', 3, 8, 12), T('Side Lateral Raise', 4, 12, 15), T('Rear Delt DB Raise', 3, 12, 15), T('Incline DB Curl', 3, 10, 12), T('Overhead Tricep Extension (Rope)', 3, 10, 15)]}]},
+  {id:'ppl', name:'Push / Pull / Legs (6 day)', days:6, style:'Muscle growth, high frequency', wave:false,
+   desc:'Popular 6 day push, pull, legs routine with a heavy lift to start each day (last set AMRAP), then hypertrophy work. Run it Monday to Saturday. Leg press is replaced with Bulgarian split squats.',
+   plan:[
+     {name:'Pull (Deadlift)', items:[T('Deadlift', 1, 5, 5, {a:1, w:1, inc:10}), T('Chinups', 3, 8, 12), T('Cable Row', 3, 8, 12), T('Face Pulls', 4, 15, 20), T('Hammer Curl', 3, 8, 12), T('Incline DB Curl', 3, 8, 12)]},
+     {name:'Push (Bench)', items:[T('Bench Press', 5, 5, 5, {a:1, w:1, inc:5}), T('Overhead Press', 3, 8, 12), T('Incline DB Press', 3, 8, 12), T('Tricep Pushdown (Rope)', 3, 8, 12), T('Overhead Tricep Extension (Rope)', 3, 8, 12), T('Side Lateral Raise', 4, 15, 20)]},
+     {name:'Legs', items:[T('Squat', 3, 5, 5, {a:1, w:1, inc:5}), T('Romanian Deadlift', 3, 8, 12), T('Bulgarian Split Squat', 3, 8, 12), T('Lying Leg Curls', 3, 8, 12), T('Standing DB Calf Raise', 5, 8, 12)]},
+     {name:'Pull (Row)', items:[T('Barbell Row', 5, 5, 5, {a:1, w:1, inc:5}), T('Chinups', 3, 8, 12), T('Cable Row', 3, 8, 12), T('Face Pulls', 4, 15, 20), T('Hammer Curl', 3, 8, 12), T('Incline DB Curl', 3, 8, 12)]},
+     {name:'Push (Press)', items:[T('Overhead Press', 5, 5, 5, {a:1, w:1, inc:5}), T('Bench Press', 3, 8, 12), T('Incline DB Press', 3, 8, 12), T('Tricep Pushdown (Rope)', 3, 8, 12), T('Overhead Tricep Extension (Rope)', 3, 8, 12), T('Side Lateral Raise', 4, 15, 20)]},
+     {name:'Legs', items:[T('Squat', 3, 5, 5, {a:1, w:1, inc:5}), T('Romanian Deadlift', 3, 8, 12), T('Bulgarian Split Squat', 3, 8, 12), T('Lying Leg Curls', 3, 8, 12), T('Standing DB Calf Raise', 5, 8, 12)]}]}
+];
+function installTemplate(t) {
+  const idFor = name => { const ex = findExByName(name) || createExercise(name, (LIBRARY.find(l => l[0] === name) || [0, 'dumbbell'])[1]); return ex.id; };
+  const id = uid('p_');
+  const p = {id, name:t.name, wave:!!t.wave, days:[], tm:{}, tmInc:{}, template:t.id};
+  t.plan.forEach(d => {
+    const day = {name:d.name, main:d.main ? idFor(d.main) : null, items:[]};
+    d.items.forEach(it => {
+      const o = {ex:idFor(it.ex), sets:it.sets || 1, min:it.min || 1, max:it.max || 1};
+      if (it.t) o.type = it.t; if (it.pct) o.pct = it.pct; if (it.a) o.amrap = true; if (it.w) o.warm = true; if (it.inc != null) o.inc = it.inc;
+      day.items.push(o);
+    });
+    p.days.push(day);
+  });
+  /* carry over training maxes you already have for the same lifts */
+  const known = {};
+  Object.values(S.programs).forEach(q => Object.entries(q.tm || {}).forEach(([k, v]) => { if (v && !known[k]) known[k] = v; }));
+  if (S.active && S.programs[S.active]) Object.entries(S.programs[S.active].tm || {}).forEach(([k, v]) => { if (v) known[k] = v; });
+  tmLifts(p).forEach(k => { if (known[k]) p.tm[k] = known[k]; p.tmInc[k] = /dead|squat/i.test(exName(k)) ? 10 : 5; });
+  S.programs[id] = p; S.pos[id] = {week:0, day:0, cycle:1};
+  return p;
+}
+function templatesSheet() {
+  const list = TEMPLATES.map(t => `<div class="it" style="display:block"><div class="between"><div class="t">${esc(t.name)}</div><span class="pill">${t.days} day${t.days > 1 ? 's' : ''}</span></div>
+    <div class="s" style="margin:4px 0 8px">${esc(t.style)}${t.wave ? ' · 5/3/1 wave' : ''}</div><div class="small" style="line-height:1.45">${esc(t.desc)}</div>
+    <button class="btn sm mt" data-tpl="${t.id}">Add this program</button></div>`).join('');
+  sheet(`<div class="hd"><h2>Program templates</h2><button class="x" data-act="close">✕</button></div>
+    <p class="sub">Well known programs set up for your equipment. Adding one copies it into your programs so you can edit it; your history and training maxes carry over.</p><div class="card list">${list}</div>`, bg => {
+    bg.addEventListener('click', e => {
+      const b = e.target.closest('[data-tpl]'); if (!b) return;
+      const p = installTemplate(TEMPLATES.find(t => t.id === b.dataset.tpl));
+      if (!S.active) S.active = p.id;
+      save(); closeSheet(bg); editProgId = p.id; tab = 'program'; render(); window.scrollTo(0, 0);
+      toast(p.name + ' added. Tap Use to start it.');
+    });
+  });
+}
+
 /* ---------- programs and the live session ---------- */
 const prog = () => S.programs[S.active] || null;
 const pos = () => S.pos[S.active] || (S.pos[S.active] = {week:0, day:0, cycle:1});
 function liveKey(p, ps) { return p.id + ':' + ps.cycle + ':' + ps.week + ':' + ps.day; }
 
+const TM_TYPES = {'531':1, fsl:1, bbb:1};
+const ITEM_TYPES = {reps:'Rep range (double progression)', '531':'5/3/1 main lift (training max wave)', fsl:'First Set Last (5/3/1 supplemental)', bbb:'Fixed % of training max (BBB style)'};
+/* every lift in a program that needs a training max */
+function tmLifts(p) {
+  const out = [];
+  p.days.forEach(d => { if (d.main && p.wave && !out.includes(d.main)) out.push(d.main); d.items.forEach(i => { if (TM_TYPES[i.type] && !out.includes(i.ex)) out.push(i.ex); }); });
+  return out;
+}
+function waveLifts(p) {
+  const out = [];
+  p.days.forEach(d => { if (d.main && p.wave && !out.includes(d.main)) out.push(d.main); d.items.forEach(i => { if (i.type === '531' && !out.includes(i.ex)) out.push(i.ex); }); });
+  return out;
+}
+const isDeload = (p, week) => !!(p.wave && WAVE[week] && WAVE[week].deload);
 function buildSets531(p, exId, week) {
   const tm = p.tm[exId];
   const wv = WAVE[week];
@@ -348,18 +580,67 @@ function buildSets531(p, exId, week) {
   wv.sets.forEach(([pct, reps, amrap], i) => sets.push({lbl:String(i + 1), tw:Math.max(bar, roundLoad(tm * pct)), tr:reps, amrap:!!amrap, pct}));
   return sets;
 }
-/* Double progression: if every set last time hit the top of the range, suggest the next increment. */
+/* Ramp-up warmups for straight-set barbell work: empty bar, then about 40/60/80% of the working weight. */
+function rampWarmups(ex, work) {
+  const bar = barWeight(ex);
+  if (!bar || !work || work < bar + 40) return [];
+  const out = [{lbl:'W1', tw:bar, tr:5, warm:true}];
+  [[.4, 5], [.6, 3], [.8, 2]].forEach(([pc, r]) => { const w = roundLoad(work * pc); if (w > out[out.length - 1].tw && w < work) out.push({lbl:'W' + (out.length + 1), tw:w, tr:r, warm:true}); });
+  return out;
+}
+/* Double progression: when every set last time hit the top of the range, the weight goes up one step.
+   If your last session used a very different rep range (5s vs 10s), the weight is estimated from that set instead.
+   Straight-set programs with an AMRAP last set reset about 10% after missing reps two sessions in a row. */
 function suggestion(item) {
   const ex = S.exercises[item.ex];
-  const last = lastPerformance(item.ex);
+  const hist = exHistory(item.ex), last = hist[0];
   if (!last) return {w:item.start != null ? item.start : null, up:false, last:null};
-  const ws = last.sets.map(s => s.w || 0);
-  const w = Math.max(...ws);
+  const inc = item.inc != null ? item.inc : ex && ex.inc != null ? ex.inc : DEFAULT_INC[ex ? ex.equip : 'dumbbell'];
+  const step = inc > 0 ? inc : 2.5;
+  const w = Math.max(...last.sets.map(s => s.w || 0));
   const top = last.sets.filter(s => (s.w || 0) === w);
+  const avgR = top.reduce((a, s) => a + s.r, 0) / top.length;
+  if (w > 0 && (avgR > item.max + 3 || avgR < item.min - 3)) {
+    const best = Math.max(...last.sets.map(s => e1rm(s.w, s.r)));
+    const est = Math.floor(best / (1 + item.max / 30) / step) * step;
+    return {w:Math.max(barWeight(ex) || 0, est), up:false, last, est:true};
+  }
   const hitAll = top.length >= Math.min(item.sets, last.sets.length) && top.every(s => s.r >= item.max);
-  const inc = ex && ex.inc != null ? ex.inc : DEFAULT_INC[ex ? ex.equip : 'dumbbell'];
   if (hitAll && inc > 0) return {w:w + inc, up:true, last};
+  if (item.amrap && item.min === item.max && hist[1]) {
+    const w2 = Math.max(...hist[1].sets.map(s => s.w || 0));
+    const missed = h => h.sets.some(s => s.r < item.max);
+    if (w2 === w && missed(last) && missed(hist[1])) return {w:Math.max(barWeight(ex) || 0, Math.floor(w * 0.9 / step) * step), up:false, last, reset:true};
+  }
   return {w:w || null, up:false, last};
+}
+const liveSet = (s) => Object.assign(s, {w:s.tw, r:null, done:false});
+/* Turn one program day into today's list of exercises and sets. */
+function buildEntries(p, d, week) {
+  const ex = [];
+  const deload = isDeload(p, week);
+  if (d.main && p.wave) ex.push({ex:d.main, kind:'main', main:true, sets:buildSets531(p, d.main, week).map(liveSet)});
+  else if (d.main) d = Object.assign({}, d, {items:[{ex:d.main, sets:3, min:5, max:5, warm:true}].concat(d.items)});
+  for (const it of d.items) {
+    const type = it.type || 'reps';
+    const tm = p.tm[it.ex], exo = S.exercises[it.ex], bar = barWeight(exo) || 0;
+    if (type === '531') { ex.push({ex:it.ex, kind:'531', main:true, sets:buildSets531(p, it.ex, week).map(liveSet)}); continue; }
+    if (type === 'fsl' || type === 'bbb') {
+      if (deload) continue;                       // supplemental work is skipped on deload weeks
+      const pct = type === 'fsl' ? WAVE[week].sets[0][0] : (it.pct || 0.5);
+      const tw = tm ? Math.max(bar, roundLoad(tm * pct)) : null;
+      const sets = [];
+      for (let i = 0; i < it.sets; i++) sets.push(liveSet({lbl:String(i + 1), tw, tr:it.max, amrap:!!it.amrap && i === it.sets - 1, pct}));
+      ex.push({ex:it.ex, kind:type, main:false, supp:true, pct, min:it.max, max:it.max, sets});
+      continue;
+    }
+    const sg = suggestion(it);
+    const n = deload && S.settings.deloadAcc ? Math.max(1, Math.ceil(it.sets / 2)) : it.sets;
+    const sets = it.warm ? rampWarmups(exo, sg.w).map(liveSet) : [];
+    for (let i = 0; i < n; i++) sets.push(liveSet({lbl:String(i + 1), tw:sg.w, tr:it.max, trMin:it.min, amrap:!!it.amrap && i === n - 1}));
+    ex.push({ex:it.ex, kind:'reps', main:!!it.warm, min:it.min, max:it.max, up:sg.up, reset:sg.reset, est:sg.est, sets, cut:n < it.sets});
+  }
+  return ex;
 }
 function buildLive() {
   const p = prog(); if (!p || !p.days.length) return null;
@@ -367,17 +648,7 @@ function buildLive() {
   if (ps.day >= p.days.length) ps.day = 0;
   const key = liveKey(p, ps);
   if (S.live && S.live.key === key) return S.live;
-  const d = p.days[ps.day];
-  const ex = [];
-  if (d.main && p.wave) ex.push({ex:d.main, main:true, sets:buildSets531(p, d.main, ps.week).map(s => Object.assign(s, {w:s.tw, r:null, done:false}))});
-  else if (d.main) ex.push({ex:d.main, main:true, sets:[1,2,3].map(i => ({lbl:String(i), tw:null, tr:5, w:null, r:null, done:false}))});
-  for (const it of d.items) {
-    const sg = suggestion(it);
-    const sets = [];
-    for (let i = 0; i < it.sets; i++) sets.push({lbl:String(i + 1), tw:sg.w, tr:it.max, trMin:it.min, w:sg.w, r:null, done:false});
-    ex.push({ex:it.ex, main:false, min:it.min, max:it.max, up:sg.up, sets});
-  }
-  return {key, programId:p.id, started:null, ex, note:''};
+  return {key, programId:p.id, started:null, ex:buildEntries(p, p.days[ps.day], ps.week), note:''};
 }
 function liveStarted(L) { return L.ex.some(e => e.sets.some(s => s.done || s.r != null)); }
 let L = null; // current live session object (persisted to S.live once touched)
@@ -454,7 +725,8 @@ function viewWelcome() {
   return topbar() + `<div class="card"><div class="eyebrow">Welcome</div><h1>Let's get set up</h1>
   <p class="sub">Everything stays on this phone. Restore a backup (including your converted Personal Training Coach history), or start a fresh 5/3/1 program.</p>
   <button class="btn primary block mt" data-act="restorePick">Restore from backup file</button>
-  <button class="btn block mt" data-act="startFresh">Start a fresh 5/3/1 program</button></div>`;
+  <button class="btn block mt" data-act="templates">Pick a program template</button>
+  <button class="btn block mt" data-act="startFresh">Start a basic 5/3/1 program</button></div>`;
 }
 
 /* ---------- views: today ---------- */
@@ -493,12 +765,16 @@ function exerciseCard(e, ei, p) {
   let h = `<div class="card"><div class="between"><button class="exname" data-act="openEx" data-ex="${esc(e.ex)}">${esc(ex.name)}</button>`;
   if (e.main) h += `<span class="tag">Main</span>`;
   else if (e.up) h += `<span class="tag up">Go up</span>`;
+  else if (e.reset) h += `<span class="tag gold">Reset</span>`;
   h += `</div>`;
-  if (e.main && p.wave) {
-    const tm = p.tm[e.ex];
-    h += `<div class="meta">${tm ? 'Training max ' + fmtW(tm) + ' lb' : '<b style="color:var(--gold)">Set a training max in Program to get weights.</b>'}${lastLine(e.ex)}</div>`;
-  } else if (!e.main) {
-    h += `<div class="meta">${e.sets.length} × ${e.min === e.max ? e.max : e.min + '-' + e.max} reps${e.up ? ' · hit the top of the range last time, so the weight goes up' : ''}${lastLine(e.ex)}</div>`;
+  const tmLink = () => { const tm = p.tm[e.ex]; return `<button class="link" data-act="editTm" data-ex="${esc(e.ex)}">${tm ? 'Training max ' + fmtW(tm) + ' lb · change' : 'Set training max'}</button>`; };
+  if (e.kind === 'main' || e.kind === '531') {
+    h += `<div class="meta">${tmLink()}${lastLine(e.ex)}</div>`;
+  } else if (e.kind === 'fsl' || e.kind === 'bbb') {
+    h += `<div class="meta">${e.sets.length} × ${e.max} at ${Math.round(e.pct * 100)}% of training max (${e.kind === 'fsl' ? 'First Set Last' : 'supplemental'}) · ${tmLink()}</div>`;
+  } else {
+    const nWork = e.sets.filter(x => !x.warm).length;
+    h += `<div class="meta">${nWork} × ${e.min === e.max ? e.max : e.min + '-' + e.max} reps${e.sets.some(x => x.amrap) ? ', last set as many as you can' : ''}${e.up ? ' · hit the top of the range last time, so the weight goes up' : ''}${e.cut ? ' · deload week: half the sets' : ''}${e.reset ? ' · missed reps twice at this weight, so it drops about 10%' : ''}${e.est ? ' · weight estimated from your last session at a different rep range' : ''}${lastLine(e.ex)}</div>`;
   }
   e.sets.forEach((s, si) => {
     const tgt = s.tw != null ? `<b>${fmtW(s.tw)}</b> × ${s.amrap ? s.tr + '+' : (s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr)}` : `${s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr} reps`;
@@ -508,7 +784,7 @@ function exerciseCard(e, ei, p) {
       <input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? 'reps' : s.tr}" aria-label="reps">
       <button class="chk ${s.done ? 'on' : ''}" data-act="check" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button></div>`;
   });
-  h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${!e.main ? `<button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}" style="margin-left:auto">Remove</button>` : ''}</div></div>`;
+  h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
   return h;
 }
 function lastLine(exId) {
@@ -570,13 +846,13 @@ function viewProgram() {
       ${q.id === editProgId ? '<span class="small">Editing</span>' : `<button class="btn sm" data-act="editProg" data-id="${esc(q.id)}">Edit</button>`}
       ${q.id !== S.active ? `<button class="btn sm" data-act="activate" data-id="${esc(q.id)}">Use</button>` : ''}</div>`;
   });
-  h += `</div><div class="row"><button class="btn sm" data-act="newProg">+ New program</button><button class="btn sm" data-act="dupProg">Duplicate</button></div>`;
+  h += `</div><div class="row" style="flex-wrap:wrap"><button class="btn sm primary" data-act="templates">+ From template</button><button class="btn sm" data-act="newProg">+ Blank</button><button class="btn sm" data-act="dupProg">Duplicate</button></div>`;
 
   h += `<h3>${esc(p.name)}</h3><div class="card"><div class="field"><label>Name</label><input data-in="progName" value="${esc(p.name)}"></div>
     <div class="toggle"><div><b>5/3/1 wave</b><div class="small">Main lifts use training max, 4-week wave, AMRAP top sets, deload.</div></div><button class="sw ${p.wave ? 'on' : ''}" data-act="toggleWave"></button></div></div>`;
 
-  const mains = [...new Set(p.days.map(d => d.main).filter(Boolean))];
-  if (p.wave && mains.length) {
+  const mains = tmLifts(p);
+  if (mains.length) {
     h += `<h3>Training maxes</h3><div class="card"><div class="small" style="margin-bottom:10px">Weights for the main lifts come from these. After each cycle the app suggests raising them if you hit your AMRAP reps.</div>`;
     mains.forEach(m => {
       h += `<div class="grid2"><div class="field"><label>${esc(exName(m))} TM</label><input type="number" inputmode="decimal" step="any" data-in="tm" data-ex="${esc(m)}" value="${p.tm[m] != null ? fmtW(p.tm[m]) : ''}"></div>
@@ -588,16 +864,17 @@ function viewProgram() {
   p.days.forEach((d, di) => {
     h += `<div class="card daycard"><div class="hdr"><input class="dayin" data-in="dayName" data-di="${di}" value="${esc(d.name)}">
       <button class="ib" data-act="dayUp" data-di="${di}" aria-label="move up">↑</button><button class="ib" data-act="delDay" data-di="${di}" aria-label="delete day">✕</button></div>
-      <div class="field"><label>Main lift</label><button class="btn block" style="justify-content:flex-start" data-act="pickMain" data-di="${di}">${d.main ? esc(exName(d.main)) : 'None'}</button></div>
-      <div class="edhead"><span>Accessory</span><span>Sets</span><span>Min</span><span>Max</span><span></span></div>`;
+      ${p.wave || d.main ? `<div class="field"><label>Main lift (5/3/1 wave)</label><div class="row"><button class="btn" style="justify-content:flex-start;flex:1" data-act="pickMain" data-di="${di}">${d.main ? esc(exName(d.main)) : 'None'}</button>${d.main ? `<button class="ib" data-act="clearMain" data-di="${di}" aria-label="clear">✕</button>` : ''}</div></div>` : ''}
+      <div class="edhead"><span>Exercise (tap for options)</span><span>Sets</span><span>Min</span><span>Max</span><span></span></div>`;
     d.items.forEach((it, ii) => {
-      h += `<div class="edrow"><button class="nm" data-act="swapItem" data-di="${di}" data-ii="${ii}">${esc(exName(it.ex))}</button>
+      const tl = {'531':'5/3/1 wave', fsl:'First Set Last', bbb:Math.round((it.pct || .5) * 100) + '% of TM'}[it.type] || (it.amrap ? 'last set AMRAP' : '');
+      h += `<div class="edrow"><button class="nm" data-act="itemOpts" data-di="${di}" data-ii="${ii}">${esc(exName(it.ex))}${tl ? `<span class="small" style="display:block">${esc(tl)}</span>` : ''}</button>
         <input class="num" type="number" inputmode="numeric" data-in="itSets" data-di="${di}" data-ii="${ii}" value="${it.sets}">
         <input class="num" type="number" inputmode="numeric" data-in="itMin" data-di="${di}" data-ii="${ii}" value="${it.min}">
         <input class="num" type="number" inputmode="numeric" data-in="itMax" data-di="${di}" data-ii="${ii}" value="${it.max}">
         <button class="ib" data-act="delItem" data-di="${di}" data-ii="${ii}" aria-label="remove">✕</button></div>`;
     });
-    h += `<button class="btn sm mt" data-act="addItem" data-di="${di}">+ Accessory</button></div>`;
+    h += `<button class="btn sm mt" data-act="addItem" data-di="${di}">+ Exercise</button></div>`;
   });
   h += `<button class="btn block" data-act="addDay">+ Add day</button>`;
   if (Object.keys(S.programs).length > 1) h += `<button class="btn danger block mt" data-act="delProg">Delete this program</button>`;
@@ -623,6 +900,7 @@ function viewSettings() {
   h += `<h3>Rest timer (seconds)</h3><div class="card grid3">${[['main', 'Main lift'], ['acc', 'Accessory'], ['warm', 'Warmup']].map(([k, n]) => `<div class="field"><label>${n}</label><input class="num" type="number" inputmode="numeric" data-in="rest" data-k="${k}" value="${st.rest[k]}"></div>`).join('')}</div>`;
   h += `<h3>Workout</h3><div class="card">
     ${swRow('warmups', 'Warmup sets', '40/50/60% of training max before main lifts (skipped on deload).')}
+    ${swRow('deloadAcc', 'Lighter accessories on deload', 'Deload week (5/3/1 week 4) cuts accessory sets in half.')}
     ${swRow('awake', 'Keep screen on', 'Screen stays awake while a workout is in progress.')}
     ${swRow('sound', 'Beep when rest is done', 'Phone also vibrates.')}
     <div class="toggle"><div><b>Round main lift weights to</b><div class="small">Smallest jump you can load.</div></div><select data-in="round" class="num" style="width:80px">${[2.5, 5, 10].map(v => `<option ${st.round === v ? 'selected' : ''} value="${v}">${v} lb</option>`).join('')}</select></div></div>`;
@@ -783,7 +1061,7 @@ function finishSheet() {
     <button class="btn primary block" data-act="saveWorkout">Save and go to next day</button>`);
 }
 function tmReviewSheet(p, cycle) {
-  const mains = [...new Set(p.days.map(d => d.main).filter(Boolean))];
+  const mains = tmLifts(p);
   const rows = mains.map(m => {
     const amraps = [];
     S.sessions.filter(s => s.programId === p.id && s.cycle === cycle).forEach(s => s.ex.filter(e => e.ex === m).forEach(e => e.sets.filter(x => x.amrap).forEach(x => amraps.push(x))));
@@ -922,7 +1200,7 @@ function absRange(tr) {
 }
 function strengthSignal() {
   const p = prog(); if (!p) return null;
-  const mains = [...new Set(p.days.map(d => d.main).filter(Boolean))];
+  const mains = waveLifts(p);
   const now = Date.now(); let up = 0, down = 0, hold = 0;
   for (const m of mains) {
     const best = (from, to) => { let b = 0; for (const s of S.sessions) if (s.date >= now - to * DAY && s.date < now - from * DAY) for (const e of s.ex) if (e.ex === m) for (const x of e.sets) if (x.amrap) b = Math.max(b, e1rm(x.w, x.r)); return b; };
@@ -1142,21 +1420,69 @@ async function backup() {
   }
   S.settings.lastBackup = Date.now(); S.dirtySinceBackup = 0; save(); render(); toast('Backup saved.');
 }
+/* Merge a backup into what is already here: nothing on this phone is overwritten or lost. */
+function mergeData(d) {
+  const map = {}, n = {ex:0, prog:0, sess:0, wt:0};
+  const byName = {}; Object.values(S.exercises).forEach(e => { byName[e.name.trim().toLowerCase()] = e.id; });
+  Object.values(d.exercises || {}).forEach(e => {
+    const hit = byName[(e.name || '').trim().toLowerCase()];
+    if (hit) { map[e.id] = hit; const cur = S.exercises[hit]; if (!cur.video && e.video) cur.video = e.video; return; }
+    let id = e.id; if (S.exercises[id]) id = uid('x_');
+    S.exercises[id] = Object.assign({}, e, {id}); map[e.id] = id; byName[e.name.trim().toLowerCase()] = id; n.ex++;
+  });
+  const mx = id => map[id] || id;
+  Object.values(d.programs || {}).forEach(p => {
+    if (S.programs[p.id]) return;
+    const q = clone(p);
+    q.days.forEach(day => { if (day.main) day.main = mx(day.main); day.items.forEach(i => { i.ex = mx(i.ex); }); });
+    const rm = o => { const r = {}; Object.entries(o || {}).forEach(([k, v]) => { r[mx(k)] = v; }); return r; };
+    q.tm = rm(q.tm); q.tmInc = rm(q.tmInc);
+    S.programs[q.id] = q; S.pos[q.id] = (d.pos && d.pos[q.id]) || {week:0, day:0, cycle:1}; n.prog++;
+  });
+  const have = new Set(S.sessions.map(x => x.id));
+  (d.sessions || []).forEach(x => { if (have.has(x.id)) return; const c = clone(x); c.ex.forEach(e => { e.ex = mx(e.ex); }); S.sessions.push(c); n.sess++; });
+  S.sessions.sort((a, b) => b.date - a.date);
+  if (d.body && !Array.isArray(d.body)) {
+    const dates = new Set(S.body.weights.map(w => w.d));
+    (d.body.weights || []).forEach(w => { if (!dates.has(w.d)) { S.body.weights.push(w); n.wt++; } });
+    S.body.weights.sort((a, b) => a.d < b.d ? -1 : 1);
+    const wd = new Set(S.body.waist.map(w => w.d)); (d.body.waist || []).forEach(w => { if (!wd.has(w.d)) S.body.waist.push(w); });
+    const ws = new Set(S.body.intake.map(w => w.start)); (d.body.intake || []).forEach(w => { if (!ws.has(w.start)) S.body.intake.push(w); });
+    if (!S.body.phases.length && d.body.phases) S.body.phases = d.body.phases;
+  }
+  if (!S.active) S.active = d.active && S.programs[d.active] ? d.active : Object.keys(S.programs)[0] || null;
+  return n;
+}
 function restorePick() {
   const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
   inp.onchange = async () => {
     const f = inp.files[0]; if (!f) return;
+    let d;
     try {
-      const d = JSON.parse(await f.text());
+      d = JSON.parse(await f.text());
       if (d.app !== 'chalk-and-iron' || !Array.isArray(d.sessions) || typeof d.exercises !== 'object') throw new Error('Not a Chalk & Iron backup');
-      const has = S.sessions.length || Object.keys(S.programs).length;
-      if (has && !confirm('Replace everything on this phone with this backup (' + d.sessions.length + ' workouts)?')) return;
+    } catch (e) { toast('Could not read that file: ' + e.message, 3500); return; }
+    const replace = async () => {
       const keepSettings = S.settings, keepBody = S.body;
       S = normalize(Object.assign(blankState(), d, {live:null}));
       if (!d.settings) S.settings = Object.assign(defaultSettings(), keepSettings);
-      if (!d.body) S.body = keepBody;
+      if (!d.body || Array.isArray(d.body)) S.body = keepBody;
       await save(true); tab = 'today'; render(); toast('Restored ' + S.sessions.length + ' workouts.');
-    } catch (e) { toast('Could not read that file: ' + e.message, 3500); }
+    };
+    const has = S.sessions.length || Object.keys(S.programs).length;
+    if (!has) return replace();
+    sheet(`<div class="hd"><h2>Import backup</h2><button class="x" data-act="close">✕</button></div>
+      <p class="sub">This file has ${d.sessions.length} workouts and ${Object.keys(d.programs || {}).length} programs.</p>
+      <button class="btn primary block" id="imMerge">Merge into what is here (recommended)</button>
+      <div class="small" style="margin:6px 0 14px">Adds programs, exercises, workouts and weigh-ins you do not have yet. Nothing on this phone is changed or removed.</div>
+      <button class="btn danger block" id="imReplace">Replace everything</button>
+      <div class="small mt">Wipes this phone's data and uses only the file.</div>`, bg => {
+      bg.querySelector('#imMerge').addEventListener('click', async () => {
+        const n = mergeData(d); await save(true); closeSheet(bg); render();
+        toast('Added ' + n.prog + ' programs, ' + n.sess + ' workouts, ' + n.ex + ' exercises' + (n.wt ? ', ' + n.wt + ' weigh-ins' : '') + '.', 4000);
+      });
+      bg.querySelector('#imReplace').addEventListener('click', async () => { if (!confirm('Erase what is on this phone and use only the file?')) return; closeSheet(bg); await replace(); });
+    });
   };
   inp.click();
 }
@@ -1235,7 +1561,7 @@ const actions = {
   backup: () => backup(),
   restorePick: () => restorePick(),
   startFresh: () => { freshProgram(); save(); tab = 'program'; editProgId = S.active; render(); toast('Enter your training maxes to get started.'); },
-  sw: el => { const k = el.dataset.k; S.settings[k] = !S.settings[k]; if (k === 'warmups' && S.live && !liveStarted(S.live)) S.live = null; if (k === 'awake') keepAwake(S.settings.awake && !!S.live); save(); render(); },
+  sw: el => { const k = el.dataset.k; S.settings[k] = !S.settings[k]; if ((k === 'warmups' || k === 'deloadAcc') && S.live && !liveStarted(S.live)) S.live = null; if (k === 'awake') keepAwake(S.settings.awake && !!S.live); save(); render(); },
   addPlate: el => { const w = num(prompt('Plate weight in lb (e.g. 1.25)')); if (!w || w <= 0) return; S.settings.plates[el.dataset.k][String(w)] = 2; save(); render(); },
   mergeOpen: () => mergeSheet(),
   resetAll: () => { if (!confirm('Erase ALL workouts, programs and settings on this phone?')) return; if (!confirm('Really erase? Make sure you have a backup.')) return; S = blankState(); save(true); tab = 'today'; render(); },
@@ -1249,7 +1575,11 @@ const actions = {
   delDay: el => { const p = S.programs[editProgId]; if (p.days.length < 2) return toast('A program needs at least one day.'); if (!confirm('Delete day "' + p.days[+el.dataset.di].name + '"?')) return; p.days.splice(+el.dataset.di, 1); const ps = S.pos[p.id]; if (ps.day >= p.days.length) ps.day = 0; progChanged(p); },
   dayUp: el => { const p = S.programs[editProgId], i = +el.dataset.di; if (i < 1) return; [p.days[i - 1], p.days[i]] = [p.days[i], p.days[i - 1]]; progChanged(p); },
   pickMain: el => { const p = S.programs[editProgId], d = p.days[+el.dataset.di]; pickExercise('Main lift', id => { d.main = id; if (p.tmInc[id] == null) p.tmInc[id] = /dead|squat/i.test(exName(id)) ? 10 : 5; progChanged(p); }); },
-  addItem: el => { const p = S.programs[editProgId], d = p.days[+el.dataset.di]; pickExercise('Add accessory', id => { d.items.push({ex:id, sets:3, min:8, max:12}); progChanged(p); }); },
+  addItem: el => { const p = S.programs[editProgId], d = p.days[+el.dataset.di]; pickExercise('Add exercise', id => { d.items.push({ex:id, sets:3, min:8, max:12}); progChanged(p); }); },
+  templates: () => templatesSheet(),
+  itemOpts: el => itemSheet(S.programs[editProgId], +el.dataset.di, +el.dataset.ii),
+  clearMain: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].main = null; progChanged(p); },
+  swapToday: el => { const e = L.ex[+el.dataset.ei]; pickExercise('Swap ' + exName(e.ex) + ' today', id => { e.ex = id; if (e.kind === 'reps') { const sg = suggestion({ex:id, sets:e.sets.length, min:e.min, max:e.max}); e.up = sg.up; e.sets.forEach(x => { if (!x.done) { x.tw = sg.w; x.w = sg.w; } }); } touchLive(true); render(); toast('Swapped for today only.'); }); },
   swapItem: el => { const p = S.programs[editProgId], it = p.days[+el.dataset.di].items[+el.dataset.ii]; pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); }); },
   bwSave: () => bodySave(),
   bwEdit: el => { bodyLogDate = el.dataset.d; render(); window.scrollTo(0, 0); },
@@ -1273,8 +1603,82 @@ const actions = {
     const x = num(v.in); if (!x || x < 20 || x > 70) { toast('Enter inches.'); return false; }
     S.body.waist = S.body.waist.filter(w => w.d !== v.d).concat({d:v.d || todayStr(), in:x}); toast('Saved.');
   }, 'Same time each week, relaxed, tape level at the belly button.'),
+  editTm: el => tmSheet(el.dataset.ex),
   delItem: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].items.splice(+el.dataset.ii, 1); progChanged(p); }
 };
+/* After a training max changes, re-figure any sets in today's workout that are not checked off yet. */
+function refreshLiveTm(p, exId) {
+  if (!S.live || p.id !== S.active) return;
+  const ps = pos(), fresh = buildEntries(p, p.days[ps.day], ps.week);
+  S.live.ex.forEach(e => {
+    if (e.ex !== exId || !(e.kind === 'main' || TM_TYPES[e.kind])) return;
+    const f = fresh.find(x => x.ex === exId && x.kind === e.kind); if (!f) return;
+    e.sets = e.sets.map((st, i) => st.done || !f.sets[i] ? st : f.sets[i]);
+    for (let i = e.sets.length; i < f.sets.length; i++) e.sets.push(f.sets[i]);
+  });
+}
+function setTm(p, exId, v) {
+  if (v) p.tm[exId] = v; else delete p.tm[exId];
+  refreshLiveTm(p, exId);
+}
+function tmSheet(exId) {
+  const p = prog(), cur = p.tm[exId];
+  sheet(`<div class="hd"><h2>${esc(exName(exId))}</h2><button class="x" data-act="close">✕</button></div>
+    <p class="sub">Every week of this lift is figured from the training max, so changing it here updates today and all future workouts. Sets you already checked off stay as you logged them.</p>
+    <div class="field"><label>Training max (lb)</label><input id="tmV" class="num" type="number" inputmode="decimal" step="any" value="${cur != null ? fmtW(cur) : ''}"></div>
+    <div class="field"><label>Or enter a 1 rep max (training max = 90%)</label><input id="tmR" class="num" type="number" inputmode="decimal" step="any" placeholder="optional"></div>
+    <div class="small" id="tmPrev" style="margin-bottom:10px"></div>
+    <button class="btn primary block" id="tmGo">Save</button>`, bg => {
+    const v = bg.querySelector('#tmV'), r = bg.querySelector('#tmR'), pv = bg.querySelector('#tmPrev');
+    const preview = () => {
+      const tm = num(v.value); if (!tm) { pv.textContent = ''; return; }
+      const wv = WAVE[pos().week];
+      pv.textContent = wv.name + ' working sets: ' + wv.sets.map(([pc, reps, a]) => roundLoad(tm * pc) + '×' + reps + (a ? '+' : '')).join(', ');
+    };
+    r.addEventListener('input', () => { const x = num(r.value); if (x) v.value = fmtW(Math.round(x * 0.9 * 10) / 10); preview(); });
+    v.addEventListener('input', preview); preview();
+    bg.querySelector('#tmGo').addEventListener('click', () => {
+      const tm = num(v.value); if (!tm || tm < 20) return toast('Enter a training max.');
+      setTm(p, exId, tm); save(true); closeSheet(bg); render(); toast(exName(exId) + ' updated.');
+    });
+  });
+}
+/* Options for one exercise slot in a program day. */
+function itemSheet(p, di, ii) {
+  const d = p.days[di], it = d.items[ii];
+  const draw = () => `<div class="hd"><h2>${esc(exName(it.ex))}</h2><button class="x" data-act="close">✕</button></div>
+    <button class="btn block" id="isSwap" style="margin-bottom:12px">Change exercise</button>
+    <div class="field"><label>How weights are set</label><select id="isType">${Object.entries(ITEM_TYPES).map(([k, v]) => `<option value="${k}" ${(it.type || 'reps') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+    <div class="small" id="isHelp" style="margin:-4px 0 10px"></div>
+    <div class="grid3" id="isNums"><div class="field"><label>Sets</label><input class="num" id="isSets" type="number" inputmode="numeric" value="${it.sets}"></div>
+      <div class="field"><label>Min reps</label><input class="num" id="isMin" type="number" inputmode="numeric" value="${it.min}"></div>
+      <div class="field"><label>Max reps</label><input class="num" id="isMax" type="number" inputmode="numeric" value="${it.max}"></div></div>
+    <div class="field" id="isPctF"><label>% of training max</label><input class="num" id="isPct" type="number" inputmode="decimal" value="${Math.round((it.pct || .5) * 100)}"></div>
+    <div class="toggle"><div><b>Last set as many reps as possible</b><div class="small">Linear programs like GreySkull use this.</div></div><button class="sw ${it.amrap ? 'on' : ''}" id="isAmrap" data-act="flip"></button></div>
+    <div class="toggle"><div><b>Warmup sets</b><div class="small">Empty bar, then about 40/60/80% of the working weight.</div></div><button class="sw ${it.warm ? 'on' : ''}" id="isWarm" data-act="flip"></button></div>
+    <div class="field mt"><label>Weight step when you hit the top of the range (lb)</label><input class="num" id="isInc" type="number" inputmode="decimal" step="any" placeholder="exercise default (${S.exercises[it.ex] ? S.exercises[it.ex].inc : 5})" value="${it.inc != null ? it.inc : ''}"></div>
+    <div class="grid2"><button class="btn" id="isUp" ${ii === 0 ? 'disabled' : ''}>Move up</button><button class="btn danger" id="isDel">Remove</button></div>
+    <button class="btn primary block mt" id="isGo">Save</button>`;
+  sheet(draw(), bg => {
+    const help = {reps:'Pick a rep range. When every set reaches the top of the range, the next workout adds one weight step.', '531':'Uses the 5/3/1 weekly percentages of this lift\'s training max, with an AMRAP top set.', fsl:'Repeats the first working set percentage of the week for extra sets (5x5 is classic). Skipped on deload weeks.', bbb:'Sets of a fixed percentage of the training max, like Boring But Big 5x10 at 50-60%. Skipped on deload weeks.'};
+    const sync = () => { const t = bg.querySelector('#isType').value; bg.querySelector('#isHelp').textContent = help[t]; bg.querySelector('#isPctF').style.display = t === 'bbb' ? '' : 'none'; bg.querySelector('#isNums').style.display = t === '531' ? 'none' : ''; };
+    sync(); bg.querySelector('#isType').addEventListener('change', sync);
+    bg.querySelector('#isSwap').addEventListener('click', () => { closeSheet(bg); pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); itemSheet(p, di, ii); }); });
+    bg.querySelector('#isUp').addEventListener('click', () => { if (ii < 1) return; [d.items[ii - 1], d.items[ii]] = [d.items[ii], d.items[ii - 1]]; closeSheet(bg); progChanged(p); });
+    bg.querySelector('#isDel').addEventListener('click', () => { d.items.splice(ii, 1); closeSheet(bg); progChanged(p); });
+    bg.querySelector('#isGo').addEventListener('click', () => {
+      const t = bg.querySelector('#isType').value, int = (id, dflt) => Math.max(1, parseInt(bg.querySelector(id).value) || dflt);
+      it.type = t === 'reps' ? undefined : t;
+      it.sets = Math.min(12, int('#isSets', it.sets)); it.min = int('#isMin', it.min); it.max = Math.max(it.min, int('#isMax', it.max));
+      it.pct = t === 'bbb' ? Math.min(1, Math.max(.2, (num(bg.querySelector('#isPct').value) || 50) / 100)) : undefined;
+      it.amrap = bg.querySelector('#isAmrap').classList.contains('on') || undefined;
+      it.warm = bg.querySelector('#isWarm').classList.contains('on') || undefined;
+      const inc = num(bg.querySelector('#isInc').value); it.inc = inc != null ? inc : undefined;
+      if (TM_TYPES[t] && p.tmInc[it.ex] == null) p.tmInc[it.ex] = /dead|squat/i.test(exName(it.ex)) ? 10 : 5;
+      closeSheet(bg); progChanged(p); toast('Saved.');
+    });
+  });
+}
 function progChanged(p, noRender) {
   if (p.id === S.active && S.live && !liveStarted(S.live)) S.live = null;
   save(); if (!noRender) render();
@@ -1287,7 +1691,7 @@ const inputs = {
   liveNote: el => { L.note = el.value; touchLive(); },
   exSearch: el => { exSearch = el.value; $('#exList').innerHTML = exerciseListHtml(); },
   progName: el => { const p = S.programs[editProgId]; p.name = el.value || 'Program'; save(); },
-  tm: el => { const p = S.programs[editProgId]; const v = num(el.value); if (v) p.tm[el.dataset.ex] = v; else delete p.tm[el.dataset.ex]; progChanged(p, true); },
+  tm: el => { const p = S.programs[editProgId]; setTm(p, el.dataset.ex, num(el.value)); progChanged(p, true); },
   tmInc: el => { const p = S.programs[editProgId]; const v = num(el.value); p.tmInc[el.dataset.ex] = v == null ? 5 : v; save(); },
   dayName: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].name = el.value; progChanged(p, true); },
   itSets: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].items[+el.dataset.ii].sets = Math.max(1, Math.min(10, parseInt(el.value) || 1)); progChanged(p, true); },
@@ -1339,7 +1743,7 @@ async function boot() {
     }).catch(() => {});
   }
 }
-window.CI = {get state() { return S; }, plateCombo, mergeExercises, exportData}; // used by tests
+window.CI = {get state() { return S; }, plateCombo, mergeExercises, exportData, mergeData, installTemplate, TEMPLATES}; // used by tests
 boot();
 </script>
 </body>
