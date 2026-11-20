@@ -1,5 +1,5 @@
 /* Chalk & Iron service worker: caches the app so it runs fully offline. */
-const CACHE = 'chalk-iron-3.4.0';
+const CACHE = 'chalk-iron-3.4.1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './maskable-512.png'];
 self.addEventListener('install', e => {
   /* cache each file on its own so one missing file never blocks the app */

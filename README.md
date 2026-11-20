@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.4.0
+Version 3.4.1
 
 ## What it does
 
@@ -80,6 +80,8 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.4.1**
+  - Fixed: the plates to load were cut off on narrow phone screens. They now show in full on their own line under each set.
 - **3.4.0**
   - Effort-based rest timer: tap Easy, Hard or Fail after a set (defaults: warmups 1:00; main lifts 1:30 / 3:00 / 5:00; accessories 0:45 / 1:00 / 1:30). Editable in Settings. A missed AMRAP starts on Fail. Effort is saved with each set.
   - Form videos play inside the app in YouTube's privacy mode.

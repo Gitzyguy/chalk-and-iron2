@@ -63,7 +63,7 @@ a.btn{color:var(--text)}
 .set .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;font-weight:700}
 .set .tgt{font-size:14px;min-width:0}
 .set .tgt b{font-family:var(--mono)}
-.set .plates{display:block;font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set .plates{grid-column:2/-1;font-size:12.5px;color:var(--text);opacity:.8;font-family:var(--mono);margin-top:-2px;white-space:normal;line-height:1.35}
 .num{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 4px;text-align:center;font-family:var(--mono);font-size:15px}
 .num:focus,.field input:focus,.field select:focus,textarea:focus{outline:2px solid var(--rust);outline-offset:-1px}
 .chk{width:40px;height:40px;border-radius:9px;border:1.5px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent}
@@ -152,7 +152,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.4.0';
+const APP_VERSION = '3.4.1';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -868,11 +868,11 @@ function exerciseCard(e, ei, p) {
   }
   e.sets.forEach((s, si) => {
     const tgt = s.tw != null ? `<b>${fmtW(s.tw)}</b> × ${s.amrap ? s.tr + '+' : (s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr)}` : `${s.trMin && s.trMin !== s.tr ? s.trMin + '-' + s.tr : s.tr} reps`;
-    const pt = (s.tw && barWeight(ex)) ? `<span class="plates">${esc(plateText(s.w != null ? s.w : s.tw, ex))}</span>` : '';
-    h += `<div class="set ${s.warm ? 'warm' : ''}"><div class="lbl">${esc(s.lbl)}</div><div class="tgt">${tgt}${s.amrap ? ' <span class="tag">AMRAP</span>' : ''}${pt}</div>
+    const pt = (s.tw && barWeight(ex)) ? `<div class="plates">${esc(plateText(s.w != null ? s.w : s.tw, ex))}</div>` : '';
+    h += `<div class="set ${s.warm ? 'warm' : ''}"><div class="lbl">${esc(s.lbl)}</div><div class="tgt">${tgt}${s.amrap ? ' <span class="tag">AMRAP</span>' : ''}</div>
       <input class="num" type="number" inputmode="decimal" step="any" data-in="w" data-ei="${ei}" data-si="${si}" value="${s.w != null ? fmtW(s.w) : ''}" placeholder="lb" aria-label="weight">
       <input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? 'reps' : s.tr}" aria-label="reps">
-      <button class="chk ${s.done ? 'on' : ''}" data-act="check" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button></div>`;
+      <button class="chk ${s.done ? 'on' : ''}" data-act="check" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button>${pt}</div>`;
   });
   h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
   return h;
