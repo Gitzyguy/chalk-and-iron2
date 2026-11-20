@@ -28,13 +28,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 #app{max-width:520px;margin:0 auto;min-height:100vh;padding:calc(10px + var(--safe-t)) 14px calc(150px + var(--safe-b))}
 .top{display:flex;align-items:center;gap:10px;padding:6px 2px 12px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.12em;font-size:13px}
+.brand{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;font-weight:800;letter-spacing:.12em;font-size:13px}
 .brand i{display:inline-block;width:20px;height:14px;position:relative}
 .brand i:before,.brand i:after{content:"";position:absolute;top:0;width:5px;height:14px;background:var(--rust);border-radius:1px}
 .brand i:before{left:0}.brand i:after{right:0}
 .brand b{position:absolute;left:4px;right:4px;top:5px;height:4px;background:var(--text)}
 .top .sp{flex:1}
-.pill{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.pill{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:3px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.top .pill{max-width:46vw}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
 .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);font-weight:700}
 h1{font-size:24px;margin:2px 0 2px;letter-spacing:.01em;text-transform:uppercase}
@@ -148,7 +149,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '3.3.0';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -338,7 +339,17 @@ function plateText(total, ex) {
    adjustable dumbbells, adjustable bench, cable with low and high pulley,
    chin-up bar, dip station, ab wheel). Cues are short reminders, not a course.
    ========================================================================= */
-const LIB_VERSION = 1;
+const LIB_VERSION = 2;
+/* Form videos picked earlier from respected coaching channels (RP Strength, Squat University, Buff Dudes). */
+const VIDEO_DEFAULTS = {
+  'Arnold Press':'https://www.youtube.com/watch?v=6Z15_WdXmVw', 'Cable Lateral Raise':'https://www.youtube.com/watch?v=2OMbdPF7mz4',
+  'Incline DB Curl':'https://www.youtube.com/watch?v=aTYlqC_JacQ', 'Overhead Tricep Extension (Rope)':'https://www.youtube.com/watch?v=kqidUIf1eJE',
+  'Cable Row':'https://www.youtube.com/watch?v=UCXxvVItLoM', 'Cable Fly':'https://www.youtube.com/watch?v=4mfLHnFL0Uw',
+  'Rear Delt DB Raise':'https://www.youtube.com/watch?v=34gVHrkaiz0', 'Single Leg RDL (DB)':'https://www.youtube.com/watch?v=Zfr6wizR8rs',
+  'Bulgarian Split Squat':'https://www.youtube.com/watch?v=hPlKPjohFS0', 'Hyperextensions':'https://www.youtube.com/watch?v=5_ejbGfdAQE',
+  'Face Pulls':'https://www.youtube.com/watch?v=-MODnZdnmAQ', 'Tricep Pushdown (Straight Bar)':'https://www.youtube.com/watch?v=6Fzep104f0s',
+  'Tricep Pushdown (Rope)':'https://www.youtube.com/watch?v=-xa-6cQaZKY', 'Dumbbell Lunges':'https://www.youtube.com/watch?v=eFWCn5iEbTU'
+};
 const LIBRARY = [
   // barbell
   ['Squat', 'barbell', 0, 'Bar on upper back, brace hard, sit down between your heels, knees track over toes, drive up through mid-foot.'],
@@ -427,10 +438,10 @@ function seedLibrary(st) {
   Object.values(st.exercises).forEach(e => { byName[e.name.trim().toLowerCase()] = e; });
   for (const [name, equip, floor, cue] of LIBRARY) {
     const ex = byName[name.toLowerCase()];
-    if (ex) { if (!ex.notes) ex.notes = cue; continue; }
+    if (ex) { if (!ex.notes) ex.notes = cue; if (!ex.video && VIDEO_DEFAULTS[name]) ex.video = VIDEO_DEFAULTS[name]; continue; }
     let id = 'x_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
     if (st.exercises[id]) id = id + '_lib';
-    st.exercises[id] = {id, name, equip, inc:DEFAULT_INC[equip], floor:!!floor, notes:cue, video:''};
+    st.exercises[id] = {id, name, equip, inc:DEFAULT_INC[equip], floor:!!floor, notes:cue, video:VIDEO_DEFAULTS[name] || ''};
   }
   st.libVersion = LIB_VERSION;
 }
@@ -718,7 +729,7 @@ function render() {
   if (!S.active || !prog()) { app.innerHTML = tab === 'settings' ? viewSettings() : tab === 'body' ? viewBody() : viewWelcome(); return; }
   app.innerHTML = ({today:viewToday, history:viewHistory, body:viewBody, program:viewProgram, settings:viewSettings})[tab]();
 }
-const topbar = right => `<div class="top"><div class="brand"><i><b></b></i>CHALK &amp; IRON</div><div class="sp"></div>${right || ''}</div>`;
+const topbar = right => `<div class="top"><div class="brand"><i><b></b></i>CHALK &amp; IRON</div><div class="sp"></div>${right || ''}<button class="x" data-act="help" aria-label="Help" style="font-weight:700">?</button></div>`;
 
 /* ---------- views: welcome ---------- */
 function viewWelcome() {
@@ -746,6 +757,7 @@ function viewToday() {
     const top = main.sets.filter(s => !s.warm).slice(-1)[0];
     const ex = S.exercises[main.ex];
     if (top && top.tw && barWeight(ex)) h += plateVis(top.tw, ex) + `<div class="small mono">${fmtW(top.tw)} lb top set · ${esc(plateText(top.tw, ex))}</div>`;
+    if (p.wave) h += `<button class="btn sm mt" data-act="editTm" data-ex="${esc(main.ex)}">${p.tm[main.ex] ? esc(exName(main.ex)) + ' training max ' + fmtW(p.tm[main.ex]) + ' · Change' : 'Set ' + esc(exName(main.ex)) + ' training max'}</button>`;
   }
   h += `</div>`;
   L.ex.forEach((e, ei) => { h += exerciseCard(e, ei, p); });
@@ -885,6 +897,8 @@ function viewProgram() {
 function viewSettings() {
   const st = S.settings;
   let h = topbar(`<span class="pill">v${APP_VERSION}</span>`);
+  h += `<div class="grid2" style="margin-bottom:4px"><button class="btn" data-act="help">Help &amp; guide</button><button class="btn" data-act="checkUpdate">Check for updates</button></div>
+    <div class="small" id="updInfo" style="text-align:center;margin-top:6px">You are on version ${APP_VERSION}.</div>`;
   h += `<h3>Your data</h3><div class="card"><div class="sub">${S.sessions.length} workouts · ${Object.keys(S.exercises).length} exercises · last backup ${st.lastBackup ? esc(fmtDate(st.lastBackup)) : 'never'}</div>
     <div class="grid2 mt"><button class="btn primary" data-act="backup">Back up now</button><button class="btn" data-act="restorePick">Restore</button></div>
     <div class="small mt" id="persistInfo">Data is stored on this phone only. Keep a backup file somewhere safe (Google Drive works).</div></div>`;
@@ -957,6 +971,7 @@ function openExercise(exId) {
   if (pts.length > 1) h += `<div class="card"><div class="eyebrow">${weighted ? 'Estimated 1 rep max' : 'Total reps per session'}</div>${chart(pts.slice(-60))}</div>`;
   if (hist.length) h += `<div class="grid3" style="margin-bottom:12px">${weighted ? `<div class="stat"><div class="v">${Math.round(best.e)}</div><div class="k">Best e1RM</div></div><div class="stat"><div class="v">${fmtW(heavy.w)}</div><div class="k">Heaviest</div></div>` : ''}<div class="stat"><div class="v">${reps.r}</div><div class="k">Most reps</div></div></div>`;
   if (ex.video) h += `<a class="btn block" style="margin-bottom:12px;text-decoration:none" href="${esc(ex.video)}" target="_blank" rel="noopener">Watch form video</a>`;
+  else h += `<a class="btn block" style="margin-bottom:6px;text-decoration:none" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' proper form')}" target="_blank" rel="noopener">Find a form video on YouTube</a><div class="small" style="margin-bottom:12px">Found a good one? Copy its link, then tap Edit exercise below and paste it so it is saved here.</div>`;
   if (ex.notes) h += `<div class="card small" style="white-space:pre-wrap">${esc(ex.notes)}</div>`;
   h += `<h3>History</h3>`;
   if (!hist.length) h += `<div class="empty">Not logged yet.</div>`;
@@ -1402,6 +1417,41 @@ function bodySave() {
   bodyLogDate = null; save(); render(); toast('Weigh-in saved.');
 }
 
+/* ---------- help and updates ---------- */
+const HELP = [
+  ['Getting around', `<p><b>Workout</b> is today's session. <b>History</b> lists every workout and every exercise with charts. <b>Body</b> tracks weight, phases and calories. <b>Program</b> is where you pick and edit programs. <b>Settings</b> has plates, bars, timers, backup and updates. The <b>?</b> at the top opens this guide from any screen.</p>`],
+  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom (+30s or Skip). Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
+  ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you hit the target reps on its AMRAP sets.</p>`],
+  ['Weeks, days and cycles', `<p>5/3/1 runs 4 weeks: 5s, 3s, 5/3/1 and a deload. Finishing a workout moves you to the next day. Tap <b>Change</b> on the Workout screen to jump to any week, day or cycle, for example to skip a deload or redo a missed day.</p>`],
+  ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
+  ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ From template</b> adds a well known program (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
+  ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows start with a bumper so the bar sits at the right height. Set your barbell, hex bar and EZ bar weights in Settings.</p>`],
+  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. A weekly waist measurement is optional but the best check on fat loss.</p>`],
+  ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
+  ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p>`],
+  ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
+  ['Troubleshooting', `<p><b>Weights look wrong:</b> check the training max and the bar weight in Settings. <b>Wrong day:</b> use Change on the Workout screen. <b>Something odd after an update:</b> close the app fully and reopen. <b>Before anything risky:</b> Back up now.</p>`]
+];
+function helpSheet() {
+  sheet(`<div class="hd"><h2>Help &amp; guide</h2><button class="x" data-act="close">✕</button></div>
+    <div class="card list">${HELP.map(([t, b], i) => `<details class="it" style="display:block"${i === 0 ? ' open' : ''}><summary class="t" style="cursor:pointer;padding:2px 0">${esc(t)}</summary><div class="small" style="line-height:1.55;color:var(--text)">${b}</div></details>`).join('')}</div>
+    <div class="small" style="text-align:center">Chalk &amp; Iron ${APP_VERSION}</div>`);
+}
+async function checkUpdate() {
+  const info = $('#updInfo'), say = t => { if (info) info.textContent = t; toast(t, 3000); };
+  say('Checking...');
+  try {
+    const txt = await (await fetch('./index.html?check=' + Date.now(), {cache:'no-store'})).text();
+    const m = txt.match(/APP_VERSION = '([0-9.]+)'/);
+    if (!m) return say('Could not read the online version.');
+    if (m[1] === APP_VERSION) return say('You are up to date (version ' + APP_VERSION + ').');
+    say('Updating to version ' + m[1] + '...');
+    await save(true);
+    if ('serviceWorker' in navigator) { const reg = await navigator.serviceWorker.getRegistration(); if (reg) { try { await reg.update(); } catch (e) {} } }
+    setTimeout(() => location.reload(), 1200);
+  } catch (e) { say('No connection. Connect to the internet and try again.'); }
+}
+
 /* ---------- backup / restore ---------- */
 function exportData() {
   return {app:'chalk-and-iron', schema:3, version:APP_VERSION, exported:Date.now(), exercises:S.exercises, programs:S.programs, active:S.active, pos:S.pos, sessions:S.sessions, settings:S.settings, body:S.body};
@@ -1577,6 +1627,8 @@ const actions = {
   pickMain: el => { const p = S.programs[editProgId], d = p.days[+el.dataset.di]; pickExercise('Main lift', id => { d.main = id; if (p.tmInc[id] == null) p.tmInc[id] = /dead|squat/i.test(exName(id)) ? 10 : 5; progChanged(p); }); },
   addItem: el => { const p = S.programs[editProgId], d = p.days[+el.dataset.di]; pickExercise('Add exercise', id => { d.items.push({ex:id, sets:3, min:8, max:12}); progChanged(p); }); },
   templates: () => templatesSheet(),
+  help: () => helpSheet(),
+  checkUpdate: () => checkUpdate(),
   itemOpts: el => itemSheet(S.programs[editProgId], +el.dataset.di, +el.dataset.ii),
   clearMain: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].main = null; progChanged(p); },
   swapToday: el => { const e = L.ex[+el.dataset.ei]; pickExercise('Swap ' + exName(e.ex) + ' today', id => { e.ex = id; if (e.kind === 'reps') { const sg = suggestion({ex:id, sets:e.sets.length, min:e.min, max:e.max}); e.up = sg.up; e.sets.forEach(x => { if (!x.done) { x.tw = sg.w; x.w = sg.w; } }); } touchLive(true); render(); toast('Swapped for today only.'); }); },
