@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.6.1
+Version 3.6.2
 
 ## What it does
 
@@ -62,11 +62,12 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 ## Your data
 
 - **Where it's stored:** only on your phone, in the browser's storage for this app. The app asks Chrome to protect it from automatic clearing.
-- **Backing up:** **Settings > Back up now** saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up.
+- **Backing up:** after each workout the app asks to back up (pick Google Drive in the share menu). **Settings > Back up now** does the same any time. A backup file is the only copy that survives clearing Chrome's data or losing the phone.
 - **Restoring:**
   - **Merge** adds anything new and never changes or removes what is on the phone.
   - **Replace** wipes the phone and uses the file. Only use Replace when moving to a new phone.
-- **Uninstalling:** removing the app from your phone, or clearing Chrome's site data, deletes your data. Back up first.
+- **Uninstalling or clearing Chrome:** removing the app, or clearing Chrome's **Cookies and site data**, deletes your data. Clearing only **Cached images and files** is safe. Back up first.
+- **If the app cannot read your data:** it says so and saves nothing until you choose to try again, save a copy, restore or start over.
 
 ## Troubleshooting
 
@@ -76,10 +77,15 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 | Weights look wrong | Check the training max (Workout screen top card, or Program) and your bar weights in Settings. |
 | Wrong day or week | Tap **Change** on the Workout screen. |
 | Update not showing | Wait 2 minutes after uploading, then tap **Check for updates**. Or close the app fully and reopen it twice. |
+| All workouts gone, "Let's get set up" screen | Chrome's site data was cleared. Tap **Restore from backup file** and pick your latest backup. |
 | Rest timer quiet with screen off | The app keeps the screen on during workouts (Settings). A web app cannot sound alerts reliably when the phone is locked. |
 
 ## Version history
 
+- **3.6.2**
+  - After each workout the app asks to back up, so a backup is always one tap away. Turn it off in Settings, Your data.
+  - An empty app can no longer save over your data, and if the app cannot read your data it says so and saves nothing until you choose what to do.
+  - Settings, Help and this guide explain that clearing Chrome's "Cookies and site data" deletes your workouts.
 - **3.6.1**
   - Fixed: after a cycle, training maxes were suggested to go up even for lifts with no AMRAP sets logged. They now hold.
   - Fixed: workouts are dated when you started them, not when you tapped Finish.
