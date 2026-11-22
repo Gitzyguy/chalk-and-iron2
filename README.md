@@ -84,6 +84,7 @@ The version number is shown in Settings and at the end of the help guide. Downlo
   - Fixed: after a cycle, training maxes were suggested to go up even for lifts with no AMRAP sets logged. They now hold.
   - Fixed: workouts are dated when you started them, not when you tapped Finish.
   - Fixed: setting a rest time to 0 now turns that timer off (it used to become 1:00).
+  - Help guide and Settings updated to match.
   - Offline: the app opens from its saved copy after 3 seconds on a weak connection, and a server error page can no longer replace the saved app.
 - **3.6.0**
   - Cable exercises show the plates to stack on the pulley's loading pin (starts at 0), for example 25 lb = 10 · 10 · 2.5 · 2.5 on pin. Which plates fit the pin is in Settings.
