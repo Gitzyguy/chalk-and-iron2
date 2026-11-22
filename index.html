@@ -161,7 +161,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.6.1';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -812,11 +812,11 @@ function touchLive(now) {
 /* ---------- rest timer (clock based, survives screen lock) ---------- */
 /* Rest depends on how hard the set felt: tap Easy, Hard or Fail on the timer bar and the time adjusts. */
 const rest = {end:0, total:0, h:null, start:0, kind:null, set:null, tier:null};
-function restSecs(kind, tier) { const r = S.settings.rest; return kind === 'warm' ? r.warm : (r[kind] || r.acc)[tier] || 60; }
+function restSecs(kind, tier) { const r = S.settings.rest, v = kind === 'warm' ? r.warm : (r[kind] || r.acc)[tier]; return v != null ? v : 60; }
 function startRest(kind, set, tier) {
   rest.kind = kind; rest.set = set; rest.tier = kind === 'warm' ? null : tier || S.settings.rest.def;
   rest.start = Date.now();
-  const sec = restSecs(kind, rest.tier); if (!sec) return;
+  const sec = restSecs(kind, rest.tier); if (!sec) { stopRest(); return; }   // 0 = timer off
   rest.total = sec; rest.end = rest.start + sec * 1000;
   if (set && rest.tier) set.eff = rest.tier;
   $('#rest').classList.add('show'); drawEff();
@@ -829,6 +829,8 @@ function drawEff() {
 function setEffort(tier) {
   if (!rest.end || !rest.tier) return;
   rest.tier = tier; const sec = restSecs(rest.kind, tier);
+  if (rest.set) rest.set.eff = tier;
+  if (!sec) { if (rest.set) touchLive(true); stopRest(); return; }
   rest.total = sec; rest.end = rest.start + sec * 1000;
   if (rest.set) { rest.set.eff = tier; touchLive(true); }
   drawEff(); tickRest();
@@ -1102,7 +1104,7 @@ function viewSettings() {
   Object.keys(st.pin).sort((a, b) => b - a).forEach(w => { h += `<div class="field"><label>${fmtW(+w)} lb</label><input class="num" type="number" inputmode="numeric" data-in="pinPlate" data-w="${w}" value="${st.pin[w]}"></div>`; });
   h += `</div><h3>Bars</h3><div class="card grid3">${['barbell', 'hex', 'ez'].map(k => `<div class="field"><label>${EQUIP[k]}</label><input class="num" type="number" inputmode="decimal" data-in="bar" data-k="${k}" value="${st.bars[k]}"></div>`).join('')}</div>`;
   const rs = st.rest, rin = (k, t) => `<input class="num" type="number" inputmode="numeric" data-in="rest" data-k="${k}" data-t="${t}" value="${rs[k][t]}">`;
-  h += `<h3>Rest timer (seconds)</h3><div class="card"><div class="small" style="margin-bottom:8px">After each set, tap Easy, Hard or Fail on the timer bar and the rest changes to match. An AMRAP set short of its target starts on Fail.</div>
+  h += `<h3>Rest timer (seconds)</h3><div class="card"><div class="small" style="margin-bottom:8px">After each set, tap Easy, Hard or Fail on the timer bar and the rest changes to match. An AMRAP set short of its target starts on Fail. Set a time to 0 to turn that timer off.</div>
     <div class="edhead" style="grid-template-columns:1fr 62px 62px 62px"><span></span><span>Easy</span><span>Hard</span><span>Fail</span></div>
     <div class="edrow" style="grid-template-columns:1fr 62px 62px 62px"><b>Main lifts</b>${rin('main', 'easy')}${rin('main', 'hard')}${rin('main', 'fail')}</div>
     <div class="edrow" style="grid-template-columns:1fr 62px 62px 62px"><b>Accessories</b>${rin('acc', 'easy')}${rin('acc', 'hard')}${rin('acc', 'fail')}</div>
@@ -1279,14 +1281,14 @@ function tmReviewSheet(p, cycle) {
   const rows = mains.map(m => {
     const amraps = [];
     S.sessions.filter(s => s.programId === p.id && s.cycle === cycle).forEach(s => s.ex.filter(e => e.ex === m).forEach(e => e.sets.filter(x => x.amrap).forEach(x => amraps.push(x))));
-    const pass = amraps.every(x => x.r >= x.t);
+    const pass = amraps.length > 0 && amraps.every(x => x.r >= x.t);   // nothing logged = hold, not a pass
     const inc = p.tmInc[m] != null ? p.tmInc[m] : 5;
     const sug = (p.tm[m] || 0) + (pass ? inc : 0);
     return {m, pass, sug, n:amraps.length};
   });
   sheet(`<div class="hd"><h2>Cycle ${cycle} done</h2><button class="x" data-act="close">✕</button></div>
-    <p class="sub">Suggested training maxes for the next cycle. A lift goes up only if you hit the target reps on every AMRAP set this cycle; otherwise it holds.</p>
-    ${rows.map(r => `<div class="grid2"><div class="field"><label>${esc(exName(r.m))} ${r.pass ? '(hit reps)' : '(missed reps, hold)'}</label><input class="num" type="number" inputmode="decimal" step="any" data-tmnew="${esc(r.m)}" value="${fmtW(r.sug)}"></div><div class="small" style="align-self:center">was ${fmtW(p.tm[r.m] || 0)}</div></div>`).join('')}
+    <p class="sub">Suggested training maxes for the next cycle. A lift goes up only if you logged its AMRAP sets this cycle and hit the target reps on every one; otherwise it holds.</p>
+    ${rows.map(r => `<div class="grid2"><div class="field"><label>${esc(exName(r.m))} ${r.pass ? '(hit reps)' : r.n ? '(missed reps, hold)' : '(no AMRAP sets logged, hold)'}</label><input class="num" type="number" inputmode="decimal" step="any" data-tmnew="${esc(r.m)}" value="${fmtW(r.sug)}"></div><div class="small" style="align-self:center">was ${fmtW(p.tm[r.m] || 0)}</div></div>`).join('')}
     <button class="btn primary block" id="tmSave">Save training maxes</button>`, bg => {
     bg.querySelector('#tmSave').addEventListener('click', () => {
       bg.querySelectorAll('[data-tmnew]').forEach(i => { const v = num(i.value); if (v) p.tm[i.dataset.tmnew] = v; });
@@ -1662,8 +1664,8 @@ function videoSheet(exId) {
 /* ---------- help and updates ---------- */
 const HELP = [
   ['Getting around', `<p><b>Workout</b> is today's session. <b>History</b> lists every workout and every exercise with charts. <b>Body</b> tracks weight, phases and calories. <b>Program</b> is where you pick and edit programs. <b>Settings</b> has plates, bars, timers, backup and updates. The <b>?</b> at the top opens this guide from any screen.</p>`],
-  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b>; tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
-  ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you hit the target reps on its AMRAP sets.</p>`],
+  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b>; tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings; 0 turns one off), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
+  ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you logged its AMRAP sets and hit the target reps on every one. Skipped lifts hold.</p>`],
   ['Weeks, days and cycles', `<p>5/3/1 runs 4 weeks: 5s, 3s, 5/3/1 and a deload. Finishing a workout moves you to the next day. Tap <b>Change</b> on the Workout screen to jump to any week, day or cycle, for example to skip a deload or redo a missed day.</p>`],
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
   ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ Add program</b> lists your own programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) and well known programs (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
@@ -1794,8 +1796,9 @@ function saveWorkout() {
   const ex = L.ex.map(e => ({ex:e.ex, sets:e.sets.filter(s => s.done).map(s => Object.assign({w:s.w != null ? s.w : (s.tw || 0), r:s.r != null ? s.r : (s.tr || 0), t:s.tr || 0, amrap:!!s.amrap, warm:!!s.warm}, s.eff ? {e:s.eff} : {}))})).filter(e => e.sets.length);
   if (!ex.length && !confirm('Nothing is checked off. Skip this day without logging?')) return;
   if (ex.length) {
-    S.sessions.unshift({id:uid('s'), date:Date.now(), programId:p.id, program:p.name, day:p.days[ps.day].name, week:p.wave ? ps.week : null, cycle:ps.cycle,
+    S.sessions.unshift({id:uid('s'), date:L.started || Date.now(), programId:p.id, program:p.name, day:p.days[ps.day].name, week:p.wave ? ps.week : null, cycle:ps.cycle,
       dur:L.started ? Math.max(1, Math.round((Date.now() - L.started) / 60000)) : null, note:(L.note || '').trim(), ex});
+    S.sessions.sort((a, b) => b.date - a.date);
     S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
     const logged = new Set(ex.map(e => e.ex));
     p.days[ps.day].items.forEach(it => { if (it.next && logged.has(it.ex)) delete it.next; });
