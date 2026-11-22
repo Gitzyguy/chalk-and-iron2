@@ -161,7 +161,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.6.1';
+const APP_VERSION = '3.6.2';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -180,6 +180,7 @@ function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classLis
 /* ---------- storage: IndexedDB with localStorage fallback ---------- */
 const store = {
   db: null,
+  failed: false,   // true when IndexedDB could not be opened or read (3.6.2)
   async open() {
     if (this.db || !window.indexedDB) return this.db;
     this.db = await new Promise(res => {
@@ -190,14 +191,15 @@ const store = {
         r.onerror = () => res(null);
       } catch (e) { res(null); }
     });
+    if (!this.db) this.failed = true;
     return this.db;
   },
   async get(k) {
     const db = await this.open();
     if (db) {
       const v = await new Promise(res => {
-        try { const r = db.transaction(DB_STORE).objectStore(DB_STORE).get(k); r.onsuccess = () => res(r.result); r.onerror = () => res(undefined); }
-        catch (e) { res(undefined); }
+        try { const r = db.transaction(DB_STORE).objectStore(DB_STORE).get(k); r.onsuccess = () => res(r.result); r.onerror = () => { this.failed = true; res(undefined); }; }
+        catch (e) { this.failed = true; res(undefined); }
       });
       if (v !== undefined) return v;
     }
@@ -234,7 +236,7 @@ function defaultSettings() {
     plates: {iron:{'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2}, bumper:{'45':2,'35':2,'25':2,'15':2,'10':2}},
     pin: {'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2},
     rest: {warm:60, main:{easy:90, hard:180, fail:300}, acc:{easy:45, hard:60, fail:90}, def:'easy'},
-    warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null,
+    warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null, askBackup: true,
     lockDone: true, autoNext: true, volume: 'loud'
   };
 }
@@ -243,9 +245,24 @@ function blankState() {
 }
 let S = null;               // app state
 let saveTimer = null;
+/* Data guard (3.6.2). An empty app never overwrites saved data by accident:
+   had     = the stored copy has workouts, programs or weigh-ins
+   allow   = the next save may store an empty app (set only by deletes the user asked for)
+   blocked = the stored data could not be read, so nothing is saved until the user decides */
+const guard = {had:false, allow:false, blocked:null};
+const isEmptyState = st => !st.sessions.length && !Object.keys(st.programs).length && !(st.body && st.body.weights.length);
 function save(now) {
   clearTimeout(saveTimer);
-  const run = () => store.set(STATE_KEY, S).then(ok => { if (!ok) toast('Could not save. Storage may be full.'); });
+  const run = () => {
+    if (guard.blocked) return Promise.resolve(false);
+    const empty = isEmptyState(S);
+    if (empty && guard.had && !guard.allow) return Promise.resolve(false);
+    return store.set(STATE_KEY, S).then(ok => {
+      if (!ok) toast('Could not save. Storage may be full.');
+      else { guard.had = !empty; guard.allow = false; }
+      return ok;
+    });
+  };
   if (now) return run();
   saveTimer = setTimeout(run, 250);
 }
@@ -896,6 +913,7 @@ function renderNav() {
 function render() {
   renderNav();
   const app = $('#app');
+  if (guard.blocked) { app.innerHTML = viewBlocked(); return; }
   if (!S.active || !prog()) { app.innerHTML = tab === 'settings' ? viewSettings() : tab === 'body' ? viewBody() : viewWelcome(); return; }
   app.innerHTML = ({today:viewToday, history:viewHistory, body:viewBody, program:viewProgram, settings:viewSettings})[tab]();
 }
@@ -908,6 +926,22 @@ function viewWelcome() {
   <button class="btn primary block mt" data-act="restorePick">Restore from backup file</button>
   <button class="btn block mt" data-act="templates">Pick a program template</button>
   <button class="btn block mt" data-act="startFresh">Start a basic 5/3/1 program</button></div>`;
+}
+
+/* The stored data could not be read or opened. Nothing is saved until the user picks what to do. */
+function viewBlocked() {
+  const b = guard.blocked;
+  return topbar() + `<div class="card"><div class="eyebrow">Your data</div><h1>${b.why === 'read' ? 'Could not read your data' : 'Could not open your data'}</h1>
+  <p class="sub">${b.why === 'read' ? 'The phone did not let the app read its storage this time. Your data has not been changed.' : 'Your data is on this phone but this version could not open it. It has not been changed.'} Nothing will be saved until you choose below.</p>
+  <button class="btn primary block mt" data-act="blkRetry">Close and try again</button>
+  ${b.raw !== undefined ? '<button class="btn block mt" data-act="blkCopy">Save a copy of the stored data</button>' : ''}
+  <button class="btn block mt" data-act="restorePick">Restore from backup file</button>
+  <button class="btn danger block mt" data-act="blkStart">Start over anyway</button>
+  <div class="small mt">Start over and Restore replace what is stored on this phone. Save a copy first if you can.</div></div>`;
+}
+function downloadJson(obj, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(obj)], {type:'application/json'})); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
 /* ---------- views: today ---------- */
@@ -1091,7 +1125,9 @@ function viewSettings() {
     <div class="small" id="updInfo" style="text-align:center;margin-top:6px">You are on version ${APP_VERSION}.</div>`;
   h += `<h3>Your data</h3><div class="card"><div class="sub">${S.sessions.length} workouts · ${Object.keys(S.exercises).length} exercises · last backup ${st.lastBackup ? esc(fmtDate(st.lastBackup)) : 'never'}</div>
     <div class="grid2 mt"><button class="btn primary" data-act="backup">Back up now</button><button class="btn" data-act="restorePick">Restore</button></div>
-    <div class="small mt" id="persistInfo">Data is stored on this phone only. Keep a backup file somewhere safe (Google Drive works).</div></div>`;
+    <div class="small mt" id="persistInfo">Data is stored on this phone only. Keep a backup file somewhere safe (Google Drive works).</div>
+    <div class="small mt">Clearing Chrome's <b>Cookies and site data</b> deletes everything here. When clearing Chrome, tick only <b>Cached images and files</b>.</div>
+    ${swRow('askBackup', 'Ask to back up after each workout', 'Opens a Back up now prompt when you finish a workout.')}</div>`;
   h += `<h3>Plates you own</h3><div class="card"><div class="small" style="margin-bottom:8px">Total count of each plate (pairs = count ÷ 2). Floor lifts load bumpers first.</div>`;
   for (const kind of ['bumper', 'iron']) {
     h += `<div class="between" style="margin:6px 0"><b>${kind === 'bumper' ? 'Bumper' : 'Iron'}</b><button class="link" data-act="addPlate" data-k="${kind}">+ size</button></div><div class="plategrid">`;
@@ -1141,13 +1177,14 @@ let skipPop = 0;
 function closeSheet(bg) {
   bg = bg || [...document.querySelectorAll('.sheet-bg')].pop();
   if (!bg) return;
-  bg.remove();
+  bg.remove(); sheetAfter(bg);
   if (history.state && history.state.sheet) { skipPop++; history.back(); }
 }
+function sheetAfter(bg) { const f = bg && bg._after; if (f) { bg._after = null; setTimeout(f, 300); } }
 /* Android back button closes the top sheet instead of leaving the app */
 window.addEventListener('popstate', () => {
   if (skipPop > 0) { skipPop--; return; }
-  const bg = [...document.querySelectorAll('.sheet-bg')].pop(); if (bg) bg.remove();
+  const bg = [...document.querySelectorAll('.sheet-bg')].pop(); if (bg) { bg.remove(); sheetAfter(bg); }
 });
 
 function openExercise(exId) {
@@ -1672,7 +1709,7 @@ const HELP = [
   ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows start with a bumper so the bar sits at the right height. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0 (Settings, Pulley pin plates). Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
   ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. A weekly waist measurement is optional but the best check on fat loss.</p>`],
   ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app. If YouTube asks you to sign in or prove you are not a bot, tap <b>Open in the YouTube app</b> instead. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
-  ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p>`],
+  ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p><p>After each workout the app asks to back up; pick Google Drive in the share menu. Clearing Chrome's <b>Cookies and site data</b> deletes your workouts, so when clearing Chrome tick only <b>Cached images and files</b>. If the app ever cannot read your data, it says so and saves nothing until you choose what to do.</p>`],
   ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
   ['Troubleshooting', `<p><b>Weights look wrong:</b> check the training max and the bar weight in Settings. <b>Wrong day:</b> use Change on the Workout screen. <b>Something odd after an update:</b> close the app fully and reopen. <b>Before anything risky:</b> Back up now.</p>`]
 ];
@@ -1713,6 +1750,18 @@ async function backup() {
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); ok = true;
   }
   S.settings.lastBackup = Date.now(); S.dirtySinceBackup = 0; save(); render(); toast('Backup saved.');
+}
+/* After a workout: offer a backup right away. A backup file is the only copy that survives clearing Chrome's data.
+   then: what to show next (the end-of-cycle training max review), however this sheet is closed. */
+function backupAskSheet(then) {
+  sheet(`<div class="hd"><h2>Workout saved</h2><button class="x" data-act="close">✕</button></div>
+    <p class="sub">Back up now? Pick Google Drive in the share menu. A backup file is the only copy of your workouts that survives clearing Chrome's data or losing this phone.</p>
+    <button class="btn primary block" id="baGo">Back up now</button>
+    <button class="btn ghost block mt" data-act="close">Not now</button>
+    <div class="small mt">Turn this off in Settings, Your data.</div>`, bg => {
+    bg._after = then;
+    bg.querySelector('#baGo').addEventListener('click', async () => { await backup(); closeSheet(bg); });
+  });
 }
 /* Merge a backup into what is already here: nothing on this phone is overwritten or lost. */
 function mergeData(d) {
@@ -1761,6 +1810,7 @@ function restorePick() {
       S = normalize(Object.assign(blankState(), d, {live:null}));
       if (!d.settings) S.settings = Object.assign(defaultSettings(), keepSettings);
       if (!d.body || Array.isArray(d.body)) S.body = keepBody;
+      guard.blocked = null; guard.allow = true;
       await save(true); tab = 'today'; render(); toast('Restored ' + S.sessions.length + ' workouts.');
     };
     const has = S.sessions.length || Object.keys(S.programs).length;
@@ -1810,7 +1860,9 @@ function saveWorkout() {
   S.live = null; L = null; stopRest(); keepAwake(false);
   save(true); closeSheet(); render();
   toast(ex.length ? 'Workout saved.' : 'Day skipped.');
-  if (cycleDone) setTimeout(() => tmReviewSheet(p, finishedCycle), 400);
+  const review = cycleDone ? () => tmReviewSheet(p, finishedCycle) : null;
+  if (ex.length && S.settings.askBackup) setTimeout(() => backupAskSheet(review), 400);
+  else if (review) setTimeout(review, 400);
 }
 
 const actions = {
@@ -1833,7 +1885,7 @@ const actions = {
     save(); closeSheet(); S.live = S.live && liveStarted(S.live) ? S.live : null; render(); toast('Saved.');
   },
   openSession: el => openSession(el.dataset.id),
-  delSession: el => { if (!confirm('Delete this workout from history?')) return; S.sessions = S.sessions.filter(s => s.id !== el.dataset.id); save(); closeSheet(); render(); },
+  delSession: el => { if (!confirm('Delete this workout from history?')) return; guard.allow = true; S.sessions = S.sessions.filter(s => s.id !== el.dataset.id); save(); closeSheet(); render(); },
   check: el => {
     const {e, s} = curLiveSet(el);
     s.done = !s.done; s.edit = false;
@@ -1866,17 +1918,20 @@ const actions = {
   restAdd: () => { if (rest.end) { rest.end += 30000; rest.total += 30; tickRest(); } },
   restSkip: () => stopRest(),
   backup: () => backup(),
+  blkRetry: () => location.reload(),
+  blkCopy: () => { downloadJson(guard.blocked.raw, 'chalk-and-iron-stored-data-' + new Date().toISOString().slice(0, 10) + '.json'); toast('Copy saved to Downloads.'); },
+  blkStart: () => { if (!confirm('Start over? What is stored on this phone will be replaced.')) return; guard.blocked = null; guard.allow = true; save(true); tab = 'today'; render(); },
   restorePick: () => restorePick(),
   startFresh: () => { freshProgram(); save(); tab = 'program'; editProgId = S.active; render(); toast('Enter your training maxes to get started.'); },
   sw: el => { const k = el.dataset.k; S.settings[k] = !S.settings[k]; if ((k === 'warmups' || k === 'deloadAcc') && S.live && !liveStarted(S.live)) S.live = null; if (k === 'awake') keepAwake(S.settings.awake && !!S.live); save(); render(); },
   addPlate: el => { const w = num(prompt('Plate weight in lb (e.g. 1.25)')); if (!w || w <= 0) return; S.settings.plates[el.dataset.k][String(w)] = 2; save(); render(); },
   mergeOpen: () => mergeSheet(),
-  resetAll: () => { if (!confirm('Erase ALL workouts, programs and settings on this phone?')) return; if (!confirm('Really erase? Make sure you have a backup.')) return; S = blankState(); save(true); tab = 'today'; render(); },
+  resetAll: () => { if (!confirm('Erase ALL workouts, programs and settings on this phone?')) return; if (!confirm('Really erase? Make sure you have a backup.')) return; guard.allow = true; S = normalize(null); save(true); tab = 'today'; render(); },
   editProg: el => { editProgId = el.dataset.id; render(); },
   activate: el => { if (S.live && liveStarted(S.live) && !confirm('Switch programs and discard the workout in progress?')) return; S.active = el.dataset.id; editProgId = S.active; S.live = null; save(); render(); toast('Now using ' + prog().name); },
   newProg: () => { const id = uid('p_'); S.programs[id] = {id, name:'New program', wave:false, days:[{name:'Day 1', main:null, items:[]}], tm:{}, tmInc:{}}; S.pos[id] = {week:0, day:0, cycle:1}; editProgId = id; save(); render(); },
   dupProg: () => { const p = clone(S.programs[editProgId]); p.id = uid('p_'); p.name += ' (copy)'; S.programs[p.id] = p; S.pos[p.id] = {week:0, day:0, cycle:1}; editProgId = p.id; save(); render(); },
-  delProg: () => { const p = S.programs[editProgId]; if (!confirm('Delete program "' + p.name + '"? Logged history stays.')) return; delete S.programs[p.id]; delete S.pos[p.id]; if (S.active === p.id) { S.active = Object.keys(S.programs)[0]; S.live = null; } editProgId = S.active; save(); render(); },
+  delProg: () => { const p = S.programs[editProgId]; if (!confirm('Delete program "' + p.name + '"? Logged history stays.')) return; guard.allow = true; delete S.programs[p.id]; delete S.pos[p.id]; if (S.active === p.id) { S.active = Object.keys(S.programs)[0]; S.live = null; } editProgId = S.active; save(); render(); },
   toggleWave: () => { const p = S.programs[editProgId]; p.wave = !p.wave; progChanged(p); },
   addDay: () => { const p = S.programs[editProgId]; p.days.push({name:'Day ' + (p.days.length + 1), main:null, items:[]}); progChanged(p); },
   delDay: el => { const p = S.programs[editProgId]; if (p.days.length < 2) return toast('A program needs at least one day.'); if (!confirm('Delete day "' + p.days[+el.dataset.di].name + '"?')) return; p.days.splice(+el.dataset.di, 1); const ps = S.pos[p.id]; if (ps.day >= p.days.length) ps.day = 0; progChanged(p); },
@@ -1893,7 +1948,7 @@ const actions = {
   swapItem: el => { const p = S.programs[editProgId], it = p.days[+el.dataset.di].items[+el.dataset.ii]; pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); }); },
   bwSave: () => bodySave(),
   bwEdit: el => { bodyLogDate = el.dataset.d; render(); window.scrollTo(0, 0); },
-  bwDel: el => { if (!confirm('Delete the weigh-in on ' + el.dataset.d + '?')) return; S.body.weights = S.body.weights.filter(w => w.d !== el.dataset.d); save(); render(); },
+  bwDel: el => { if (!confirm('Delete the weigh-in on ' + el.dataset.d + '?')) return; guard.allow = true; S.body.weights = S.body.weights.filter(w => w.d !== el.dataset.d); save(); render(); },
   bwAll: () => { bodyShowAll = true; render(); },
   phaseSet: () => phaseSheet(),
   targetsEdit: () => targetsSheet(),
@@ -2061,8 +2116,12 @@ document.addEventListener('visibilitychange', () => {
 
 /* ---------- boot ---------- */
 async function boot() {
-  try { S = normalize(await store.get(STATE_KEY)); }
-  catch (e) { S = blankState(); }
+  let raw;
+  try { raw = await store.get(STATE_KEY); } catch (e) { store.failed = true; }
+  if (raw === undefined && store.failed) guard.blocked = {why:'read'};
+  else { try { S = normalize(raw); } catch (e) { guard.blocked = {why:'open', raw}; } }
+  if (guard.blocked) S = normalize(null);    // usable on screen, never saved until the user decides
+  else guard.had = !isEmptyState(S);
   if (S.live) { S.live.ex.forEach(e => { if (!e.kind) e.kind = e.main ? 'main' : 'reps'; }); L = S.live; if (L.started) keepAwake(true); }
   render();
   if (navigator.storage && navigator.storage.persist) {
