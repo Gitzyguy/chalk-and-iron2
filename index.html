@@ -161,7 +161,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.6.1';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -812,11 +812,11 @@ function touchLive(now) {
 /* ---------- rest timer (clock based, survives screen lock) ---------- */
 /* Rest depends on how hard the set felt: tap Easy, Hard or Fail on the timer bar and the time adjusts. */
 const rest = {end:0, total:0, h:null, start:0, kind:null, set:null, tier:null};
-function restSecs(kind, tier) { const r = S.settings.rest; return kind === 'warm' ? r.warm : (r[kind] || r.acc)[tier] || 60; }
+function restSecs(kind, tier) { const r = S.settings.rest, v = kind === 'warm' ? r.warm : (r[kind] || r.acc)[tier]; return v != null ? v : 60; }
 function startRest(kind, set, tier) {
   rest.kind = kind; rest.set = set; rest.tier = kind === 'warm' ? null : tier || S.settings.rest.def;
   rest.start = Date.now();
-  const sec = restSecs(kind, rest.tier); if (!sec) return;
+  const sec = restSecs(kind, rest.tier); if (!sec) { stopRest(); return; }   // 0 = timer off
   rest.total = sec; rest.end = rest.start + sec * 1000;
   if (set && rest.tier) set.eff = rest.tier;
   $('#rest').classList.add('show'); drawEff();
@@ -829,6 +829,8 @@ function drawEff() {
 function setEffort(tier) {
   if (!rest.end || !rest.tier) return;
   rest.tier = tier; const sec = restSecs(rest.kind, tier);
+  if (rest.set) rest.set.eff = tier;
+  if (!sec) { if (rest.set) touchLive(true); stopRest(); return; }
   rest.total = sec; rest.end = rest.start + sec * 1000;
   if (rest.set) { rest.set.eff = tier; touchLive(true); }
   drawEff(); tickRest();
@@ -1279,14 +1281,14 @@ function tmReviewSheet(p, cycle) {
   const rows = mains.map(m => {
     const amraps = [];
     S.sessions.filter(s => s.programId === p.id && s.cycle === cycle).forEach(s => s.ex.filter(e => e.ex === m).forEach(e => e.sets.filter(x => x.amrap).forEach(x => amraps.push(x))));
-    const pass = amraps.every(x => x.r >= x.t);
+    const pass = amraps.length > 0 && amraps.every(x => x.r >= x.t);   // nothing logged = hold, not a pass
     const inc = p.tmInc[m] != null ? p.tmInc[m] : 5;
     const sug = (p.tm[m] || 0) + (pass ? inc : 0);
     return {m, pass, sug, n:amraps.length};
   });
   sheet(`<div class="hd"><h2>Cycle ${cycle} done</h2><button class="x" data-act="close">✕</button></div>
-    <p class="sub">Suggested training maxes for the next cycle. A lift goes up only if you hit the target reps on every AMRAP set this cycle; otherwise it holds.</p>
-    ${rows.map(r => `<div class="grid2"><div class="field"><label>${esc(exName(r.m))} ${r.pass ? '(hit reps)' : '(missed reps, hold)'}</label><input class="num" type="number" inputmode="decimal" step="any" data-tmnew="${esc(r.m)}" value="${fmtW(r.sug)}"></div><div class="small" style="align-self:center">was ${fmtW(p.tm[r.m] || 0)}</div></div>`).join('')}
+    <p class="sub">Suggested training maxes for the next cycle. A lift goes up only if you logged its AMRAP sets this cycle and hit the target reps on every one; otherwise it holds.</p>
+    ${rows.map(r => `<div class="grid2"><div class="field"><label>${esc(exName(r.m))} ${r.pass ? '(hit reps)' : r.n ? '(missed reps, hold)' : '(no AMRAP sets logged, hold)'}</label><input class="num" type="number" inputmode="decimal" step="any" data-tmnew="${esc(r.m)}" value="${fmtW(r.sug)}"></div><div class="small" style="align-self:center">was ${fmtW(p.tm[r.m] || 0)}</div></div>`).join('')}
     <button class="btn primary block" id="tmSave">Save training maxes</button>`, bg => {
     bg.querySelector('#tmSave').addEventListener('click', () => {
       bg.querySelectorAll('[data-tmnew]').forEach(i => { const v = num(i.value); if (v) p.tm[i.dataset.tmnew] = v; });
@@ -1794,8 +1796,9 @@ function saveWorkout() {
   const ex = L.ex.map(e => ({ex:e.ex, sets:e.sets.filter(s => s.done).map(s => Object.assign({w:s.w != null ? s.w : (s.tw || 0), r:s.r != null ? s.r : (s.tr || 0), t:s.tr || 0, amrap:!!s.amrap, warm:!!s.warm}, s.eff ? {e:s.eff} : {}))})).filter(e => e.sets.length);
   if (!ex.length && !confirm('Nothing is checked off. Skip this day without logging?')) return;
   if (ex.length) {
-    S.sessions.unshift({id:uid('s'), date:Date.now(), programId:p.id, program:p.name, day:p.days[ps.day].name, week:p.wave ? ps.week : null, cycle:ps.cycle,
+    S.sessions.unshift({id:uid('s'), date:L.started || Date.now(), programId:p.id, program:p.name, day:p.days[ps.day].name, week:p.wave ? ps.week : null, cycle:ps.cycle,
       dur:L.started ? Math.max(1, Math.round((Date.now() - L.started) / 60000)) : null, note:(L.note || '').trim(), ex});
+    S.sessions.sort((a, b) => b.date - a.date);
     S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
     const logged = new Set(ex.map(e => e.ex));
     p.days[ps.day].items.forEach(it => { if (it.next && logged.has(it.ex)) delete it.next; });

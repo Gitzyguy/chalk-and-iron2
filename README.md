@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.6.0
+Version 3.6.1
 
 ## What it does
 
@@ -47,7 +47,7 @@ Every file must sit at the top level of the repository. If the icons are missing
 3. Go to **Settings > Pages > Deploy from a branch > main > / (root) > Save**.
 4. Wait 1 to 2 minutes. Then open `https://<username>.github.io/chalk-and-iron/` in Chrome on your phone.
 5. Tap **⋮ > Install app**.
-6. In the app, go to **Settings > Restore** and pick your history file (`chalk-and-iron-history-v*.json`).
+6. In the app, go to **Settings > Restore** and pick your backup file (`chalk-and-iron-backup-<date>.json`, or an older `chalk-and-iron-history-v*.json`).
 7. To add another of your programs, go to **Program > + Add program > Your programs**.
 
 **Do not upload your history or backup files to GitHub.** A public repository would show your data to anyone.
@@ -57,7 +57,7 @@ Every file must sit at the top level of the repository. If the icons are missing
 1. Upload the new `index.html` and `sw.js`, plus any other changed files, replacing the old ones. Commit.
 2. Wait 1 to 2 minutes. Then in the app go to **Settings > Check for updates**. It updates and reloads, and your data is not touched.
 
-The version number is shown in Settings and at the end of the help guide. Downloads are named with the version, for example `chalk-and-iron-app-v3.3.0.zip`.
+The version number is shown in Settings and at the end of the help guide. Downloads are named with the version, for example `chalk-and-iron-app-v3.3.0.zip`. Backups are named `chalk-and-iron-backup-<date>.json`.
 
 ## Your data
 
@@ -80,6 +80,11 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.6.1**
+  - Fixed: after a cycle, training maxes were suggested to go up even for lifts with no AMRAP sets logged. They now hold.
+  - Fixed: workouts are dated when you started them, not when you tapped Finish.
+  - Fixed: setting a rest time to 0 now turns that timer off (it used to become 1:00).
+  - Offline: the app opens from its saved copy after 3 seconds on a weak connection, and a server error page can no longer replace the saved app.
 - **3.6.0**
   - Cable exercises show the plates to stack on the pulley's loading pin (starts at 0), for example 25 lb = 10 · 10 · 2.5 · 2.5 on pin. Which plates fit the pin is in Settings.
   - The bar button on each exercise picks barbell, hex, EZ, pulley pin, another bar weight or no plates, for this workout only or always.
