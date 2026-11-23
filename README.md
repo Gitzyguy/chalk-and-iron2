@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.6.2
+Version 3.7.0
 
 ## What it does
 
@@ -82,6 +82,11 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.7.0**
+  - One exercise at a time: the Workout screen shows only the exercise you are on and moves to the next one when its last set is checked. The main lift's warmups and work sets stay on one card. Tap a name in the row at the top, or the buttons under the card, to go back or skip ahead, or Show all for the whole day. Turn it off in Settings, Workout.
+  - Minus and plus buttons beside the reps change them by one, so you do not have to type a missed or extra rep.
+  - Rest: 1:30 after the last warmup before the first work set (new setting, "After last warmup"), and accessory Easy rest is now 1:00 (changed from 0:45 if you still had the old default).
+  - The rest-done alert is one double beep and two short vibrations instead of six beeps.
 - **3.6.2**
   - After each workout the app asks to back up, so a backup is always one tap away. Turn it off in Settings, Your data.
   - An empty app can no longer save over your data, and if the app cannot read your data it says so and saves nothing until you choose what to do.

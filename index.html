@@ -59,7 +59,7 @@ a.btn{color:var(--text)}
 .tag.up{background:#2f5a3a}.tag.gold{background:#6b5016}
 .meta{font-size:14px;color:var(--dim);margin:4px 0 8px;line-height:1.5}
 .chipbtn{border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:3px 10px;font-size:13px;font-weight:600;color:var(--text);margin-left:6px}
-.set{display:grid;grid-template-columns:30px minmax(0,1fr) 70px 54px 46px;gap:6px;align-items:center;padding:8px 4px;margin:0 -4px;border-top:1px dashed var(--line);border-radius:8px}
+.set{display:grid;grid-template-columns:24px minmax(0,1fr) 62px 104px 44px;gap:6px;align-items:center;padding:8px 4px;margin:0 -4px;border-top:1px dashed var(--line);border-radius:8px}
 .set.next{background:rgba(210,85,26,.10);box-shadow:inset 3px 0 0 var(--rust)}
 .set.done .num[readonly]{background:transparent;border-color:transparent;color:var(--dim)}
 .set.warm{opacity:.72}
@@ -72,6 +72,19 @@ a.btn{color:var(--text)}
 .num{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 4px;text-align:center;font-family:var(--mono);font-size:18px}
 .num:focus,.field input:focus,.field select:focus,textarea:focus{outline:2px solid var(--rust);outline-offset:-1px}
 .chk{width:46px;height:46px;border-radius:9px;border:1.5px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;font-size:18px;color:transparent}
+.step{display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:stretch;border:1px solid var(--line);border-radius:7px;background:var(--panel2);overflow:hidden}
+.step .num{border:none;border-radius:0;background:transparent;padding:9px 0}
+.step button{background:none;border:none;color:var(--text);font-size:22px;font-weight:700;padding:0;line-height:1}
+.step button:active{background:var(--rust-dim)}
+.set.done .step:has(.num[readonly]){background:transparent;border-color:transparent}
+.set.done .step:has(.num[readonly]) button{visibility:hidden}
+.fstrip{display:flex;gap:6px;overflow-x:auto;margin:0 -4px 10px;padding:2px 4px;scrollbar-width:none}
+.fstrip::-webkit-scrollbar{display:none}
+.fstrip button{flex:0 0 auto;max-width:150px;border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:6px 11px;font-size:13.5px;font-weight:600;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fstrip button.on{border-color:var(--rust);color:var(--text);background:rgba(210,85,26,.16)}
+.fstrip button.ok{color:var(--green)}
+.fnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.fnav .btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chk.on{background:var(--green);border-color:var(--green);color:#10140f}
 .exfoot{display:flex;gap:8px;margin-top:8px}
 .field{margin-bottom:10px}
@@ -161,7 +174,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.6.2';
+const APP_VERSION = '3.7.0';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -235,9 +248,9 @@ function defaultSettings() {
     bars: {barbell:45, ez:15, hex:45},
     plates: {iron:{'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2}, bumper:{'45':2,'35':2,'25':2,'15':2,'10':2}},
     pin: {'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2},
-    rest: {warm:60, main:{easy:90, hard:180, fail:300}, acc:{easy:45, hard:60, fail:90}, def:'easy'},
+    rest: {warm:60, warmLast:90, main:{easy:90, hard:180, fail:300}, acc:{easy:60, hard:60, fail:90}, def:'easy'},
     warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null, askBackup: true,
-    lockDone: true, autoNext: true, volume: 'loud'
+    lockDone: true, autoNext: true, focus: true, volume: 'loud'
   };
 }
 function blankState() {
@@ -272,12 +285,14 @@ function normalize(st) {
   out.settings = Object.assign(defaultSettings(), st && st.settings || {});
   out.settings.bars = Object.assign(defaultSettings().bars, out.settings.bars || {});
   const r0 = out.settings.rest || {}, dr = defaultSettings().rest;
-  out.settings.rest = {warm:r0.warm != null ? r0.warm : dr.warm, def:r0.def || dr.def,
+  out.settings.rest = {warm:r0.warm != null ? r0.warm : dr.warm, warmLast:r0.warmLast != null ? r0.warmLast : dr.warmLast, def:r0.def || dr.def,
     main:Object.assign({}, dr.main, typeof r0.main === 'object' ? r0.main : {}), acc:Object.assign({}, dr.acc, typeof r0.acc === 'object' ? r0.acc : {})};
   if (!out.settings.plates || !out.settings.plates.iron) out.settings.plates = defaultSettings().plates;
   if (!st || !st.settings || !st.settings.pin) out.settings.pin = Object.assign({}, out.settings.plates.iron);
   /* 3.5: rest timer starts on Easy by default (older versions saved Hard) */
   if (!out.settings.mig35) { if (out.settings.rest.def === 'hard') out.settings.rest.def = 'easy'; out.settings.mig35 = 1; }
+  /* 3.7: accessory Easy rest goes from 45 to 60 seconds (only if it was still the old default) */
+  if (!out.settings.mig37) { if (out.settings.rest.acc.easy === 45) out.settings.rest.acc.easy = 60; out.settings.mig37 = 1; }
   const bd = st && st.body && !Array.isArray(st.body) ? st.body : {};
   out.body = Object.assign(defaultBody(), bd);
   ['weights', 'waist', 'intake', 'phases'].forEach(k => { if (!Array.isArray(out.body[k])) out.body[k] = []; });
@@ -829,9 +844,10 @@ function touchLive(now) {
 /* ---------- rest timer (clock based, survives screen lock) ---------- */
 /* Rest depends on how hard the set felt: tap Easy, Hard or Fail on the timer bar and the time adjusts. */
 const rest = {end:0, total:0, h:null, start:0, kind:null, set:null, tier:null};
-function restSecs(kind, tier) { const r = S.settings.rest, v = kind === 'warm' ? r.warm : (r[kind] || r.acc)[tier]; return v != null ? v : 60; }
+/* kinds: warm (between warmups), warmLast (last warmup, before the first work set), main, acc */
+function restSecs(kind, tier) { const r = S.settings.rest, v = kind === 'warm' ? r.warm : kind === 'warmLast' ? (r.warmLast != null ? r.warmLast : r.main.easy) : (r[kind] || r.acc)[tier]; return v != null ? v : 60; }
 function startRest(kind, set, tier) {
-  rest.kind = kind; rest.set = set; rest.tier = kind === 'warm' ? null : tier || S.settings.rest.def;
+  rest.kind = kind; rest.set = set; rest.tier = kind === 'warm' || kind === 'warmLast' ? null : tier || S.settings.rest.def;
   rest.start = Date.now();
   const sec = restSecs(kind, rest.tier); if (!sec) { stopRest(); return; }   // 0 = timer off
   rest.total = sec; rest.end = rest.start + sec * 1000;
@@ -859,7 +875,7 @@ function tickRest() {
   const left = Math.max(0, Math.ceil((rest.end - Date.now()) / 1000));
   $('#restTime').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
   $('#restBar').style.width = (100 * left / rest.total) + '%';
-  if (left <= 0) { stopRest(); if (document.visibilityState === 'hidden') { rest.missed = true; if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]); } else restDone(); }
+  if (left <= 0) { stopRest(); if (document.visibilityState === 'hidden') { rest.missed = true; if (navigator.vibrate) navigator.vibrate([400, 150, 400]); } else restDone(); }
 }
 let audioCtx = null;
 const VOLUME = {normal:.3, loud:.6, max:1};
@@ -867,13 +883,13 @@ const VOLUME = {normal:.3, loud:.6, max:1};
 function primeAudio() {
   try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
 }
-/* Two bursts of three square-wave beeps: much louder than a sine tone at the same volume. Follows the phone's media volume. */
+/* One double beep (square wave, louder than a sine tone at the same volume). Follows the phone's media volume. */
 function beep() {
   try {
     primeAudio();
     const v = VOLUME[S.settings.volume] || VOLUME.loud, t0 = audioCtx.currentTime + .05;
-    [0, .28, .56, 1.1, 1.38, 1.66].forEach(t => {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'square'; o.frequency.value = t < 1 ? 1050 : 1320;
+    [0, .3].forEach(t => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'square'; o.frequency.value = 1320;
       o.connect(g); g.connect(audioCtx.destination);
       g.gain.setValueAtTime(.0001, t0 + t); g.gain.exponentialRampToValueAtTime(v, t0 + t + .01); g.gain.setValueAtTime(v, t0 + t + .19); g.gain.exponentialRampToValueAtTime(.0001, t0 + t + .22);
       o.start(t0 + t); o.stop(t0 + t + .24);
@@ -881,7 +897,7 @@ function beep() {
   } catch (e) {}
 }
 function restDone() {
-  if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]);
+  if (navigator.vibrate) navigator.vibrate([400, 150, 400]);
   if (S.settings.sound) beep();
   toast('Rest done. Next set.');
 }
@@ -966,12 +982,45 @@ function viewToday() {
   }
   h += `</div>`;
   const nx = nextOpen(L, 0, -1);
-  L.ex.forEach((e, ei) => { h += exerciseCard(e, ei, p, nx); });
+  const fi = focusIndex(nx);
+  if (fi == null) {
+    if (S.settings.focus && focus.ei === 'all' && L.ex.length > 1) h += `<button class="btn block" data-act="focusGo" data-i="auto" style="margin-bottom:12px">One exercise at a time</button>`;
+    L.ex.forEach((e, ei) => { h += exerciseCard(e, ei, p, nx); });
+  }
+  else {
+    h += focusStrip(fi);
+    h += exerciseCard(L.ex[fi], fi, p, nx);
+    const lab = i => esc(exShort(L.ex[i]));
+    h += `<div class="fnav">${fi > 0 ? `<button class="btn" data-act="focusGo" data-i="${fi - 1}">&lsaquo; ${lab(fi - 1)}</button>` : '<span></span>'}${fi < L.ex.length - 1 ? `<button class="btn" data-act="focusGo" data-i="${fi + 1}">${lab(fi + 1)} &rsaquo;</button>` : '<span></span>'}</div>`;
+  }
   h += `<button class="btn block" data-act="addExToday">+ Add exercise to today</button>
     <div class="field mt"><label>Notes</label><textarea rows="2" data-in="liveNote" placeholder="How did it feel?">${esc(L.note || '')}</textarea></div>
     <button class="btn primary block" data-act="finish">Finish workout</button>
     <button class="btn ghost block mt" data-act="discard">Discard progress</button>`;
   return h;
+}
+/* One exercise at a time: the one you are on fills the screen and the app moves to the next exercise
+   when its last set is checked. focus.ei is a manual pick (or 'all'); it resets for each new workout. */
+const focus = {key:null, ei:null};
+const exDone = e => e.sets.length > 0 && e.sets.every(s => s.done);
+const exShort = e => exName(e.ex) + (e.kind === 'fsl' ? ' FSL' : e.kind === 'bbb' ? ' BBB' : '');
+function focusIndex(nx) {
+  if (!S.settings.focus || !L || L.ex.length < 2) return null;
+  if (focus.key !== L.key) { focus.key = L.key; focus.ei = null; }
+  if (focus.ei === 'all') return null;
+  if (focus.ei != null && focus.ei < L.ex.length) return focus.ei;
+  focus.ei = null;
+  return nx ? nx.ei : L.ex.length - 1;
+}
+function focusStrip(fi) {
+  return `<div class="fstrip" id="fstrip">${L.ex.map((e, i) => `<button class="${i === fi ? 'on' : ''} ${exDone(e) ? 'ok' : ''}" data-act="focusGo" data-i="${i}">${exDone(e) ? '&#10003; ' : (i + 1) + '. '}${esc(exShort(e))}</button>`).join('')}<button data-act="focusGo" data-i="all">Show all</button></div>`;
+}
+function focusTop() {
+  requestAnimationFrame(() => {
+    const st = $('#fstrip'); if (!st) return;
+    const on = st.querySelector('.on'); if (on) on.scrollIntoView({inline:'center', block:'nearest'});
+    window.scrollTo({top:Math.max(0, st.getBoundingClientRect().top + window.scrollY - 8), behavior:'smooth'});
+  });
 }
 /* first set not checked off, starting after set si of exercise ei */
 function nextOpen(L, ei, si) {
@@ -1014,7 +1063,7 @@ function exerciseCard(e, ei, p, nx) {
     const edit = s.done && lock ? `<button class="link" data-act="editSet" data-ei="${ei}" data-si="${si}">${s.edit ? 'Done editing' : 'Edit'}</button>` : '';
     h += `<div class="set ${s.warm ? 'warm' : ''} ${s.done ? 'done' : ''} ${isNext ? 'next' : ''}" data-row="${ei}-${si}"><div class="lbl">${esc(s.lbl)}</div><div class="tgt">${tgt}${s.amrap ? ' <span class="tag">AMRAP</span>' : ''}</div>
       <input class="num" type="number" inputmode="decimal" step="any" data-in="w" data-ei="${ei}" data-si="${si}" value="${s.w != null ? fmtW(s.w) : ''}" placeholder="lb" aria-label="weight"${ro}>
-      <input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? 'reps' : s.tr}" aria-label="reps"${ro}>
+      <div class="step"><button data-act="${locked ? 'lockedTap' : 'repStep'}" data-d="-1" data-ei="${ei}" data-si="${si}" aria-label="one less rep" tabindex="-1">&minus;</button><input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? s.tr + '+' : s.tr}" aria-label="reps"${ro}><button data-act="${locked ? 'lockedTap' : 'repStep'}" data-d="1" data-ei="${ei}" data-si="${si}" aria-label="one more rep" tabindex="-1">+</button></div>
       <button class="chk ${s.done ? 'on' : ''}" data-act="${locked ? 'lockedTap' : 'check'}" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button>${pc || edit ? `<div class="plates">${pc}${edit}</div>` : ''}</div>`;
   });
   h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
@@ -1144,7 +1193,8 @@ function viewSettings() {
     <div class="edhead" style="grid-template-columns:1fr 62px 62px 62px"><span></span><span>Easy</span><span>Hard</span><span>Fail</span></div>
     <div class="edrow" style="grid-template-columns:1fr 62px 62px 62px"><b>Main lifts</b>${rin('main', 'easy')}${rin('main', 'hard')}${rin('main', 'fail')}</div>
     <div class="edrow" style="grid-template-columns:1fr 62px 62px 62px"><b>Accessories</b>${rin('acc', 'easy')}${rin('acc', 'hard')}${rin('acc', 'fail')}</div>
-    <div class="grid2 mt"><div class="field"><label>Warmup sets</label><input class="num" type="number" inputmode="numeric" data-in="restWarm" value="${rs.warm}"></div>
+    <div class="grid2 mt"><div class="field"><label>Between warmups</label><input class="num" type="number" inputmode="numeric" data-in="restWarm" value="${rs.warm}"></div>
+    <div class="field"><label>After last warmup</label><input class="num" type="number" inputmode="numeric" data-in="restWarmLast" value="${rs.warmLast}"></div>
     <div class="field"><label>Start the timer on</label><select class="num" data-in="restDef">${['easy', 'hard', 'fail'].map(t => `<option value="${t}" ${rs.def === t ? 'selected' : ''}>${t[0].toUpperCase() + t.slice(1)}</option>`).join('')}</select></div></div></div>`;
   h += `<h3>Workout</h3><div class="card">
     ${swRow('warmups', 'Warmup sets', '40/50/60% of training max before main lifts (skipped on deload).')}
@@ -1154,6 +1204,7 @@ function viewSettings() {
     <div class="toggle"><div><b>Beep volume</b><div class="small">Turn the phone's media volume up too.</div></div><div class="row"><select data-in="volume" class="num" style="width:96px">${['normal', 'loud', 'max'].map(v => `<option ${st.volume === v ? 'selected' : ''} value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select><button class="btn sm" data-act="testBeep">Test</button></div></div>
     ${swRow('lockDone', 'Lock finished sets', 'Checked sets cannot be changed by accident. Tap Edit under a set to change it.')}
     ${swRow('autoNext', 'Jump to the next set', 'After you check a set, the screen scrolls to the next one.')}
+    ${swRow('focus', 'One exercise at a time', 'Shows only the exercise you are on and moves to the next one when its last set is checked. Tap the names at the top to jump around.')}
     <div class="toggle"><div><b>Round main lift weights to</b><div class="small">Smallest jump you can load.</div></div><select data-in="round" class="num" style="width:80px">${[2.5, 5, 10].map(v => `<option ${st.round === v ? 'selected' : ''} value="${v}">${v} lb</option>`).join('')}</select></div></div>`;
   if (S.active) h += `<h3>Exercises</h3><div class="card"><div class="small">Combine two exercises that are really the same. History is merged into the one you keep.</div><button class="btn block mt" data-act="mergeOpen">Merge exercises</button></div>`;
   h += `<h3>Danger zone</h3><div class="card"><button class="btn danger block" data-act="resetAll">Erase all data on this phone</button></div>
@@ -1701,7 +1752,7 @@ function videoSheet(exId) {
 /* ---------- help and updates ---------- */
 const HELP = [
   ['Getting around', `<p><b>Workout</b> is today's session. <b>History</b> lists every workout and every exercise with charts. <b>Body</b> tracks weight, phases and calories. <b>Program</b> is where you pick and edit programs. <b>Settings</b> has plates, bars, timers, backup and updates. The <b>?</b> at the top opens this guide from any screen.</p>`],
-  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b>; tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings; 0 turns one off), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
+  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Tap <b>&minus;</b> or <b>+</b> beside the reps to change them by one without typing. Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b> (by default 1:00 between warmups, 1:30 after the last warmup, 1:30 after main sets and 1:00 after accessory sets); tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings; 0 turns one off), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. The app shows one exercise at a time: when its last set is checked it moves to the next exercise. Tap a name in the row at the top (or the buttons under the card) to go back or skip ahead, or <b>Show all</b> to see the whole day. The main lift's warmups and work sets are on the same card. Turn this off in Settings, Workout. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
   ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you logged its AMRAP sets and hit the target reps on every one. Skipped lifts hold.</p>`],
   ['Weeks, days and cycles', `<p>5/3/1 runs 4 weeks: 5s, 3s, 5/3/1 and a deload. Finishing a workout moves you to the next day. Tap <b>Change</b> on the Workout screen to jump to any week, day or cycle, for example to skip a deload or redo a missed day.</p>`],
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
@@ -1894,15 +1945,35 @@ const actions = {
       if (s.w == null && s.tw != null) s.w = s.tw;
       if (s.r == null) s.r = s.tr;
       const isLast = L.ex.indexOf(e) === L.ex.length - 1 && e.sets.indexOf(s) === e.sets.length - 1;
-      if (!isLast) startRest(s.warm ? 'warm' : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, missedSet(s) ? 'fail' : null);
+      const nextSet = e.sets[e.sets.indexOf(s) + 1];
+      if (!isLast) startRest(s.warm ? (nextSet && !nextSet.warm ? 'warmLast' : 'warm') : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, missedSet(s) ? 'fail' : null);
       if (s.amrap && s.r != null && s.w) toast('Estimated max ' + Math.round(e1rm(s.w, s.r)) + ' lb');
     }
+    let snapped = false;
+    if (s.done && S.settings.focus && focus.ei !== 'all' && exDone(e)) {
+      const n = nextOpen(L, +el.dataset.ei, -1) || nextOpen(L, 0, -1);
+      if (n && n.ei !== +el.dataset.ei) { focus.key = L.key; focus.ei = n.ei; snapped = true; }
+    }
     touchLive(true); render();
-    if (s.done && S.settings.autoNext) {
+    if (snapped) { focusTop(); toast('Next: ' + exShort(L.ex[focus.ei]), 1800); }
+    else if (s.done && S.settings.autoNext) {
       const n = nextOpen(L, +el.dataset.ei, +el.dataset.si) || nextOpen(L, 0, -1);
       const row = n && document.querySelector(`[data-row="${n.ei}-${n.si}"]`);
       if (row) requestAnimationFrame(() => row.scrollIntoView({block:'center', behavior:'smooth'}));
     }
+  },
+  focusGo: el => {
+    const v = el.dataset.i; focus.key = L && L.key;
+    focus.ei = v === 'all' ? 'all' : v === 'auto' ? null : +v;
+    render(); if (v !== 'all') focusTop();
+  },
+  repStep: el => {
+    const {s} = curLiveSet(el);
+    const base = s.r != null ? s.r : s.tr || 0;
+    s.r = Math.max(0, base + (+el.dataset.d));
+    const inp = el.parentNode.querySelector('input[data-in=r]'); if (inp) inp.value = s.r;
+    touchLive();
+    if (s.done && rest.end && rest.set === s && rest.tier && missedSet(s) && rest.tier !== 'fail') setEffort('fail');
   },
   lockedTap: () => toast('Finished sets are locked. Tap Edit under the set to change it.', 2600),
   editSet: el => { const {s} = curLiveSet(el); s.edit = !s.edit; touchLive(true); render(); },
@@ -2087,6 +2158,7 @@ const inputs = {
   bar: el => { const v = num(el.value); if (v != null) { S.settings.bars[el.dataset.k] = v; save(); } },
   rest: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest[el.dataset.k][el.dataset.t] = v; save(); } },
   restWarm: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.warm = v; save(); } },
+  restWarmLast: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.warmLast = v; save(); } },
   restDef: el => { S.settings.rest.def = el.value; save(); },
   volume: el => { S.settings.volume = el.value; save(); },
   round: el => { S.settings.round = +el.value; if (S.live && !liveStarted(S.live)) S.live = null; save(); },
