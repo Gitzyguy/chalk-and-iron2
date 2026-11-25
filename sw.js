@@ -1,5 +1,5 @@
 /* Chalk & Iron service worker: caches the app so it runs fully offline. */
-const CACHE = 'chalk-iron-3.7.0';
+const CACHE = 'chalk-iron-3.7.1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './maskable-512.png'];
 self.addEventListener('install', e => {
   /* cache each file on its own so one missing file never blocks the app */
@@ -33,4 +33,9 @@ self.addEventListener('fetch', e => {
     if (r.ok) { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); }
     return r;
   })));
+});
+/* Tapping the rest notification brings the app back. */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({type:'window', includeUncontrolled:true}).then(l => { const c = l.find(x => x.url.startsWith(self.registration.scope)); return c ? c.focus() : self.clients.openWindow('./'); }));
 });
