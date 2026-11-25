@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Builds eatout.json (the app's Eating out guide) from the Eat Out Macro Guide Sheet.
    Inputs are readCells results from the Claude Docs connector, saved as JSON files:
-     Items A1:Q<last>, Meals A1:M<last>, Restaurants A1:F<last>, and optionally How it works A11:E13.
+     Items A1:R<last>, Meals A1:M<last>, Restaurants A1:F<last>, and optionally How it works A11:E13.
    Usage: node tools/build-eatout.js items.json meals.json restaurants.json [howitworks.json] > eatout.json
    Plain Node, no dependencies. */
 'use strict';
@@ -37,7 +37,8 @@ const out = {
     type: str(r[0]), restaurant: str(r[1]), item: str(r[2]), order: str(r[3]),
     kcal: num(r[4]), p: num(r[5]), f: num(r[6]), c: num(r[7]),
     data: str(r[10]), source: str(r[11]), notes: str(r[12]),
-    checked: str(r[13]) || null, verified: str(r[14]) || 'No', sauce: str(r[15]) || 'Not stated'})),
+    checked: str(r[13]) || null, verified: str(r[14]) || 'No', sauce: str(r[15]) || 'Not stated',
+    comes: str(r[17]) || ''})),
   meals: M.rows.slice(1).filter(r => str(r[0])).map(r => ({
     restaurant: str(r[0]), rank: str(r[1]), order: str(r[3]),
     kcal: num(r[4]), p: num(r[5]), f: num(r[6]), c: num(r[7]),
