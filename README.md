@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.7.2
+Version 3.8.0
 
 ## What it does
 
@@ -23,6 +23,7 @@ Version 3.7.2
   - Phases: cut, maintain, lean gain, recomp.
   - Maintenance calories worked out from your data, and calorie targets for each phase.
   - Abs weight range estimate.
+  - **Eating out:** a restaurant guide for Frisco and Plano. Top picks under a fat limit, search, and each restaurant's tested meals, tips and items, shown against today's calories and your 65 g of fat. Updated weekly from the Eat Out Macro Guide Sheet and saved for offline use.
 - **Exercise library**
   - About 75 exercises for a home gym with a rack, barbell, hex bar, EZ bar, dumbbells, adjustable bench, a cable with low and high pulley, chin-up bar, dips and ab wheel.
   - Each one has a short form cue and a form video or a YouTube search.
@@ -35,6 +36,8 @@ Version 3.7.2
 | `index.html` | The whole app |
 | `manifest.webmanifest` | App name and icons, so Chrome can install it |
 | `sw.js` | Offline support and updates |
+| `eatout.json` | The eating out guide's data, rebuilt each week from the Sheet |
+| `tools/build-eatout.js`, `tools/check-eatout.js` | Build `eatout.json` from the Sheet and check it before it is published (not used by the app) |
 | `icon-192.png`, `icon-512.png`, `maskable-512.png` | App icons |
 | `README.md` | This guide |
 
@@ -82,6 +85,10 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.8.0**
+  - Body tab: new **Eating out** section. Tap Find a meal for top picks under a fat limit (15, 20 or 25 g), search any place or food, or open a restaurant for its tested meals, ordering tip, what to avoid and every item on file.
+  - Each row shows calories as a share of today (training or rest day), protein, fat against your 65 g and carbs. Tap it for how to order, notes, whether sauce is counted, and the source.
+  - The guide is a separate file, `eatout.json`, so the weekly update reaches the app without a new version. It works offline once loaded.
 - **3.7.2**
   - Body tab: Import file now takes Excel (.xlsx) as well as CSV, so Arboleaf's export works as it is. Readings from noon on are marked and skipped unless you turn that off.
   - Weekly averages: see every week you saved, edit or delete it, and see whether it counts toward your maintenance estimate and why.

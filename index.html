@@ -176,7 +176,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.7.2';
+const APP_VERSION = '3.8.0';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -1745,6 +1745,118 @@ function phaseNudge(ph, tr, pct) {
   return '';
 }
 
+/* ---------- eating out guide (3.8.0) ----------
+   The data is eatout.json next to the app, built each week from the Eat Out Macro Guide Sheet.
+   It lives in memory only and never goes into S, so it needs no migration. The service worker
+   saves a copy for offline use. */
+let EAT = null, eatErr = null, eatLoading = null;
+const eatUi = {q:'', rest:null, kind:'all', sort:'ratio', cap:20};
+function loadEatOut() {
+  if (EAT) return Promise.resolve(EAT);
+  if (eatLoading) return eatLoading;
+  eatLoading = fetch('./eatout.json', {cache:'no-cache'})
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(d => {
+      if (!d || d.schema !== 1 || !Array.isArray(d.items) || !Array.isArray(d.meals) || !Array.isArray(d.restaurants)) throw new Error('unreadable guide');
+      EAT = d; eatErr = null; return d;
+    })
+    .catch(e => { eatErr = (e && e.message) || 'error'; return null; })
+    .then(d => { eatLoading = null; return d; });
+  return eatLoading;
+}
+const eatT = () => ({p:(EAT && EAT.targets && EAT.targets.protein) || 200, f:(EAT && EAT.targets && EAT.targets.fat) || 65});
+function eatToday() { const t = S.body.targets, train = t.days.includes(new Date().getDay()); return {train, kcal:train ? t.train : t.rest}; }
+const eatRatio = x => x.kcal ? x.p / x.kcal * 100 : 0;
+function eatOutCard() {
+  if (!EAT && !eatErr && !eatLoading) loadEatOut().then(() => { if (tab === 'body') render(); });
+  const td = eatToday(), T = eatT();
+  let h = `<h3>Eating out</h3><div class="card">`;
+  if (EAT) h += `<div class="sub">${EAT.items.length} items at ${EAT.restaurants.length} places in Frisco and Plano · updated ${esc(fmtDate(dts(EAT.updated)))}</div>`;
+  else if (eatErr) h += `<div class="sub">The guide has not loaded on this phone yet. Connect to the internet once and it is saved for offline use.</div>`;
+  else h += `<div class="sub">Loading the guide...</div>`;
+  h += `<div class="small mt">Today is a ${td.train ? 'training' : 'rest'} day: ${td.kcal} kcal, about ${T.p} g protein and ${T.f} g fat.</div>
+    <button class="btn primary block mt" data-act="eatOpen">Find a meal</button></div>`;
+  return h;
+}
+/* One item or meal row; tapping it shows how to order, notes and the source. */
+function eatRow(x, n, opts) {
+  const td = eatToday(), T = eatT(), meal = !x.item, title = meal ? x.order : x.item;
+  const fatHi = x.f > T.f * 0.4, sauce = x.sauce === 'No' ? ' · sauce not counted' : x.sauce === 'Not stated' ? ' · sauce not stated' : '';
+  const src = x.source || (EAT.restaurants.find(r => r.name === x.restaurant) || {}).source || '';
+  let h = `<button class="it" data-eat="item" data-v="${n}"><div class="grow"><div class="t">${opts.rest ? esc(x.restaurant) + ': ' : ''}${esc(title)}</div>
+    <div class="s">${fmtW(x.kcal)} kcal (${Math.round(100 * x.kcal / td.kcal)}% of today) · P ${fmtW(x.p)} · <span style="${fatHi ? 'color:var(--gold);font-weight:700' : ''}">F ${fmtW(x.f)} of ${T.f}</span> · C ${fmtW(x.c)}${esc(sauce)}</div></div>
+    <span class="tag" title="Protein per 100 kcal">${eatRatio(x).toFixed(1)}</span></button>
+    <div id="eatD${n}" hidden class="small" style="padding:0 2px 12px;line-height:1.5">`;
+  if (!meal && x.order) h += `<div><b>How to order:</b> ${esc(x.order)}</div>`;
+  if (x.notes) h += `<div>${esc(x.notes)}</div>`;
+  h += `<div>Data: ${esc(x.data || '')}${x.verified === 'Yes' ? ', checked on the chain\'s site' : ''}${x.checked ? ' · checked ' + esc(fmtDate(dts(x.checked))) : ''}${/^https:\/\//.test(src) ? ` · <a href="${esc(src)}" target="_blank" rel="noopener" style="color:var(--rust)">Source</a>` : ''}</div></div>`;
+  return h;
+}
+function eatView() {
+  const T = eatT();
+  let n = 0, h = '';
+  const sortFn = eatUi.sort === 'fat' ? (a, b) => a.f - b.f || eatRatio(b) - eatRatio(a) : (a, b) => eatRatio(b) - eatRatio(a);
+  const sortChips = `<div class="chips mt"><button class="chip ${eatUi.sort === 'ratio' ? 'on' : ''}" data-eat="sort" data-v="ratio">Most protein per kcal</button><button class="chip ${eatUi.sort === 'fat' ? 'on' : ''}" data-eat="sort" data-v="fat">Lowest fat</button></div>`;
+  if (eatUi.rest) {
+    const r = EAT.restaurants.find(x => x.name === eatUi.rest);
+    if (!r) { eatUi.rest = null; return eatView(); }
+    h += `<button class="chip" data-eat="back">‹ All places</button><h2 class="mt">${esc(r.name)}</h2><div class="small">${esc(r.type)} · data: ${esc(r.data)}</div>`;
+    if (r.tip) h += `<div class="small mt"><b>Tip:</b> ${esc(r.tip)}</div>`;
+    if (r.avoid) h += `<div class="small mt"><b>Avoid:</b> ${esc(r.avoid)}</div>`;
+    const meals = EAT.meals.filter(m => m.restaurant === r.name).sort((a, b) => (+a.rank || 9) - (+b.rank || 9));
+    if (meals.length) h += `<h3>Tested meals</h3><div class="card list">${meals.map(m => eatRow(m, n++, {})).join('')}</div>`;
+    const items = EAT.items.filter(x => x.restaurant === r.name).sort(sortFn);
+    h += `<h3>Everything on file</h3>${sortChips}<div class="card list mt">${items.map(x => eatRow(x, n++, {})).join('')}</div>`;
+    return h;
+  }
+  const q = eatUi.q.trim().toLowerCase();
+  if (q) {
+    const places = EAT.restaurants.filter(r => r.name.toLowerCase().includes(q));
+    const items = EAT.items.filter(x => (x.item + ' ' + x.restaurant + ' ' + x.type).toLowerCase().includes(q)).sort(sortFn).slice(0, 40);
+    if (places.length) h += `<div class="card list">${places.map(r => `<button class="it" data-eat="rest" data-v="${esc(r.name)}"><div class="grow"><div class="t">${esc(r.name)}</div><div class="s">${esc(r.type)}</div></div>›</button>`).join('')}</div>`;
+    h += sortChips + (items.length ? `<div class="card list mt">${items.map(x => eatRow(x, n++, {rest:true})).join('')}</div>` : '<div class="empty">Nothing matches. Try a restaurant name or a food like chicken.</div>');
+    return h;
+  }
+  const kinds = [['all', 'All'], ['Usual', 'Usual'], ['Fast food', 'Fast food']];
+  h += `<div class="chips">${kinds.map(([k, l]) => `<button class="chip ${eatUi.kind === k ? 'on' : ''}" data-eat="kind" data-v="${k}">${l}</button>`).join('')}</div>`;
+  const inKind = name => eatUi.kind === 'all' || (EAT.restaurants.find(r => r.name === name) || {}).type === eatUi.kind;
+  const top = EAT.items.filter(x => x.type !== 'Sides, add-ons & drinks' && x.f <= eatUi.cap && x.p >= 25 && inKind(x.restaurant)).sort(sortFn).slice(0, 12);
+  h += `<h3>Top picks</h3><div class="small">Meals with at least 25 g protein and at most ${eatUi.cap} g fat (your day is ${T.f} g).</div>
+    <div class="chips mt">${[15, 20, 25].map(c => `<button class="chip ${eatUi.cap === c ? 'on' : ''}" data-eat="cap" data-v="${c}">${c} g fat</button>`).join('')}</div>${sortChips}
+    <div class="card list mt">${top.length ? top.map(x => eatRow(x, n++, {rest:true})).join('') : '<div class="small">Nothing under this cap yet.</div>'}</div>`;
+  const places = EAT.restaurants.filter(r => inKind(r.name)).sort((a, b) => a.name.localeCompare(b.name));
+  h += `<h3>Places</h3><div class="card list">${places.map(r => {
+    const its = EAT.items.filter(x => x.restaurant === r.name), best = its.slice().sort((a, b) => eatRatio(b) - eatRatio(a))[0];
+    return `<button class="it" data-eat="rest" data-v="${esc(r.name)}"><div class="grow"><div class="t">${esc(r.name)}</div><div class="s">${its.length} items${best ? ' · best: ' + esc(best.item) : ''}</div></div>›</button>`;
+  }).join('')}</div>`;
+  return h;
+}
+function eatOpen() {
+  const open = () => sheet(`<div class="hd"><h2>Eating out</h2><button class="x" data-act="close">✕</button></div>
+    <div class="field" id="eatQF"><input id="eatQ" type="search" placeholder="Search a place or food" value="${esc(eatUi.q)}" autocomplete="off"></div>
+    <div id="eatRes"></div>`, bg => {
+    const res = bg.querySelector('#eatRes'), qf = bg.querySelector('#eatQF');
+    const draw = () => { qf.style.display = eatUi.rest ? 'none' : ''; res.innerHTML = eatView(); };
+    draw();
+    bg.addEventListener('click', e => {
+      const b = e.target.closest('[data-eat]'); if (!b) return;
+      const k = b.dataset.eat, v = b.dataset.v;
+      if (k === 'item') { const d = res.querySelector('#eatD' + v); if (d) d.hidden = !d.hidden; return; }
+      if (k === 'rest') eatUi.rest = v;
+      else if (k === 'back') eatUi.rest = null;
+      else if (k === 'kind') eatUi.kind = v;
+      else if (k === 'sort') eatUi.sort = v;
+      else if (k === 'cap') eatUi.cap = +v;
+      draw();
+      if (k === 'rest' || k === 'back') bg.querySelector('.sheet').scrollTop = 0;
+    });
+    bg.querySelector('#eatQ').addEventListener('input', e => { eatUi.q = e.target.value; draw(); });
+  });
+  if (EAT) return open();
+  toast('Loading the guide...');
+  loadEatOut().then(d => d ? open() : toast('Could not load the guide. Connect to the internet once, then try again.', 3500));
+}
+
 function viewBody() {
   const B = S.body, tr = bodyTrend(), last = tr[tr.length - 1], ph = currentPhase();
   let h = topbar(ph ? `<span class="pill" style="border-color:${PHASES[ph.type].color};color:${PHASES[ph.type].color}">${PHASES[ph.type].name}</span>` : '');
@@ -1757,7 +1869,7 @@ function viewBody() {
     <button class="btn primary block" data-act="bwSave">${existing ? 'Update' : 'Save'} weigh-in</button>
     <div class="small mt">Weigh in each morning after the bathroom, before eating. Body fat from your scale is optional; it powers the abs estimate.</div><button class="btn sm mt" data-act="importCsv">Import file (Cronometer or Arboleaf)</button></div>`;
   if (!ph) h += `<div class="card"><div class="eyebrow">Start here</div><h2 class="mt">What are you doing right now?</h2><p class="sub">Pick a phase: cut, maintain, lean gain or recomp. You can switch any time and each phase gets its own targets.</p><button class="btn primary block" data-act="phaseSet">Choose phase</button></div>`;
-  if (!last) return h + `<div class="empty">Log a few weigh-ins and your trend, pace and estimates show up here.</div>`;
+  if (!last) return h + `<div class="empty">Log a few weigh-ins and your trend, pace and estimates show up here.</div>` + eatOutCard();
 
   const slope = trendSlope(tr, 21), band = phaseRateBand(ph);
   const wk = slope != null ? slope * 7 : null, pct = wk != null ? wk / last.t : null;
@@ -1783,6 +1895,7 @@ function viewBody() {
   } else h += `<div class="small">After about 2 weeks of weigh-ins, this works out your real maintenance calories and gives training and rest day targets for your phase.</div>`;
   h += `<div class="row mt" style="flex-wrap:wrap"><button class="btn sm" data-act="intakeAdd">+ Weekly Cronometer average</button><button class="btn sm" data-act="weeksOpen">Weekly averages (${S.body.intake.length})</button><button class="btn sm" data-act="targetsEdit">Daily targets</button></div></div>`;
 
+  h += eatOutCard();
   h += `<h3>Abs estimate</h3><div class="card">`;
   const ar = absRange(tr);
   if (ar) {
@@ -2099,7 +2212,7 @@ const HELP = [
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
   ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ Add program</b> lists your own programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) and well known programs (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
   ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows load as much bumper weight as fits, then steel. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0, per side or as a single stack (Settings, Pulley pin plates). The weight you log is the total. Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
-  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. <b>Weekly averages</b> lists every week you saved, lets you edit or delete it, and says whether it counts toward your maintenance estimate (up to 21 days ending at your last weigh-in). <b>Import file</b> reads Arboleaf's Excel export, a Cronometer daily nutrition or biometrics export, or any CSV or Excel file with dates and weights, and shows a preview before adding anything. Readings from noon on are skipped unless you turn that off. A weekly waist measurement is optional but the best check on fat loss.</p>`],
+  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. <b>Weekly averages</b> lists every week you saved, lets you edit or delete it, and says whether it counts toward your maintenance estimate (up to 21 days ending at your last weigh-in). <b>Import file</b> reads Arboleaf's Excel export, a Cronometer daily nutrition or biometrics export, or any CSV or Excel file with dates and weights, and shows a preview before adding anything. Readings from noon on are skipped unless you turn that off. A weekly waist measurement is optional but the best check on fat loss.</p><p><b>Eating out</b> (on the Body tab) is your restaurant guide for Frisco and Plano. Tap <b>Find a meal</b> for top picks under a fat limit, search a place or food, or open a restaurant for its tested meals, tips and everything on file. Each row shows calories as a share of today (training or rest day), protein, fat against your 65 g, and carbs; the number on the right is protein per 100 kcal. Tap a row for how to order and the source. It updates every week and works offline once loaded.</p>`],
   ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app. If YouTube asks you to sign in or prove you are not a bot, tap <b>Open in the YouTube app</b> instead. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
   ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p><p>After each workout the app asks to back up; pick Google Drive in the share menu. Clearing Chrome's <b>Cookies and site data</b> deletes your workouts, so when clearing Chrome tick only <b>Cached images and files</b>. If the app ever cannot read your data, it says so and saves nothing until you choose what to do.</p>`],
   ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
@@ -2375,6 +2488,7 @@ const actions = {
   swapToday: el => { const e = L.ex[+el.dataset.ei]; pickExercise('Swap ' + exName(e.ex) + ' today', id => { e.ex = id; if (e.kind === 'reps') { delete e.bar; delete e.rest; delete e.ii; e.swapped = true; const sg = suggestLoad({ex:id, sets:e.sets.length, min:e.min, max:e.max}, S.exercises[id]); e.up = sg.up; e.sets.forEach(x => { if (!x.done) { x.tw = sg.w; x.w = sg.w; } }); } touchLive(true); render(); toast('Swapped for today only.'); }); },
   swapItem: el => { const p = S.programs[editProgId], it = p.days[+el.dataset.di].items[+el.dataset.ii]; pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); }); },
   bwSave: () => bodySave(),
+  eatOpen: () => eatOpen(),
   bwEdit: el => { bodyLogDate = el.dataset.d; render(); window.scrollTo(0, 0); },
   bwDel: el => { if (!confirm('Delete the weigh-in on ' + el.dataset.d + '?')) return; guard.allow = true; S.body.weights = S.body.weights.filter(w => w.d !== el.dataset.d); save(); render(); },
   bwAll: () => { bodyShowAll = true; render(); },
