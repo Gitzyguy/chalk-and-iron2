@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.7.1
+Version 3.7.2
 
 ## What it does
 
@@ -82,6 +82,11 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.7.2**
+  - Body tab: Import file now takes Excel (.xlsx) as well as CSV, so Arboleaf's export works as it is. Readings from noon on are marked and skipped unless you turn that off.
+  - Weekly averages: see every week you saved, edit or delete it, and see whether it counts toward your maintenance estimate and why.
+  - A weekly average always lands on its Monday, and the app shows the old number before replacing one. Older entries on other days are marked Fix date and are not changed for you.
+  - The maintenance card shows the dates it covers and how many of those days use your averages.
 - **3.7.1**
   - Accessory rest is back to 0:45 / 1:00 / 1:30. 3.7.0 changed Easy to 1:00 by mistake; if yours is still 1:00 it goes back to 0:45.
   - New rest between exercises, 1:00, in Settings. Easy, Hard and Fail are still saved for that set but do not change the 1:00.

@@ -176,7 +176,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.7.1';
+const APP_VERSION = '3.7.2';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -1615,15 +1615,77 @@ function intakeFor(n) {
   const t = S.body.targets, wd = new Date(n * DAY + DAY / 2).getUTCDay();
   return {kcal:t.days.includes(wd) ? t.train : t.rest, src:'target'};
 }
+/* The days the maintenance estimate uses: up to 21, ending at the last weigh-in. ready = enough weigh-ins to estimate. */
+function maintWindow(tr) {
+  if (!tr.length) return null;
+  const slope = trendSlope(tr, 21), end = tr[tr.length - 1].n, start = Math.max(tr[0].n, end - 20);
+  return {slope, start, end, days:end - start + 1, ready:slope != null && end - start >= 13};
+}
+const mondayOf = n => n - (new Date(n * DAY + DAY / 2).getUTCDay() + 6) % 7;
+const weekTxt = d => new Date(d + 'T12:00:00Z').toLocaleDateString([], {month:'short', day:'numeric', year:'numeric', timeZone:'UTC'});
+const overlapsOf = (d, skip) => S.body.intake.filter(x => x !== skip && x.start !== d && Math.abs(dnum(x.start) - dnum(d)) < 7);
+/* Does this weekly average count toward the estimate, and if not, why. Same day lookup as intakeFor. */
+function weekStatus(w, win) {
+  if (!win || !win.ready) return {n:0, txt:'Not used yet: about 2 weeks of weigh-ins needed'};
+  const a = dnum(w.start); let n = 0, lost = 0;
+  for (let k = Math.max(a, win.start); k <= Math.min(a + 6, win.end); k++) { if (S.body.intake.find(x => k >= dnum(x.start) && k < dnum(x.start) + 7) === w) n++; else lost++; }
+  if (n) return {n, txt:`Counts: ${n} of ${win.days} days` + (lost ? `, ${lost} more overlapped by another entry` : '')};
+  if (lost) return {n, txt:'Not used: another entry covers the same days'};
+  return {n, txt:a > win.end ? 'Not used yet: after your last weigh-in' : 'Not used: older than the days being estimated'};
+}
+/* Save one weekly average on its Monday. old = the entry being edited. Returns false if the user backs out. */
+function saveWeek(date, kcal, old) {
+  const k = parseInt(kcal);
+  if (!k || k < 800 || k > 8000) { toast('Enter the daily average from Cronometer.'); return false; }
+  if (!date || !isFinite(dnum(date))) { toast('Pick the week.'); return false; }
+  const start = dstr(mondayOf(dnum(date))), hit = S.body.intake.find(x => x.start === start && x !== old);
+  if (hit && !confirm(`Week of ${weekTxt(start)}: was ${hit.kcal}, now ${k}. Replace it?`)) return false;
+  S.body.intake = S.body.intake.filter(x => x !== old && x !== hit);
+  S.body.intake.push({start, kcal:k, src:'typed'});
+  S.body.intake.sort((a, b) => a.start < b.start ? -1 : 1);
+  S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
+  toast(overlapsOf(start).length ? 'Saved, but another entry overlaps this week. Check Weekly averages.' : 'Saved for the week of ' + weekTxt(start) + '.', 3200);
+  return true;
+}
+let weeksDraw = null;
+function weeksSheet() {
+  sheet(`<div class="hd"><h2>Weekly averages</h2><button class="x" data-act="close">✕</button></div><div id="wkBody"></div><button class="btn block mt" data-act="intakeAdd">+ Weekly Cronometer average</button>`, bg => {
+    weeksDraw = () => {
+      if (!bg.isConnected) return;
+      const win = maintWindow(bodyTrend()), list = S.body.intake.slice().sort((a, b) => a.start < b.start ? 1 : -1);
+      bg.querySelector('#wkBody').innerHTML = `<p class="sub">${win && win.ready ? `The estimate uses ${win.days} days, ${weekTxt(dstr(win.start))} to ${weekTxt(dstr(win.end))} (your last weigh-in). Days without an average use your daily targets.` : 'Log about 2 weeks of weigh-ins to get a maintenance estimate.'}</p>` +
+        (list.length ? `<div class="card list">${list.map(w => {
+          const off = dstr(mondayOf(dnum(w.start))) !== w.start, st = weekStatus(w, win);
+          return `<button class="it" data-wk="${esc(w.start)}"><div class="grow"><div class="t">Week of ${esc(weekTxt(w.start))} ${off ? '<span class="tag gold">Fix date</span>' : ''}</div><div class="s">${esc(st.txt)}</div><div class="s">${w.src === 'file' ? 'Imported' : w.src === 'typed' ? 'Typed' : ''}${w.days ? ' · ' + w.days + ' days logged' : ''}${off ? (w.src ? ' · ' : '') + 'Does not start on a Monday' : ''}</div></div><b class="mono">${w.kcal}</b><span class="sub">›</span></button>`;
+        }).join('')}</div>` : '<div class="empty">No weekly averages saved.</div>');
+    };
+    weeksDraw();
+    bg.addEventListener('click', ev => { const t = ev.target.closest('[data-wk]'); const w = t && S.body.intake.find(x => x.start === t.dataset.wk); if (w) weekEditSheet(w); });
+  });
+}
+function weekEditSheet(w) {
+  const mon = dstr(mondayOf(dnum(w.start)));
+  sheet(`<div class="hd"><h2>Week of ${esc(weekTxt(w.start))}</h2><button class="x" data-act="close">✕</button></div>
+    ${mon !== w.start ? `<p class="sub">This entry starts on a different day than Monday. Saving moves it to ${esc(weekTxt(mon))}.</p>` : ''}
+    <div class="field"><label>Week starting (moves to its Monday)</label><input id="weStart" type="date" value="${esc(w.start)}" max="${todayStr()}"></div>
+    <div class="field"><label>Average calories per day</label><input id="weKcal" class="num" type="number" inputmode="numeric" value="${w.kcal}"></div>
+    <button class="btn primary block" id="weGo">Save</button><button class="btn danger block mt" id="weDel">Delete this week</button>`, bg => {
+    const done = () => { save(true); closeSheet(bg); render(); if (weeksDraw) weeksDraw(); };
+    bg.querySelector('#weGo').addEventListener('click', () => { if (saveWeek(bg.querySelector('#weStart').value, bg.querySelector('#weKcal').value, w)) done(); });
+    bg.querySelector('#weDel').addEventListener('click', () => {
+      if (!confirm(`Delete ${w.kcal} for the week of ${weekTxt(w.start)}?`)) return;
+      guard.allow = true; S.body.intake = S.body.intake.filter(x => x !== w); S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1; done(); toast('Deleted.');
+    });
+  });
+}
 function maintenanceEstimate(tr) {
-  const slope = trendSlope(tr, 21);
-  if (slope == null) return null;
-  const end = tr[tr.length - 1].n, start = Math.max(tr[0].n, end - 20);
-  if (end - start < 13) return null;
+  const win = maintWindow(tr);
+  if (!win || !win.ready) return null;
+  const {slope, start, end} = win;
   let sum = 0, cnt = 0, fromAvg = 0;
   for (let n = start; n <= end; n++) { const x = intakeFor(n); sum += x.kcal; cnt++; if (x.src === 'avg') fromAvg++; }
   const intake = sum / cnt;
-  return {kcal:Math.round(intake - slope * 3500), intake:Math.round(intake), slope, fromAvg:fromAvg / cnt, days:end - start + 1};
+  return {kcal:Math.round(intake - slope * 3500), intake:Math.round(intake), slope, fromAvg:fromAvg / cnt, avgDays:fromAvg, start, end, days:end - start + 1};
 }
 /* Target weekly change for a phase, as a fraction of bodyweight (negative = loss). */
 function phaseRateBand(ph) {
@@ -1693,7 +1755,7 @@ function viewBody() {
     <div class="field"><label>Weight lb</label><input class="num" id="bwLb" type="number" inputmode="decimal" step="any" value="${existing ? existing.lb : ''}" placeholder="${last ? fmtW(last.lb) : 'lb'}"></div>
     <div class="field"><label>Body fat %</label><input class="num" id="bwBf" type="number" inputmode="decimal" step="any" value="${existing && existing.bf ? existing.bf : ''}" placeholder="opt"></div></div>
     <button class="btn primary block" data-act="bwSave">${existing ? 'Update' : 'Save'} weigh-in</button>
-    <div class="small mt">Weigh in each morning after the bathroom, before eating. Body fat from your scale is optional; it powers the abs estimate.</div><button class="btn sm mt" data-act="importCsv">Import CSV (Cronometer or weights)</button></div>`;
+    <div class="small mt">Weigh in each morning after the bathroom, before eating. Body fat from your scale is optional; it powers the abs estimate.</div><button class="btn sm mt" data-act="importCsv">Import file (Cronometer or Arboleaf)</button></div>`;
   if (!ph) h += `<div class="card"><div class="eyebrow">Start here</div><h2 class="mt">What are you doing right now?</h2><p class="sub">Pick a phase: cut, maintain, lean gain or recomp. You can switch any time and each phase gets its own targets.</p><button class="btn primary block" data-act="phaseSet">Choose phase</button></div>`;
   if (!last) return h + `<div class="empty">Log a few weigh-ins and your trend, pace and estimates show up here.</div>`;
 
@@ -1717,9 +1779,9 @@ function viewBody() {
   if (m) {
     h += `<div class="grid2"><div class="stat"><div class="v">${m.kcal}</div><div class="k">Your maintenance</div></div>${cal ? `<div class="stat"><div class="v">${cal.avg}</div><div class="k">${esc(PHASES[ph.type].name)} daily avg</div></div>` : ''}</div>
       ${cal ? `<div class="grid2 mt"><div class="stat"><div class="v">${cal.train}</div><div class="k">Training days</div></div><div class="stat"><div class="v">${cal.rest}</div><div class="k">Rest days</div></div></div>` : ''}
-      <div class="small mt">From the last ${m.days} days: you averaged about ${m.intake} kcal ${m.fromAvg >= 0.5 ? '(your Cronometer averages)' : '(your daily targets)'} and your trend moved ${(m.slope * 7 > 0 ? '+' : '') + (m.slope * 7).toFixed(2)} lb/week.${m.fromAvg < 0.5 ? ' Entering your real weekly averages makes this sharper.' : ''}</div>`;
+      <div class="small mt">From the last ${m.days} days: you averaged about ${m.intake} kcal ${m.fromAvg >= 0.5 ? '(your Cronometer averages)' : '(your daily targets)'} and your trend moved ${(m.slope * 7 > 0 ? '+' : '') + (m.slope * 7).toFixed(2)} lb/week.${m.fromAvg < 0.5 ? ' Entering your real weekly averages makes this sharper.' : ''}<br>Weekly averages cover ${m.avgDays} of ${m.days} days (${esc(weekTxt(dstr(m.start)))} to ${esc(weekTxt(dstr(m.end)))}).</div>`;
   } else h += `<div class="small">After about 2 weeks of weigh-ins, this works out your real maintenance calories and gives training and rest day targets for your phase.</div>`;
-  h += `<div class="row mt" style="flex-wrap:wrap"><button class="btn sm" data-act="intakeAdd">+ Weekly Cronometer average</button><button class="btn sm" data-act="targetsEdit">Daily targets</button></div></div>`;
+  h += `<div class="row mt" style="flex-wrap:wrap"><button class="btn sm" data-act="intakeAdd">+ Weekly Cronometer average</button><button class="btn sm" data-act="weeksOpen">Weekly averages (${S.body.intake.length})</button><button class="btn sm" data-act="targetsEdit">Daily targets</button></div></div>`;
 
   h += `<h3>Abs estimate</h3><div class="card">`;
   const ar = absRange(tr);
@@ -1870,7 +1932,7 @@ function videoSheet(exId) {
     ${ex.notes ? `<div class="card small mt" style="white-space:pre-wrap">${esc(ex.notes)}</div>` : ''}`);
 }
 
-/* ---------- CSV import (Cronometer daily nutrition or biometrics, or any date and weight file) ---------- */
+/* ---------- file import, CSV or Excel (Cronometer daily nutrition or biometrics, or any date and weight file) ---------- */
 function parseCsv(txt) {
   const rows = []; let row = [], cell = '', q = false;
   txt = txt.replace(/^﻿/, '');
@@ -1891,15 +1953,73 @@ function csvDate(v) {
   if ((x = v.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) [, y, m, d] = x;
   else if ((x = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/))) [, m, d, y] = x;
   else if ((x = v.match(/^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})/))) { m = 'janfebmaraprmayjunjulaugsepoctnovdec'.indexOf(x[1].toLowerCase()) / 3 + 1; d = x[2]; y = x[3]; }
+  else if (/^\d{5}(\.\d+)?$/.test(v) && +v > 20000 && +v < 80000) { const day = Math.floor(+v), fr = +v - day; return {d:dstr(day - 25569), t:fr ? Math.round(fr * 1440) : 1440}; }   // Excel date number
   else return null;
   if (!(Number.isInteger(+m) && m >= 1 && m <= 12 && d >= 1 && d <= 31)) return null;
   const tm = v.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*([ap]m)?/i);
   let t = 1440; if (tm) { let hh = +tm[1]; if (tm[3]) hh = hh % 12 + (/p/i.test(tm[3]) ? 12 : 0); t = hh * 60 + +tm[2]; }
   return {d:y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'), t};
 }
-/* Returns {weeks:[{start,kcal,days}], weights:[{d,lb,bf?}], skipped} or {error}. Reads only, saves nothing. */
-function readCsv(txt) {
-  const rows = parseCsv(txt); if (rows.length < 2) return {error:'That file has no rows.'};
+/* First sheet of an .xlsx file as rows of text. No library: an .xlsx is a zip of XML files. */
+async function readXlsx(buf) {
+  const bytes = new Uint8Array(buf), v = new DataView(buf), dec = new TextDecoder(), LIMIT = 50e6, bad = m => { throw new Error(m); };
+  let e = bytes.length - 22; while (e >= 0 && v.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) bad('That Excel file looks damaged.');
+  const files = {}; let p = v.getUint32(e + 16, true), used = 0;
+  for (let i = v.getUint16(e + 10, true); i > 0; i--) {
+    if (v.getUint32(p, true) !== 0x02014b50) bad('That Excel file looks damaged.');
+    const nl = v.getUint16(p + 28, true);
+    files[dec.decode(bytes.subarray(p + 46, p + 46 + nl))] = {enc:v.getUint16(p + 8, true) & 1, m:v.getUint16(p + 10, true), size:v.getUint32(p + 20, true), off:v.getUint32(p + 42, true)};
+    p += 46 + nl + v.getUint16(p + 30, true) + v.getUint16(p + 32, true);
+  }
+  const read = async name => {
+    const z = files[name]; if (!z) return null;
+    if (z.enc) bad('That Excel file is password protected.');
+    const o = z.off + 30 + v.getUint16(z.off + 26, true) + v.getUint16(z.off + 28, true);
+    let data = bytes.subarray(o, o + z.size);
+    if (z.m === 8) {
+      if (!('DecompressionStream' in window)) bad('Update Chrome to read this Excel file, or save it as CSV.');
+      const rd = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader(), parts = [];
+      for (;;) { const r = await rd.read(); if (r.done) break; used += r.value.length; if (used > LIMIT) { rd.cancel().catch(() => {}); bad('That Excel file is too large.'); } parts.push(r.value); }
+      data = new Uint8Array(await new Blob(parts).arrayBuffer());
+    } else if (z.m !== 0) bad('That Excel file uses an unsupported format. Save it as CSV.');
+    else { used += data.length; if (used > LIMIT) bad('That Excel file is too large.'); }
+    const x = new DOMParser().parseFromString(dec.decode(data), 'application/xml');
+    if (x.getElementsByTagName('parsererror').length) bad('That Excel file looks damaged.');
+    return x;
+  };
+  const tags = (x, t) => [...x.getElementsByTagNameNS('*', t)], text = x => tags(x, 't').map(t => t.textContent).join('');
+  let path = 'xl/worksheets/sheet1.xml';
+  const wb = await read('xl/workbook.xml'), rels = await read('xl/_rels/workbook.xml.rels'), sh = wb && tags(wb, 'sheet')[0];
+  if (sh && rels) {
+    const id = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'), r = tags(rels, 'Relationship').find(x => x.getAttribute('Id') === id), t = r && r.getAttribute('Target');
+    if (t) path = t[0] === '/' ? t.slice(1) : 'xl/' + t;
+  }
+  const doc = await read(path); if (!doc) bad('No sheet found in that Excel file.');
+  const ssx = await read('xl/sharedStrings.xml'), ss = ssx ? tags(ssx, 'si').map(text) : [];
+  return tags(doc, 'row').map(r => {
+    const out = []; let next = 0;
+    tags(r, 'c').forEach(c => {
+      const ref = (c.getAttribute('r') || '').match(/^[A-Z]{1,3}/);
+      const i = ref ? [...ref[0]].reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0) - 1 : next; next = i + 1;
+      const t = c.getAttribute('t'), val = tags(c, 'v')[0], raw = val ? val.textContent : '';
+      if (i < 1000) out[i] = t === 's' ? ss[+raw] || '' : t === 'inlineStr' ? text(c) : raw;
+    });
+    return Array.from(out, x => x == null ? '' : x);
+  }).filter(r => r.some(c => c.trim()));
+}
+/* Any supported file, told apart by its contents rather than its name. */
+async function readImport(f) {
+  if (f.size > 20e6) return {error:'That file is too large (20 MB limit).'};
+  const buf = await f.arrayBuffer(), sig = [...new Uint8Array(buf.slice(0, 4))].map(x => x.toString(16).padStart(2, '0')).join('');
+  if (sig === 'd0cf11e0') return {error:'That is an older or password protected Excel file. Save it as .xlsx or CSV.'};
+  if (sig.startsWith('504b')) { try { return readRows(await readXlsx(buf)); } catch (e) { return {error:/Excel|Chrome/.test(e.message) ? e.message : 'That Excel file looks damaged.'}; } }
+  return readCsv(new TextDecoder().decode(buf));
+}
+/* Returns {weeks:[{start,kcal,days}], weights:[{d,lb,bf?,late?}], skipped} or {error}. late = first reading of that day was noon or later. Reads only, saves nothing. */
+const readCsv = txt => readRows(parseCsv(txt));
+function readRows(rows) {
+  if (rows.length < 2) return {error:'That file has no rows.'};
   const hd = rows[0].map(x => x.trim().toLowerCase()), col = re => hd.findIndex(x => re.test(x));
   const cD = col(/^(date|day|time|timestamp|measure)/), cE = col(/^(energy|calories).*kcal|^energy$|^calories$/), cM = col(/^metric$/), cA = col(/^amount$|^value$/), cU = col(/^unit/), cT = col(/^time$/);
   if (cD < 0) return {error:'No date column found.'};
@@ -1925,34 +2045,46 @@ function readCsv(txt) {
     if (cW < 0) return {error:'No calories or weight column found in that file.'};
     rows.slice(1).forEach(r => { const a = when(r); put(a, 'lb', lbs(n(r[cW]), hd[cW] + (cU >= 0 ? r[cU] : '') + r[cW])); if (cF >= 0) put(a, 'bf', n(r[cF])); });
   }
-  const weights = Object.entries(best).filter(([, o]) => o.lb && o.lb.v >= 80 && o.lb.v <= 600).map(([d, o]) => Object.assign({d, lb:Math.round(o.lb.v * 10) / 10}, o.bf && o.bf.v >= 3 && o.bf.v <= 60 ? {bf:o.bf.v} : {})).sort((a, b) => a.d < b.d ? -1 : 1);
+  const weights = Object.entries(best).filter(([, o]) => o.lb && o.lb.v >= 80 && o.lb.v <= 600).map(([d, o]) => Object.assign({d, lb:Math.round(o.lb.v * 10) / 10}, o.bf && o.bf.v >= 3 && o.bf.v <= 60 ? {bf:o.bf.v} : {}, o.lb.t >= 720 && o.lb.t < 1440 ? {late:true} : {})).sort((a, b) => a.d < b.d ? -1 : 1);
   return {weeks:[], weights, skipped:Object.keys(best).length - weights.length};
 }
 /* Adds what is missing. With over = true the file also replaces weeks and days already here. */
 function applyCsv(res, over) {
   const b = S.body; let c = 0;
   const add = (arr, k, x) => { const i = arr.findIndex(y => y[k] === x[k]); if (i < 0) { arr.push(x); c++; } else if (over) { arr[i] = Object.assign({}, arr[i], x); c++; } };
-  res.weeks.forEach(w => add(b.intake, 'start', {start:w.start, kcal:w.kcal}));
-  res.weights.forEach(w => add(b.weights, 'd', w));
+  res.weeks.forEach(w => add(b.intake, 'start', {start:w.start, kcal:w.kcal, src:'file', days:w.days}));
+  res.weights.forEach(w => add(b.weights, 'd', Object.assign({d:w.d, lb:w.lb}, w.bf ? {bf:w.bf} : {})));
   b.intake.sort((x, y) => x.start < y.start ? -1 : 1); b.weights.sort((x, y) => x.d < y.d ? -1 : 1);
   if (c) S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
   save(true); return c;
 }
 function importCsv() {
-  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv,text/csv,text/comma-separated-values,text/plain';
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv,.xlsx,text/csv,text/comma-separated-values,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/octet-stream';
   inp.onchange = async () => {
     const f = inp.files[0]; if (!f) return;
-    let res; try { res = readCsv(await f.text()); } catch (e) { res = {error:'Could not read that file.'}; }
+    let res; try { res = await readImport(f); } catch (e) { res = {error:'Could not read that file.'}; }
     if (!res.error && !res.weeks.length && !res.weights.length) res.error = 'Nothing usable found. A week needs at least 4 logged days.';
     if (res.error) return toast(res.error, 4000);
-    const isW = res.weeks.length > 0, list = isW ? res.weeks : res.weights, have = isW ? S.body.intake.map(x => x.start) : S.body.weights.map(x => x.d);
-    const dup = list.filter(x => have.includes(isW ? x.start : x.d)).length;
-    sheet(`<div class="hd"><h2>Import ${list.length} ${isW ? 'weekly average' : 'weigh-in'}${list.length > 1 ? 's' : ''}</h2><button class="x" data-act="close">✕</button></div>
-      <p class="sub">${list.length - dup} new, ${dup} already here${res.skipped ? ', ' + res.skipped + (isW ? ' weeks skipped (under 4 days logged)' : ' days skipped') : ''}.</p>
-      <div class="card" style="max-height:38vh;overflow:auto">${list.slice().reverse().map(x => `<div class="between"><span>${isW ? 'Week of ' : ''}${esc(isW ? x.start : x.d)}</span><span class="mono">${isW ? x.kcal + ' kcal (' + x.days + ' days)' : x.lb + ' lb' + (x.bf ? ' · ' + x.bf + '%' : '')}</span></div>`).join('')}</div>
-      ${dup ? '<div class="toggle"><div><b>Replace the ones already here</b><div class="small">Off keeps what you entered.</div></div><button class="sw" id="icOver" data-act="flip"></button></div>' : ''}
-      <button class="btn primary block mt" id="icGo">Import</button>`, bg => {
-      bg.querySelector('#icGo').addEventListener('click', () => { const o = bg.querySelector('#icOver'), c = applyCsv(res, !!o && o.classList.contains('on')); closeSheet(bg); render(); toast(c ? c + ' imported.' : 'Nothing new to import.'); });
+    const isW = res.weeks.length > 0, all = isW ? res.weeks : res.weights, key = isW ? 'start' : 'd', have = new Set((isW ? S.body.intake : S.body.weights).map(x => x[key]));
+    const late = all.filter(x => x.late).length, clash = isW ? all.filter(w => overlapsOf(w.start).length).length : 0;
+    let skipLate = late > 0, over = false;
+    sheet(`<div class="hd"><h2>Import ${isW ? 'weekly averages' : 'weigh-ins'}</h2><button class="x" data-act="close">✕</button></div><div id="icBody"></div><button class="btn primary block mt" id="icGo">Import</button>`, bg => {
+      const list = () => all.filter(x => !(skipLate && x.late));
+      const tog = (id, on, t, d) => `<div class="toggle"><div><b>${t}</b><div class="small">${d}</div></div><button class="sw ${on ? 'on' : ''}" id="${id}"></button></div>`;
+      const draw = () => {
+        const l = list(), dup = l.filter(x => have.has(x[key])).length, allDup = all.some(x => have.has(x[key]));
+        bg.querySelector('#icBody').innerHTML = `<p class="sub">${l.length - dup} new, ${dup} already here${res.skipped ? ', ' + res.skipped + (isW ? ' weeks skipped (under 4 days logged or out of range)' : ' days skipped') : ''}.</p>
+          ${clash ? `<div class="banner"><div class="grow">${clash} ${clash > 1 ? 'weeks overlap' : 'week overlaps'} an entry that does not start on a Monday. Fix or delete it in Weekly averages.</div></div>` : ''}
+          ${late ? tog('icLate', skipLate, 'Skip afternoon and evening readings', late + ' found. They usually run heavier than morning weights.') : ''}
+          ${allDup ? tog('icOver', over, 'Replace the ones already here', 'Off keeps what you entered.') : ''}
+          <div class="card" style="max-height:36vh;overflow:auto">${all.slice().reverse().map(x => `<div class="between" style="${skipLate && x.late ? 'opacity:.45;text-decoration:line-through' : ''}"><span>${isW ? 'Week of ' : ''}${esc(x[key])}${x.late ? ' <span class="tag gold">PM</span>' : ''}</span><span class="mono">${isW ? x.kcal + ' kcal (' + x.days + ' days)' : x.lb + ' lb' + (x.bf ? ' · ' + x.bf + '%' : '')}</span></div>`).join('')}</div>`;
+      };
+      draw();
+      bg.addEventListener('click', ev => {
+        const id = ev.target.id;
+        if (id === 'icLate') { skipLate = !skipLate; draw(); } else if (id === 'icOver') { over = !over; draw(); }
+        else if (id === 'icGo') { const l = list(), c = applyCsv({weeks:isW ? l : [], weights:isW ? [] : l}, over); closeSheet(bg); render(); toast(c ? c + ' imported.' : 'Nothing new to import.'); }
+      });
     });
   };
   inp.click();
@@ -1967,7 +2099,7 @@ const HELP = [
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
   ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ Add program</b> lists your own programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) and well known programs (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
   ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows load as much bumper weight as fits, then steel. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0, per side or as a single stack (Settings, Pulley pin plates). The weight you log is the total. Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
-  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. <b>Import CSV</b> reads a Cronometer daily nutrition or biometrics export, or any file with dates and weights, and shows a preview before adding anything. A weekly waist measurement is optional but the best check on fat loss.</p>`],
+  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. <b>Weekly averages</b> lists every week you saved, lets you edit or delete it, and says whether it counts toward your maintenance estimate (up to 21 days ending at your last weigh-in). <b>Import file</b> reads Arboleaf's Excel export, a Cronometer daily nutrition or biometrics export, or any CSV or Excel file with dates and weights, and shows a preview before adding anything. Readings from noon on are skipped unless you turn that off. A weekly waist measurement is optional but the best check on fat loss.</p>`],
   ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app. If YouTube asks you to sign in or prove you are not a bot, tap <b>Open in the YouTube app</b> instead. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
   ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p><p>After each workout the app asks to back up; pick Google Drive in the share menu. Clearing Chrome's <b>Cookies and site data</b> deletes your workouts, so when clearing Chrome tick only <b>Cached images and files</b>. If the app ever cannot read your data, it says so and saves nothing until you choose what to do.</p>`],
   ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
@@ -2195,6 +2327,7 @@ const actions = {
   editSet: el => { const {s} = curLiveSet(el); s.edit = !s.edit; touchLive(true); render(); },
   exOpts: el => exOptsSheet(+el.dataset.ei),
   importCsv: () => importCsv(),
+  weeksOpen: () => weeksSheet(),
   pickBar: el => barSheet(el.dataset.ex, +el.dataset.ei),
   testBeep: () => { primeAudio(); beep(); if (navigator.vibrate) navigator.vibrate([400, 150, 400]); },
   addSet: el => { const e = L.ex[+el.dataset.ei]; const last = e.sets[e.sets.length - 1] || {lbl:'0', tr:10}; e.sets.push({lbl:String(e.sets.filter(s => !s.warm).length + 1), tw:last.tw, tr:last.tr, trMin:last.trMin, w:last.w != null ? last.w : last.tw, r:null, done:false}); touchLive(); render(); },
@@ -2249,10 +2382,9 @@ const actions = {
   targetsEdit: () => targetsSheet(),
   intakeAdd: () => {
     const n = dnum(todayStr()), mon = n - ((new Date(n * DAY + DAY / 2).getUTCDay() + 6) % 7) - 7;
-    simpleSheet('Weekly Cronometer average', [{id:'start', label:'Week starting (Monday)', type:'date', value:dstr(mon), max:todayStr()}, {id:'kcal', label:'Average calories per day that week'}], v => {
-      const k = parseInt(v.kcal); if (!k || k < 800 || k > 8000) { toast('Enter the daily average from Cronometer.'); return false; }
-      if (!v.start) { toast('Pick the week.'); return false; }
-      const rest_ = S.body.intake.filter(x => x.start !== v.start); rest_.push({start:v.start, kcal:k}); S.body.intake = rest_.sort((a, b) => a.start < b.start ? -1 : 1); toast('Saved.');
+    simpleSheet('Weekly Cronometer average', [{id:'start', label:'Week starting (any day, moves to its Monday)', type:'date', value:dstr(mon), max:todayStr()}, {id:'kcal', label:'Average calories per day that week'}], v => {
+      if (!saveWeek(v.start, v.kcal)) return false;
+      setTimeout(() => weeksDraw && weeksDraw(), 0);
     }, 'In Cronometer, open Trends for that week and copy the average daily calories. Weeks you skip use your daily targets instead.');
   },
   goalEdit: () => simpleSheet('Goal', [{id:'lo', label:'Goal body fat % (low end)', value:S.body.goal.bfLow}, {id:'hi', label:'Goal body fat % (high end)', value:S.body.goal.bfHigh}, {id:'man', label:'Your body fat % if you do not log it with weigh-ins (optional)', value:S.body.bfManual}], v => {
