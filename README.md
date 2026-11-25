@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.7.0
+Version 3.7.1
 
 ## What it does
 
@@ -82,6 +82,15 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.7.1**
+  - Accessory rest is back to 0:45 / 1:00 / 1:30. 3.7.0 changed Easy to 1:00 by mistake; if yours is still 1:00 it goes back to 0:45.
+  - New rest between exercises, 1:00, in Settings. Easy, Hard and Fail are still saved for that set but do not change the 1:00.
+  - Pulley pin loads per side by default (equal plates on both sides) or as a single stack, set in Settings or on any exercise. The weight you log is still the total.
+  - Deadlifts and rows load as much bumper weight as fits, with steel only to finish, and bumpers always on the inside.
+  - Back to: when you look at another exercise, one tap returns you to the set you are on.
+  - Options on each exercise changes sets, reps, weight step and rest times, for this workout or always.
+  - Body tab: Import CSV for Cronometer weekly averages and weigh-ins, with a preview.
+  - Notify me in other apps (Settings, off until you turn it on): a notification when rest ends. Android can pause web apps, so it may be late.
 - **3.7.0**
   - One exercise at a time: the Workout screen shows only the exercise you are on and moves to the next one when its last set is checked. The main lift's warmups and work sets stay on one card. Tap a name in the row at the top, or the buttons under the card, to go back or skip ahead, or Show all for the whole day. Turn it off in Settings, Workout.
   - Minus and plus buttons beside the reps change them by one, so you do not have to type a missed or extra rep.

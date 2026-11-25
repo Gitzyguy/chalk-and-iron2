@@ -83,8 +83,10 @@ a.btn{color:var(--text)}
 .fstrip button{flex:0 0 auto;max-width:150px;border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:6px 11px;font-size:13.5px;font-weight:600;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fstrip button.on{border-color:var(--rust);color:var(--text);background:rgba(210,85,26,.16)}
 .fstrip button.ok{color:var(--green)}
+.backcur{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(134px + var(--safe-b));z-index:28;max-width:min(490px,calc(100vw - 32px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+@media(max-width:400px){.exfoot{gap:5px}.exfoot .btn{padding-left:6px;padding-right:6px;font-size:13px;white-space:nowrap}}
 .fnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.fnav .btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fnav .btn{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chk.on{background:var(--green);border-color:var(--green);color:#10140f}
 .exfoot{display:flex;gap:8px;margin-top:8px}
 .field{margin-bottom:10px}
@@ -125,7 +127,7 @@ nav button.on{color:var(--rust)}
 .sheet .hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .sheet .hd h2{flex:1}
 .x{background:var(--panel2);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;font-size:18px;line-height:1}
-.toast{position:fixed;left:50%;bottom:calc(140px + var(--safe-b));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--rust);border-radius:10px;padding:10px 16px;z-index:80;font-size:14px;max-width:90%;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:calc(196px + var(--safe-b));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--rust);border-radius:10px;padding:10px 16px;z-index:80;font-size:14px;max-width:90%;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1;pointer-events:auto}
 .banner{background:#2a2216;border:1px solid #6b5016;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px}
 .banner .grow{flex:1}
@@ -174,7 +176,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 /* =========================================================================
    Chalk & Iron v3. Offline 5/3/1 tracker. All data stays on this device.
    ========================================================================= */
-const APP_VERSION = '3.7.0';
+const APP_VERSION = '3.7.1';
 const DB_NAME = 'chalk-and-iron', DB_STORE = 'kv', STATE_KEY = 'state';
 
 /* ---------- small helpers ---------- */
@@ -248,7 +250,8 @@ function defaultSettings() {
     bars: {barbell:45, ez:15, hex:45},
     plates: {iron:{'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2}, bumper:{'45':2,'35':2,'25':2,'15':2,'10':2}},
     pin: {'45':4,'35':2,'25':2,'10':2,'5':4,'2.5':2},
-    rest: {warm:60, warmLast:90, main:{easy:90, hard:180, fail:300}, acc:{easy:60, hard:60, fail:90}, def:'easy'},
+    pinSides: 2, notify: false,
+    rest: {warm:60, warmLast:90, between:60, main:{easy:90, hard:180, fail:300}, acc:{easy:45, hard:60, fail:90}, def:'easy'},
     warmups: true, deloadAcc: true, awake: true, sound: true, round: 5, lastBackup: null, askBackup: true,
     lockDone: true, autoNext: true, focus: true, volume: 'loud'
   };
@@ -285,14 +288,14 @@ function normalize(st) {
   out.settings = Object.assign(defaultSettings(), st && st.settings || {});
   out.settings.bars = Object.assign(defaultSettings().bars, out.settings.bars || {});
   const r0 = out.settings.rest || {}, dr = defaultSettings().rest;
-  out.settings.rest = {warm:r0.warm != null ? r0.warm : dr.warm, warmLast:r0.warmLast != null ? r0.warmLast : dr.warmLast, def:r0.def || dr.def,
+  out.settings.rest = {warm:r0.warm != null ? r0.warm : dr.warm, warmLast:r0.warmLast != null ? r0.warmLast : dr.warmLast, between:r0.between != null ? r0.between : dr.between, def:r0.def || dr.def,
     main:Object.assign({}, dr.main, typeof r0.main === 'object' ? r0.main : {}), acc:Object.assign({}, dr.acc, typeof r0.acc === 'object' ? r0.acc : {})};
   if (!out.settings.plates || !out.settings.plates.iron) out.settings.plates = defaultSettings().plates;
   if (!st || !st.settings || !st.settings.pin) out.settings.pin = Object.assign({}, out.settings.plates.iron);
   /* 3.5: rest timer starts on Easy by default (older versions saved Hard) */
   if (!out.settings.mig35) { if (out.settings.rest.def === 'hard') out.settings.rest.def = 'easy'; out.settings.mig35 = 1; }
-  /* 3.7: accessory Easy rest goes from 45 to 60 seconds (only if it was still the old default) */
-  if (!out.settings.mig37) { if (out.settings.rest.acc.easy === 45) out.settings.rest.acc.easy = 60; out.settings.mig37 = 1; }
+  /* 3.7.0 wrongly moved accessory Easy rest from 45 to 60 seconds; put it back if that is where it still is */
+  if (!out.settings.mig371) { if (out.settings.mig37 && out.settings.rest.acc.easy === 60) out.settings.rest.acc.easy = 45; out.settings.mig371 = 1; }
   const bd = st && st.body && !Array.isArray(st.body) ? st.body : {};
   out.body = Object.assign(defaultBody(), bd);
   ['weights', 'waist', 'intake', 'phases'].forEach(k => { if (!Array.isArray(out.body[k])) out.body[k] = []; });
@@ -339,10 +342,10 @@ function lastPerformance(exId) { const h = exHistory(exId); return h.length ? h[
 /* An exercise can pick its own bar (ex.bar): a weight, or 0 for no bar. Otherwise the bar comes from its equipment. */
 /* How an exercise is loaded. A choice for today (e.bar on the workout entry) beats the exercise's
    own choice (ex.bar), which beats its equipment. Values: a bar weight (plates per side), 'pin'
-   (pulley loading pin: plates stacked on one pin, starts at 0), or 0 (no plates). */
+   (pulley pin, starts at 0: sides from Settings), 'pin1' (one stack), 'pin2' (equal plates on both sides), or 0 (no plates). */
 function rigOf(ex, e) {
   const v = e && e.bar != null ? e.bar : ex && ex.bar != null ? ex.bar : ex && ex.equip === 'cable' ? 'pin' : PLATE_EQUIP[ex && ex.equip] ? (S.settings.bars[PLATE_EQUIP[ex.equip]] || 45) : 0;
-  if (v === 'pin') return {mode:'pin', base:0, m:1};
+  if (v === 'pin1' || v === 'pin2' || v === 'pin') return {mode:'pin', base:0, m:v === 'pin1' ? 1 : v === 'pin2' ? 2 : S.settings.pinSides === 1 ? 1 : 2};
   return +v > 0 ? {mode:'side', base:+v, m:2} : null;
 }
 function barWeight(ex, e) { const r = rigOf(ex, e); return r && r.mode === 'side' ? r.base : 0; }
@@ -357,9 +360,10 @@ function loadable(w, ex, e) {
 }
 function roundLoad(w) { const r = S.settings.round || 5; return Math.round(w / r) * r; }
 /* Plates you own: pairs (one per side) for a bar, single iron plates for the pulley pin. */
-function plateInv(mode) {
+function plateInv(r) {
+  const mode = r.mode;
   const inv = [];
-  if (mode === 'pin') { const p = S.settings.pin || {}; for (const w in p) for (let i = 0; i < (p[w] || 0); i++) inv.push({w:+w, kind:'iron'}); }
+  if (mode === 'pin') { const p = S.settings.pin || {}; for (const w in p) for (let i = 0; i < Math.floor((p[w] || 0) / r.m); i++) inv.push({w:+w, kind:'iron'}); }
   else for (const kind of ['bumper', 'iron']) {
     const p = S.settings.plates[kind] || {};
     for (const w in p) { const pairs = Math.floor((p[w] || 0) / 2); for (let i = 0; i < pairs; i++) inv.push({w:+w, kind}); }
@@ -372,7 +376,7 @@ function knap(inv, target, floor) {
   const best = new Map(); best.set(0, {cost:0, pick:[]});
   for (const pl of inv) {
     const wu = Math.round(pl.w / PU);
-    const pen = floor ? (pl.kind === 'iron' ? 0.01 : 0) : (pl.kind === 'bumper' ? 0.01 : 0);
+    const pen = floor ? (pl.kind === 'iron' ? pl.w * 100 : 0) : (pl.kind === 'bumper' ? 0.01 : 0);
     for (const [s, v] of [...best.entries()]) {
       const ns = s + wu; if (ns > target + 400) continue;
       const nc = v.cost + 1 + pen, cur = best.get(ns);
@@ -383,25 +387,25 @@ function knap(inv, target, floor) {
 }
 function orderPlates(pick, floor) {
   pick = pick.slice().sort((a, b) => b.w - a.w || (a.kind === 'bumper' ? -1 : 1));
-  if (floor) { const fb = pick.findIndex(p => p.kind === 'bumper'); if (fb > 0) { const [b] = pick.splice(fb, 1); pick.unshift(b); } }
+  if (floor) pick.sort((a, b) => (a.kind === 'bumper' ? 0 : 1) - (b.kind === 'bumper' ? 0 : 1) || b.w - a.w);   // bumpers inside, steel outside
   return pick;
 }
-/* Best per-side plate combo from owned pairs (fewest plates). Floor lifts start with a bumper so bar height is right. */
+/* Best per-side plate combo from owned pairs (fewest plates). Floor lifts use as much bumper weight as possible, then steel. */
 function plateCombo(total, ex, e) {
   const r = rigOf(ex, e);
   if (!r) return null;
-  const bar = r.base, pin = r.mode === 'pin';
+  const bar = r.base, pin = r.mode === 'pin' ? r.m : 0;
   const perSide = (total - bar) / r.m;
   if (perSide <= 0) return {plates:[], total:bar, exact: total <= bar ? total === bar : false, pin};
-  const target = Math.round(perSide / PU), floor = !pin && !!(ex && ex.floor), best = knap(plateInv(r.mode), target, floor);
+  const target = Math.round(perSide / PU), floor = !pin && !!(ex && ex.floor), best = knap(plateInv(r), target, floor);
   let pickKey = null;
   if (best.has(target)) pickKey = target;
   else { let d = Infinity; for (const k of best.keys()) { const dd = Math.abs(k - target); if (dd < d || (dd === d && k < pickKey)) { d = dd; pickKey = k; } } }
   return {plates:orderPlates(best.get(pickKey).pick, floor), total:bar + r.m * pickKey * PU, exact: pickKey === target, pin};
 }
 /* Every distinct way to load exactly this many units per side (up to a few more plates than the fewest). */
-function plateOptions(target, floor, mode) {
-  const inv = plateInv(mode), out = new Map();
+function plateOptions(target, floor, r) {
+  const inv = plateInv(r), out = new Map();
   const units = inv.map(p => Math.round(p.w / PU));
   const go = (i, left, pick) => {
     if (left === 0) { const key = pick.map(p => p.kind[0] + p.w).sort().join(','); if (!out.has(key)) out.set(key, orderPlates(pick, floor)); return; }
@@ -414,15 +418,18 @@ function plateOptions(target, floor, mode) {
 }
 /* Plates for every set of one exercise, planned together: the fewest plate swaps across the whole
    exercise (you keep what is on the bar and add to it), then the fewest plates. Iron is used on
-   bench, squat and press; bumpers only on floor lifts or when there is no other way. */
+   bench, squat and press; floor lifts use the most bumper weight
+   that fits, then only the steel needed to finish. */
 function plateChain(e, ex) {
   const r = rigOf(ex, e); if (!r) return [];
-  const bar = r.base, pin = r.mode === 'pin', floor = !pin && !!(ex && ex.floor);
+  const bar = r.base, pin = r.mode === 'pin' ? r.m : 0, floor = !pin && !!(ex && ex.floor);
+  const steel = pl => pl.reduce((a, p) => a + (p.kind === 'iron' ? p.w : 0), 0);
   const cands = e.sets.map(s => {
     const w = s.w != null ? s.w : s.tw; if (!w) return null;
     const perSide = (w - bar) / r.m;
     if (perSide <= 0) return [{plates:[], total:bar, exact:w === bar, pin}];
-    const opts = Math.abs(perSide / PU - Math.round(perSide / PU)) < 1e-9 ? plateOptions(Math.round(perSide / PU), floor, r.mode) : [];
+    let opts = Math.abs(perSide / PU - Math.round(perSide / PU)) < 1e-9 ? plateOptions(Math.round(perSide / PU), floor, r) : [];
+    if (floor && opts.length) { const least = Math.min(...opts.map(steel)); opts = opts.filter(o => steel(o) === least); }
     return opts.length ? opts.map(pl => ({plates:pl, total:w, exact:true, pin})) : [plateCombo(w, ex, e)];
   });
   const nodeCost = c => c.plates.length * 0.6 + c.plates.reduce((a, p) => a + (!floor && p.kind === 'bumper' ? 3 : 0), 0) + (floor && c.plates.length && c.plates[0].kind !== 'bumper' ? 3 : 0);
@@ -442,7 +449,7 @@ function plateChain(e, ex) {
 function plateFmt(c) {
   if (!c) return '';
   if (!c.plates.length) return c.pin ? 'empty pin' : 'empty bar';
-  const t = c.plates.map(p => (p.kind === 'bumper' ? 'B' : '') + fmtW(p.w)).join(' · ') + (c.pin ? ' on pin' : ' /side');
+  const t = c.plates.map(p => (p.kind === 'bumper' ? 'B' : '') + fmtW(p.w)).join(' · ') + (c.pin === 2 ? ' /side on pin' : c.pin ? ' on pin' : ' /side');
   return c.exact ? t : t + ' (=' + fmtW(c.total) + ')';
 }
 function plateText(total, ex) { return plateFmt(plateCombo(total, ex)); }
@@ -795,32 +802,49 @@ function suggestion(item) {
   }
   return {w:w || (item.start != null ? item.start : null), up:false, last};
 }
+/* Suggested weight rounded to something loadable. If "go up" rounds back to last time's weight, take the next loadable step. */
+function suggestLoad(it, exo, e) {
+  const sg = suggestion(it);
+  if (!sg.w) return sg;
+  const raw = sg.w; sg.w = loadable(raw, exo, e);
+  if (sg.up && sg.last) {
+    const was = Math.max(...sg.last.sets.map(x => x.w || 0));
+    for (let d = 2.5; sg.w <= was && d <= 30; d += 2.5) { const c = loadable(was + d, exo, e); if (c > was) sg.w = c; }
+  }
+  return sg;
+}
+/* Pulley weights not done yet and not typed by hand move to weights the pin can hold. */
+function snapPins(live) {
+  live.ex.forEach(e => { const ex = S.exercises[e.ex], r = rigOf(ex, e); if (!r || r.mode !== 'pin') return;
+    e.sets.forEach(x => { if (!x.done && x.tw && (x.w == null || x.w === x.tw)) { x.tw = loadable(x.tw, ex, e); x.w = x.tw; } }); });
+  live.pin371 = true;
+}
 const liveSet = (s) => Object.assign(s, {w:s.tw, r:null, done:false});
 /* Turn one program day into today's list of exercises and sets. */
 function buildEntries(p, d, week) {
   const ex = [];
-  const deload = isDeload(p, week);
-  if (d.main && p.wave) ex.push({ex:d.main, kind:'main', main:true, sets:buildSets531(p, d.main, week).map(liveSet)});
-  else if (d.main) d = Object.assign({}, d, {items:[{ex:d.main, sets:3, min:5, max:5, warm:true}].concat(d.items)});
+  const deload = isDeload(p, week), items = d.items, mainRest = d.mainRest;
+  const own = it => Object.assign({ii:items.indexOf(it)}, it.rest ? {rest:clone(it.rest)} : {});
+  if (d.main && p.wave) ex.push({ex:d.main, kind:'main', main:true, rest:mainRest ? clone(mainRest) : undefined, sets:buildSets531(p, d.main, week).map(liveSet)});
+  else if (d.main) d = Object.assign({}, d, {items:[{ex:d.main, sets:3, min:5, max:5, warm:true, rest:mainRest}].concat(d.items)});
   for (const it of d.items) {
     const type = it.type || 'reps';
     const tm = p.tm[it.ex], exo = S.exercises[it.ex], bar = barWeight(exo) || 0;
-    if (type === '531') { ex.push({ex:it.ex, kind:'531', main:true, sets:buildSets531(p, it.ex, week).map(liveSet)}); continue; }
+    if (type === '531') { ex.push({...own(it), ex:it.ex, kind:'531', main:true, sets:buildSets531(p, it.ex, week).map(liveSet)}); continue; }
     if (type === 'fsl' || type === 'bbb') {
       if (deload) continue;                       // supplemental work is skipped on deload weeks
       const pct = type === 'fsl' ? WAVE[week].sets[0][0] : (it.pct || 0.5);
       const tw = tm ? loadable(Math.max(bar, roundLoad(tm * pct)), exo) : null;
       const sets = [];
       for (let i = 0; i < it.sets; i++) sets.push(liveSet({lbl:String(i + 1), tw, tr:it.max, amrap:!!it.amrap && i === it.sets - 1, pct}));
-      ex.push({ex:it.ex, kind:type, main:false, supp:true, pct, min:it.max, max:it.max, sets});
+      ex.push({...own(it), ex:it.ex, kind:type, main:false, supp:true, pct, min:it.max, max:it.max, sets});
       continue;
     }
-    const sg = suggestion(it);
-    if (sg.w) sg.w = loadable(sg.w, exo);
+    const sg = suggestLoad(it, exo);
     const n = deload && S.settings.deloadAcc ? Math.max(1, Math.ceil(it.sets / 2)) : it.sets;
     const sets = it.warm ? rampWarmups(exo, sg.w).map(liveSet) : [];
     for (let i = 0; i < n; i++) sets.push(liveSet({lbl:String(i + 1), tw:sg.w, tr:it.max, trMin:it.min, amrap:!!it.amrap && i === n - 1}));
-    ex.push({ex:it.ex, kind:'reps', main:!!it.warm, min:it.min, max:it.max, up:sg.up, reset:sg.reset, est:sg.est, sets, cut:n < it.sets});
+    ex.push({...own(it), ex:it.ex, kind:'reps', main:!!it.warm, min:it.min, max:it.max, up:sg.up, reset:sg.reset, est:sg.est, sets, cut:n < it.sets});
   }
   return ex;
 }
@@ -829,8 +853,8 @@ function buildLive() {
   const ps = pos();
   if (ps.day >= p.days.length) ps.day = 0;
   const key = liveKey(p, ps);
-  if (S.live && S.live.key === key) return S.live;
-  return {key, programId:p.id, started:null, ex:buildEntries(p, p.days[ps.day], ps.week), note:''};
+  if (S.live && S.live.key === key) { if (!S.live.pin371) snapPins(S.live); return S.live; }
+  return {key, pin371:true, programId:p.id, started:null, ex:buildEntries(p, p.days[ps.day], ps.week), note:''};
 }
 function liveStarted(L) { return L.ex.some(e => e.sets.some(s => s.done || s.r != null)); }
 let L = null; // current live session object (persisted to S.live once touched)
@@ -844,14 +868,23 @@ function touchLive(now) {
 /* ---------- rest timer (clock based, survives screen lock) ---------- */
 /* Rest depends on how hard the set felt: tap Easy, Hard or Fail on the timer bar and the time adjusts. */
 const rest = {end:0, total:0, h:null, start:0, kind:null, set:null, tier:null};
-/* kinds: warm (between warmups), warmLast (last warmup, before the first work set), main, acc */
-function restSecs(kind, tier) { const r = S.settings.rest, v = kind === 'warm' ? r.warm : kind === 'warmLast' ? (r.warmLast != null ? r.warmLast : r.main.easy) : (r[kind] || r.acc)[tier]; return v != null ? v : 60; }
-function startRest(kind, set, tier) {
-  rest.kind = kind; rest.set = set; rest.tier = kind === 'warm' || kind === 'warmLast' ? null : tier || S.settings.rest.def;
-  rest.start = Date.now();
-  const sec = restSecs(kind, rest.tier); if (!sec) { stopRest(); return; }   // 0 = timer off
-  rest.total = sec; rest.end = rest.start + sec * 1000;
+/* kinds: warm (between warmups), warmLast (last warmup, before the first work set), main, acc,
+   between (moving to a different exercise: fixed time, effort is recorded but does not change it).
+   ov: rest times set on this one exercise, which beat Settings for main and acc. */
+function restSecs(kind, tier, ov) {
+  const r = S.settings.rest;
+  if (kind === 'warm' || kind === 'warmLast' || kind === 'between') return r[kind] != null ? r[kind] : 60;
+  const v = ov && ov[tier] != null ? ov[tier] : (r[kind] || r.acc)[tier];
+  return v != null ? v : 60;
+}
+function startRest(kind, set, tier, ov) {
+  clearRestNote();
+  rest.kind = kind; rest.set = set; rest.ov = ov || null; rest.missed = rest.notified = false;
+  rest.tier = kind === 'warm' || kind === 'warmLast' ? null : tier || S.settings.rest.def;
   if (set && rest.tier) set.eff = rest.tier;
+  rest.start = Date.now();
+  const sec = restSecs(kind, rest.tier, rest.ov); if (!sec) { stopRest(); return; }   // 0 = timer off
+  rest.total = sec; rest.end = rest.start + sec * 1000;
   $('#rest').classList.add('show'); drawEff();
   clearInterval(rest.h); rest.h = setInterval(tickRest, 250); tickRest();
 }
@@ -861,8 +894,10 @@ function drawEff() {
 }
 function setEffort(tier) {
   if (!rest.end || !rest.tier) return;
-  rest.tier = tier; const sec = restSecs(rest.kind, tier);
+  rest.tier = tier;
   if (rest.set) rest.set.eff = tier;
+  if (rest.kind === 'between') { if (rest.set) touchLive(true); drawEff(); return; }
+  const sec = restSecs(rest.kind, tier, rest.ov);
   if (!sec) { if (rest.set) touchLive(true); stopRest(); return; }
   rest.total = sec; rest.end = rest.start + sec * 1000;
   if (rest.set) { rest.set.eff = tier; touchLive(true); }
@@ -875,7 +910,20 @@ function tickRest() {
   const left = Math.max(0, Math.ceil((rest.end - Date.now()) / 1000));
   $('#restTime').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
   $('#restBar').style.width = (100 * left / rest.total) + '%';
-  if (left <= 0) { stopRest(); if (document.visibilityState === 'hidden') { rest.missed = true; if (navigator.vibrate) navigator.vibrate([400, 150, 400]); } else restDone(); }
+  if (left <= 0) { stopRest(); if (document.visibilityState === 'hidden') { rest.missed = true; notifyRest(); if (navigator.vibrate) navigator.vibrate([400, 150, 400]); } else restDone(); }
+}
+/* Rest is over while another app is on screen. Android may freeze the page first, so this can be late. */
+async function notifyRest() {
+  try {
+    if (!S.settings.notify || !('Notification' in window) || Notification.permission !== 'granted') return;
+    const c = currentSet(), reg = await navigator.serviceWorker.ready;
+    await reg.showNotification('Rest done', {body:c ? 'Next: ' + exShort(L.ex[c.ei]) + ', set ' + L.ex[c.ei].sets[c.si].lbl : 'Next set', tag:'rest', renotify:true, icon:'icon-192.png', vibrate:[400, 150, 400]});
+    rest.notified = true;
+    if (document.visibilityState === 'visible') clearRestNote();
+  } catch (e) {}
+}
+async function clearRestNote() {
+  try { const reg = await navigator.serviceWorker.getRegistration(); if (reg) (await reg.getNotifications({tag:'rest'})).forEach(n => n.close()); } catch (e) {}
 }
 let audioCtx = null;
 const VOLUME = {normal:.3, loud:.6, max:1};
@@ -981,7 +1029,7 @@ function viewToday() {
     if (p.wave) h += `<button class="btn sm mt" data-act="editTm" data-ex="${esc(main.ex)}">${p.tm[main.ex] ? esc(exName(main.ex)) + ' training max ' + fmtW(p.tm[main.ex]) + ' · Change' : 'Set ' + esc(exName(main.ex)) + ' training max'}</button>`;
   }
   h += `</div>`;
-  const nx = nextOpen(L, 0, -1);
+  const nx = currentSet();
   const fi = focusIndex(nx);
   if (fi == null) {
     if (S.settings.focus && focus.ei === 'all' && L.ex.length > 1) h += `<button class="btn block" data-act="focusGo" data-i="auto" style="margin-bottom:12px">One exercise at a time</button>`;
@@ -993,11 +1041,20 @@ function viewToday() {
     const lab = i => esc(exShort(L.ex[i]));
     h += `<div class="fnav">${fi > 0 ? `<button class="btn" data-act="focusGo" data-i="${fi - 1}">&lsaquo; ${lab(fi - 1)}</button>` : '<span></span>'}${fi < L.ex.length - 1 ? `<button class="btn" data-act="focusGo" data-i="${fi + 1}">${lab(fi + 1)} &rsaquo;</button>` : '<span></span>'}</div>`;
   }
+  const away = nx && S.settings.focus && L.ex.length > 1 && (focus.ei === 'all' || (fi != null && fi !== nx.ei));
   h += `<button class="btn block" data-act="addExToday">+ Add exercise to today</button>
     <div class="field mt"><label>Notes</label><textarea rows="2" data-in="liveNote" placeholder="How did it feel?">${esc(L.note || '')}</textarea></div>
     <button class="btn primary block" data-act="finish">Finish workout</button>
     <button class="btn ghost block mt" data-act="discard">Discard progress</button>`;
+  if (away) h += `<div style="height:64px"></div><button class="btn primary backcur" data-act="backCur">Back to ${esc(exShort(L.ex[nx.ei]))}, set ${esc(L.ex[nx.ei].sets[nx.si].lbl)}</button>`;
   return h;
+}
+/* Where you are: the first open set of the exercise you last checked a set in, otherwise the next open set. */
+function currentSet() {
+  if (!L) return null;
+  const a = L.lastEi;
+  if (a != null && a < L.ex.length) return nextOpen(L, a, -1) || nextOpen(L, 0, -1);
+  return nextOpen(L, 0, -1);
 }
 /* One exercise at a time: the one you are on fills the screen and the app moves to the next exercise
    when its last set is checked. focus.ei is a manual pick (or 'all'); it resets for each new workout. */
@@ -1040,7 +1097,7 @@ function exerciseCard(e, ei, p, nx) {
   else if (e.reset) h += `<span class="tag gold">Reset</span>`;
   h += `</div>`;
   const rg = rigOf(ex, e);
-  const barBtn = ex.equip === 'bodyweight' && ex.bar == null && e.bar == null ? '' : `<button class="chipbtn" data-act="pickBar" data-ex="${esc(e.ex)}" data-ei="${ei}">${rg ? (rg.mode === 'pin' ? 'Pulley pin' : 'Bar ' + fmtW(rg.base) + ' lb') : 'No plates'}${e.bar != null ? ' (today)' : ''}</button>`;
+  const barBtn = ex.equip === 'bodyweight' && ex.bar == null && e.bar == null ? '' : `<button class="chipbtn" data-act="pickBar" data-ex="${esc(e.ex)}" data-ei="${ei}">${rg ? (rg.mode === 'pin' ? (rg.m === 2 ? 'Pulley pin, per side' : 'Pulley pin, single') : 'Bar ' + fmtW(rg.base) + ' lb') : 'No plates'}${e.bar != null ? ' (today)' : ''}</button>`;
   const tmLink = () => { const tm = p.tm[e.ex]; return `<button class="link" data-act="editTm" data-ex="${esc(e.ex)}">${tm ? 'Training max ' + fmtW(tm) + ' lb · change' : 'Set training max'}</button>`; };
   if (e.kind === 'main' || e.kind === '531') {
     h += `<div class="meta">${tmLink()}${barBtn}${lastLine(e.ex)}</div>`;
@@ -1066,7 +1123,7 @@ function exerciseCard(e, ei, p, nx) {
       <div class="step"><button data-act="${locked ? 'lockedTap' : 'repStep'}" data-d="-1" data-ei="${ei}" data-si="${si}" aria-label="one less rep" tabindex="-1">&minus;</button><input class="num" type="number" inputmode="numeric" data-in="r" data-ei="${ei}" data-si="${si}" value="${s.r != null ? s.r : ''}" placeholder="${s.amrap ? s.tr + '+' : s.tr}" aria-label="reps"${ro}><button data-act="${locked ? 'lockedTap' : 'repStep'}" data-d="1" data-ei="${ei}" data-si="${si}" aria-label="one more rep" tabindex="-1">+</button></div>
       <button class="chk ${s.done ? 'on' : ''}" data-act="${locked ? 'lockedTap' : 'check'}" data-ei="${ei}" data-si="${si}" aria-label="done">&#10003;</button>${pc || edit ? `<div class="plates">${pc}${edit}</div>` : ''}</div>`;
   });
-  h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
+  h += `<div class="exfoot"><button class="btn sm" data-act="addSet" data-ei="${ei}">+ Set</button><button class="btn sm" data-act="delSet" data-ei="${ei}">− Set</button><button class="btn sm" data-act="exOpts" data-ei="${ei}">Options</button>${e.kind !== 'main' ? `<button class="btn sm ghost" data-act="swapToday" data-ei="${ei}" style="margin-left:auto">Swap</button><button class="btn sm ghost" data-act="removeExToday" data-ei="${ei}">Remove</button>` : ''}</div></div>`;
   return h;
 }
 const setChips = (sets, opts) => sets.map(s => `<span class="hs ${s.amrap ? 'a' : ''}">${s.w ? `<b>${fmtW(s.w)}</b>×${s.r}` : `<b>${s.r}</b> reps`}${s.amrap ? '+' : ''}</span>`).join('');
@@ -1177,7 +1234,7 @@ function viewSettings() {
     <div class="small mt" id="persistInfo">Data is stored on this phone only. Keep a backup file somewhere safe (Google Drive works).</div>
     <div class="small mt">Clearing Chrome's <b>Cookies and site data</b> deletes everything here. When clearing Chrome, tick only <b>Cached images and files</b>.</div>
     ${swRow('askBackup', 'Ask to back up after each workout', 'Opens a Back up now prompt when you finish a workout.')}</div>`;
-  h += `<h3>Plates you own</h3><div class="card"><div class="small" style="margin-bottom:8px">Total count of each plate (pairs = count ÷ 2). Floor lifts load bumpers first.</div>`;
+  h += `<h3>Plates you own</h3><div class="card"><div class="small" style="margin-bottom:8px">Total count of each plate (pairs = count ÷ 2). Deadlifts and rows load as much bumper weight as possible, then steel.</div>`;
   for (const kind of ['bumper', 'iron']) {
     h += `<div class="between" style="margin:6px 0"><b>${kind === 'bumper' ? 'Bumper' : 'Iron'}</b><button class="link" data-act="addPlate" data-k="${kind}">+ size</button></div><div class="plategrid">`;
     Object.keys(st.plates[kind]).sort((a, b) => b - a).forEach(w => {
@@ -1185,7 +1242,8 @@ function viewSettings() {
     });
     h += `</div>`;
   }
-  h += `</div><h3>Pulley pin plates</h3><div class="card"><div class="small" style="margin-bottom:8px">Iron plates that fit on the pulley's loading pin (single plates, not pairs). Set a size to 0 if it does not fit.</div><div class="plategrid">`;
+  h += `</div><h3>Pulley pin plates</h3><div class="card"><div class="small" style="margin-bottom:8px">Iron plates that fit on the pulley's loading pin (single plates, not pairs). Set a size to 0 if it does not fit. The weight you log is always the total.</div>
+    <div class="toggle"><div><b>Load the pin</b><div class="small">Change one exercise with the pin button on its card.</div></div><select data-in="pinSides" class="num" style="width:110px"><option value="2" ${st.pinSides !== 1 ? 'selected' : ''}>Per side</option><option value="1" ${st.pinSides === 1 ? 'selected' : ''}>Single</option></select></div><div class="plategrid">`;
   Object.keys(st.pin).sort((a, b) => b - a).forEach(w => { h += `<div class="field"><label>${fmtW(+w)} lb</label><input class="num" type="number" inputmode="numeric" data-in="pinPlate" data-w="${w}" value="${st.pin[w]}"></div>`; });
   h += `</div><h3>Bars</h3><div class="card grid3">${['barbell', 'hex', 'ez'].map(k => `<div class="field"><label>${EQUIP[k]}</label><input class="num" type="number" inputmode="decimal" data-in="bar" data-k="${k}" value="${st.bars[k]}"></div>`).join('')}</div>`;
   const rs = st.rest, rin = (k, t) => `<input class="num" type="number" inputmode="numeric" data-in="rest" data-k="${k}" data-t="${t}" value="${rs[k][t]}">`;
@@ -1195,6 +1253,7 @@ function viewSettings() {
     <div class="edrow" style="grid-template-columns:1fr 62px 62px 62px"><b>Accessories</b>${rin('acc', 'easy')}${rin('acc', 'hard')}${rin('acc', 'fail')}</div>
     <div class="grid2 mt"><div class="field"><label>Between warmups</label><input class="num" type="number" inputmode="numeric" data-in="restWarm" value="${rs.warm}"></div>
     <div class="field"><label>After last warmup</label><input class="num" type="number" inputmode="numeric" data-in="restWarmLast" value="${rs.warmLast}"></div>
+    <div class="field"><label>Between exercises</label><input class="num" type="number" inputmode="numeric" data-in="restBetween" value="${rs.between}"></div>
     <div class="field"><label>Start the timer on</label><select class="num" data-in="restDef">${['easy', 'hard', 'fail'].map(t => `<option value="${t}" ${rs.def === t ? 'selected' : ''}>${t[0].toUpperCase() + t.slice(1)}</option>`).join('')}</select></div></div></div>`;
   h += `<h3>Workout</h3><div class="card">
     ${swRow('warmups', 'Warmup sets', '40/50/60% of training max before main lifts (skipped on deload).')}
@@ -1202,6 +1261,7 @@ function viewSettings() {
     ${swRow('awake', 'Keep screen on', 'Screen stays awake while a workout is in progress.')}
     ${swRow('sound', 'Beep when rest is done', 'Phone also vibrates. Uses your media volume. If the screen was locked, it beeps when you come back to the app.')}
     <div class="toggle"><div><b>Beep volume</b><div class="small">Turn the phone's media volume up too.</div></div><div class="row"><select data-in="volume" class="num" style="width:96px">${['normal', 'loud', 'max'].map(v => `<option ${st.volume === v ? 'selected' : ''} value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select><button class="btn sm" data-act="testBeep">Test</button></div></div>
+    ${swRow('notify', 'Notify me in other apps', 'Shows a phone notification when rest ends while you are in another app. Android can pause web apps, so it may be late.')}
     ${swRow('lockDone', 'Lock finished sets', 'Checked sets cannot be changed by accident. Tap Edit under a set to change it.')}
     ${swRow('autoNext', 'Jump to the next set', 'After you check a set, the screen scrolls to the next one.')}
     ${swRow('focus', 'One exercise at a time', 'Shows only the exercise you are on and moves to the next one when its last set is checked. Tap the names at the top to jump around.')}
@@ -1387,9 +1447,9 @@ function tmReviewSheet(p, cycle) {
 /* Pick how an exercise is loaded: for this workout only, or always for this exercise. */
 function barSheet(exId, ei) {
   const ex = S.exercises[exId], b = S.settings.bars, e = L && L.ex[ei] && L.ex[ei].ex === exId ? L.ex[ei] : null;
-  const name = r => r ? (r.mode === 'pin' ? 'pulley pin' : fmtW(r.base) + ' lb bar') : 'no plates';
+  const name = r => r ? (r.mode === 'pin' ? (r.m === 2 ? 'pulley pin, per side' : 'pulley pin, single') : fmtW(r.base) + ' lb bar') : 'no plates';
   let scope = e ? 'today' : 'always';
-  const opts = [['Barbell', b.barbell], ['Hex bar', b.hex], ['EZ bar', b.ez], ['Pulley pin (starts at 0, plates on one pin)', 'pin'], ['No plates (dumbbells, bodyweight)', 0]];
+  const opts = [['Barbell', b.barbell], ['Hex bar', b.hex], ['EZ bar', b.ez], ['Pulley pin, per side (equal plates on both sides)', 'pin2'], ['Pulley pin, single (one stack)', 'pin1'], ['No plates (dumbbells, bodyweight)', 0]];
   sheet(`<div class="hd"><h2>${esc(ex.name)}</h2><button class="x" data-act="close">✕</button></div>
     <p class="sub"><b style="color:var(--text)">Today: ${name(rigOf(ex, e))}</b>${e && e.bar != null ? ' (changed for today)' : ''} · Always: ${name(rigOf(ex))}</p>
     ${e ? `<div class="seg" id="bsScope"><button data-sc="today" class="on">This workout only</button><button data-sc="always">Always for this exercise</button></div>` : ''}
@@ -1408,8 +1468,69 @@ function barSheet(exId, ei) {
     };
     bg.addEventListener('click', ev => {
       const sc = ev.target.closest('[data-sc]'); if (sc) { scope = sc.dataset.sc; bg.querySelectorAll('[data-sc]').forEach(x => x.classList.toggle('on', x === sc)); return; }
-      const t = ev.target.closest('[data-bar]'); if (t) { const d = t.dataset.bar; return apply(d === 'default' ? 'default' : d === 'pin' ? 'pin' : +d); }
+      const t = ev.target.closest('[data-bar]'); if (t) { const d = t.dataset.bar; return apply(d === 'default' ? 'default' : d.startsWith('pin') ? d : +d); }
       if (ev.target.id === 'barCGo') { const v = num(bg.querySelector('#barC').value); if (!v || v < 5 || v > 100) return toast('Enter a bar weight in lb.'); apply(v); }
+    });
+  });
+}
+/* Change sets, reps, weight step and rest times without leaving the workout: just today, or always.
+   Sets already checked off never change. */
+function exOptsSheet(ei) {
+  const p = prog(), d = p.days[pos().day], e = L.ex[ei], ex = S.exercises[e.ex] || {}, kind = e.kind || (e.main ? 'main' : 'reps');
+  const fits = it => it && it.ex === e.ex && (it.type || 'reps') === kind;
+  const isMain = d.main === e.ex && !e.swapped && (kind === 'main' || e.ii === -1);
+  const it = e.swapped || isMain ? null : fits(d.items[e.ii]) ? d.items[e.ii] : d.items.find(fits) || null;
+  const canAlways = isMain || !!it, hasNums = kind === 'reps' || kind === 'fsl' || kind === 'bbb';
+  const numsFor = sc => hasNums && !(sc === 'always' && isMain);
+  const rk = e.main || kind === 'fsl' || kind === 'bbb' ? 'main' : 'acc', dr = S.settings.rest[rk], T = ['easy', 'hard', 'fail'];
+  let scope = 'today';
+  const body = () => {
+    const al = scope === 'always', src = al && it ? it : {sets:e.sets.filter(x => !x.warm).length, min:e.min, max:e.max};
+    const r = (al ? (isMain ? d.mainRest : it.rest) : e.rest) || {};
+    return (numsFor(scope) ? `<div class="grid3"><div class="field"><label>Sets</label><input class="num" id="xoSets" type="number" inputmode="numeric" value="${src.sets}"></div>
+      ${kind === 'reps' ? `<div class="field"><label>Min reps</label><input class="num" id="xoMin" type="number" inputmode="numeric" value="${src.min}"></div>` : ''}
+      <div class="field"><label>${kind === 'reps' ? 'Max reps' : 'Reps'}</label><input class="num" id="xoMax" type="number" inputmode="numeric" value="${src.max}"></div></div>` : '')
+      + (al && it && kind === 'reps' ? `<div class="field"><label>Weight step when you hit the top of the range (lb)</label><input class="num" id="xoInc" type="number" inputmode="decimal" step="any" placeholder="${ex.inc != null ? ex.inc : 5}" value="${it.inc != null ? it.inc : ''}"></div>` : '')
+      + `<div class="small" style="margin-bottom:6px">Rest in seconds. Leave blank to use Settings.</div><div class="grid3">${T.map(t => `<div class="field"><label>${t[0].toUpperCase() + t.slice(1)}</label><input class="num" id="xo_${t}" type="number" inputmode="numeric" placeholder="${dr[t]}" value="${r[t] != null ? r[t] : ''}"></div>`).join('')}</div>`;
+  };
+  sheet(`<div class="hd"><h2>${esc(exName(e.ex))}</h2><button class="x" data-act="close">✕</button></div>
+    ${canAlways ? '<div class="seg" id="xoScope"><button data-sc="today" class="on">This workout only</button><button data-sc="always">Always</button></div>' : '<p class="sub">Changes apply to this workout only.</p>'}
+    <div id="xoBody"></div>
+    ${kind === 'main' || kind === '531' ? `<p class="small">Sets and reps come from the 5/3/1 week.</p><button class="btn block" id="xoTm" style="margin-bottom:10px">Change training max</button>` : ''}
+    <button class="btn primary block" id="xoGo">Save</button>`, bg => {
+    const q = id => bg.querySelector(id), draw = () => { q('#xoBody').innerHTML = body(); };
+    draw();
+    bg.addEventListener('click', ev => { const b = ev.target.closest('[data-sc]'); if (!b) return; scope = b.dataset.sc; bg.querySelectorAll('[data-sc]').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+    if (q('#xoTm')) q('#xoTm').addEventListener('click', () => { closeSheet(bg); tmSheet(e.ex); });
+    q('#xoGo').addEventListener('click', () => {
+      const al = scope === 'always', r = {};
+      T.forEach(t => { const v = parseInt(q('#xo_' + t).value); if (v >= 0) r[t] = v; });
+      const rv = Object.keys(r).length ? r : undefined;
+      e.rest = rv;
+      if (al) (isMain ? d : it)[isMain ? 'mainRest' : 'rest'] = rv ? clone(rv) : undefined;
+      if (numsFor(scope)) {
+        const int = (id, df) => Math.max(1, parseInt(q(id) && q(id).value) || df || 1);
+        const max0 = int('#xoMax', e.max), min = kind === 'reps' ? int('#xoMin', e.min) : max0, max = Math.max(min, max0);
+        let n = Math.min(12, int('#xoSets', 3));
+        if (al) {
+          it.sets = n; it.min = min; it.max = max;
+          if (kind === 'reps') { const inc = num(q('#xoInc').value); it.inc = inc != null ? inc : undefined; if (isDeload(p, pos().week) && S.settings.deloadAcc) n = Math.max(1, Math.ceil(n / 2)); }
+        }
+        const moved = min !== e.min || max !== e.max, work = () => e.sets.filter(x => !x.warm);
+        const amrap = work().some(x => x.amrap);
+        e.min = min; e.max = max;
+        while (work().length > n) { const i = e.sets.map(x => !x.warm && !x.done).lastIndexOf(true); if (i < 0) break; e.sets.splice(i, 1); }
+        while (work().length < n) { const l = work().slice(-1)[0] || {}; e.sets.push(liveSet({lbl:'', tw:l.tw, tr:max, trMin:min, pct:l.pct})); e.sets[e.sets.length - 1].w = l.w != null ? l.w : l.tw; }
+        const sg = moved && kind === 'reps' && !(it && it.next) ? suggestLoad(Object.assign({}, it || {}, {ex:e.ex, sets:n, min, max}), ex, e) : null;
+        work().forEach((x, i, all) => {
+          x.lbl = String(i + 1); if (x.done) return;
+          x.tr = max; if (kind === 'reps') x.trMin = min;
+          x.amrap = amrap && i === all.length - 1;
+          if (sg && sg.w && x.w === x.tw) { x.tw = sg.w; x.w = sg.w; }
+        });
+      }
+      if (rest.end && e.sets.includes(rest.set) && (rest.kind === 'main' || rest.kind === 'acc')) { rest.ov = e.rest; }
+      touchLive(true); closeSheet(bg); render(); toast(al ? 'Saved for every workout.' : 'Changed for this workout.');
     });
   });
 }
@@ -1572,7 +1693,7 @@ function viewBody() {
     <div class="field"><label>Weight lb</label><input class="num" id="bwLb" type="number" inputmode="decimal" step="any" value="${existing ? existing.lb : ''}" placeholder="${last ? fmtW(last.lb) : 'lb'}"></div>
     <div class="field"><label>Body fat %</label><input class="num" id="bwBf" type="number" inputmode="decimal" step="any" value="${existing && existing.bf ? existing.bf : ''}" placeholder="opt"></div></div>
     <button class="btn primary block" data-act="bwSave">${existing ? 'Update' : 'Save'} weigh-in</button>
-    <div class="small mt">Weigh in each morning after the bathroom, before eating. Body fat from your scale is optional; it powers the abs estimate.</div></div>`;
+    <div class="small mt">Weigh in each morning after the bathroom, before eating. Body fat from your scale is optional; it powers the abs estimate.</div><button class="btn sm mt" data-act="importCsv">Import CSV (Cronometer or weights)</button></div>`;
   if (!ph) h += `<div class="card"><div class="eyebrow">Start here</div><h2 class="mt">What are you doing right now?</h2><p class="sub">Pick a phase: cut, maintain, lean gain or recomp. You can switch any time and each phase gets its own targets.</p><button class="btn primary block" data-act="phaseSet">Choose phase</button></div>`;
   if (!last) return h + `<div class="empty">Log a few weigh-ins and your trend, pace and estimates show up here.</div>`;
 
@@ -1749,16 +1870,104 @@ function videoSheet(exId) {
     ${ex.notes ? `<div class="card small mt" style="white-space:pre-wrap">${esc(ex.notes)}</div>` : ''}`);
 }
 
+/* ---------- CSV import (Cronometer daily nutrition or biometrics, or any date and weight file) ---------- */
+function parseCsv(txt) {
+  const rows = []; let row = [], cell = '', q = false;
+  txt = txt.replace(/^﻿/, '');
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (q) { if (c === '"') { if (txt[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+/* Date text to {d:'YYYY-MM-DD', t:minutes}. Slash dates are read as month/day/year. */
+function csvDate(v) {
+  v = String(v || '').trim(); let y, m, d, x;
+  if ((x = v.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) [, y, m, d] = x;
+  else if ((x = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/))) [, m, d, y] = x;
+  else if ((x = v.match(/^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})/))) { m = 'janfebmaraprmayjunjulaugsepoctnovdec'.indexOf(x[1].toLowerCase()) / 3 + 1; d = x[2]; y = x[3]; }
+  else return null;
+  if (!(Number.isInteger(+m) && m >= 1 && m <= 12 && d >= 1 && d <= 31)) return null;
+  const tm = v.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*([ap]m)?/i);
+  let t = 1440; if (tm) { let hh = +tm[1]; if (tm[3]) hh = hh % 12 + (/p/i.test(tm[3]) ? 12 : 0); t = hh * 60 + +tm[2]; }
+  return {d:y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'), t};
+}
+/* Returns {weeks:[{start,kcal,days}], weights:[{d,lb,bf?}], skipped} or {error}. Reads only, saves nothing. */
+function readCsv(txt) {
+  const rows = parseCsv(txt); if (rows.length < 2) return {error:'That file has no rows.'};
+  const hd = rows[0].map(x => x.trim().toLowerCase()), col = re => hd.findIndex(x => re.test(x));
+  const cD = col(/^(date|day|time|timestamp|measure)/), cE = col(/^(energy|calories).*kcal|^energy$|^calories$/), cM = col(/^metric$/), cA = col(/^amount$|^value$/), cU = col(/^unit/), cT = col(/^time$/);
+  if (cD < 0) return {error:'No date column found.'};
+  const today = todayStr(), n = v => { const x = parseFloat(String(v || '').replace(/,/g, '')); return isFinite(x) ? x : null; };
+  const when = r => { const a = csvDate(r[cD]); if (a && cT >= 0 && cT !== cD) { const b = csvDate(a.d + ' ' + r[cT]); if (b) a.t = b.t; } return a; };
+  if (cM < 0 && cE >= 0) {
+    const cG = col(/^group$/), tot = cG >= 0 && rows.some(r => /^total$/i.test((r[cG] || '').trim())), day = {};
+    rows.slice(1).forEach(r => { if (tot && !/^total$/i.test((r[cG] || '').trim())) return; const a = when(r), k = n(r[cE]); if (a && k > 0 && a.d < today) day[a.d] = (day[a.d] || 0) + k; });
+    const wk = {};
+    Object.entries(day).forEach(([d, k]) => { const x = dnum(d), st = dstr(x - (new Date(x * DAY + DAY / 2).getUTCDay() + 6) % 7); (wk[st] = wk[st] || []).push(k); });
+    const all = Object.entries(wk).map(([start, v]) => ({start, kcal:Math.round(v.reduce((a, b) => a + b, 0) / v.length), days:v.length})).sort((a, b) => a.start < b.start ? -1 : 1);
+    const weeks = all.filter(w => w.days >= 4 && w.kcal >= 800 && w.kcal <= 8000);
+    return {weeks, weights:[], skipped:all.length - weeks.length};
+  }
+  const best = {}, put = (a, k, v) => { if (!a || a.d > today || v == null) return; const o = best[a.d] = best[a.d] || {}; if (!o[k] || a.t < o[k].t) o[k] = {v, t:a.t}; };   // earliest reading of the day
+  const lbs = (v, u) => v == null ? null : /kg/i.test(u) ? v * 2.2046226 : v;
+  if (cM >= 0 && cA >= 0) rows.slice(1).forEach(r => {
+    const m = (r[cM] || '').trim().toLowerCase(), v = n(r[cA]);
+    if (/^(body )?weight/.test(m)) put(when(r), 'lb', lbs(v, (r[cU] || '') + m)); else if (/^body fat/.test(m) && !/mass/.test(m)) put(when(r), 'bf', v);
+  });
+  else {
+    const cW = col(/^(body ?)?weight/), cF = hd.findIndex(x => /body ?fat/.test(x) && !/mass|weight|free|\(lb|\(kg/.test(x));
+    if (cW < 0) return {error:'No calories or weight column found in that file.'};
+    rows.slice(1).forEach(r => { const a = when(r); put(a, 'lb', lbs(n(r[cW]), hd[cW] + (cU >= 0 ? r[cU] : '') + r[cW])); if (cF >= 0) put(a, 'bf', n(r[cF])); });
+  }
+  const weights = Object.entries(best).filter(([, o]) => o.lb && o.lb.v >= 80 && o.lb.v <= 600).map(([d, o]) => Object.assign({d, lb:Math.round(o.lb.v * 10) / 10}, o.bf && o.bf.v >= 3 && o.bf.v <= 60 ? {bf:o.bf.v} : {})).sort((a, b) => a.d < b.d ? -1 : 1);
+  return {weeks:[], weights, skipped:Object.keys(best).length - weights.length};
+}
+/* Adds what is missing. With over = true the file also replaces weeks and days already here. */
+function applyCsv(res, over) {
+  const b = S.body; let c = 0;
+  const add = (arr, k, x) => { const i = arr.findIndex(y => y[k] === x[k]); if (i < 0) { arr.push(x); c++; } else if (over) { arr[i] = Object.assign({}, arr[i], x); c++; } };
+  res.weeks.forEach(w => add(b.intake, 'start', {start:w.start, kcal:w.kcal}));
+  res.weights.forEach(w => add(b.weights, 'd', w));
+  b.intake.sort((x, y) => x.start < y.start ? -1 : 1); b.weights.sort((x, y) => x.d < y.d ? -1 : 1);
+  if (c) S.dirtySinceBackup = (S.dirtySinceBackup || 0) + 1;
+  save(true); return c;
+}
+function importCsv() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv,text/csv,text/comma-separated-values,text/plain';
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    let res; try { res = readCsv(await f.text()); } catch (e) { res = {error:'Could not read that file.'}; }
+    if (!res.error && !res.weeks.length && !res.weights.length) res.error = 'Nothing usable found. A week needs at least 4 logged days.';
+    if (res.error) return toast(res.error, 4000);
+    const isW = res.weeks.length > 0, list = isW ? res.weeks : res.weights, have = isW ? S.body.intake.map(x => x.start) : S.body.weights.map(x => x.d);
+    const dup = list.filter(x => have.includes(isW ? x.start : x.d)).length;
+    sheet(`<div class="hd"><h2>Import ${list.length} ${isW ? 'weekly average' : 'weigh-in'}${list.length > 1 ? 's' : ''}</h2><button class="x" data-act="close">✕</button></div>
+      <p class="sub">${list.length - dup} new, ${dup} already here${res.skipped ? ', ' + res.skipped + (isW ? ' weeks skipped (under 4 days logged)' : ' days skipped') : ''}.</p>
+      <div class="card" style="max-height:38vh;overflow:auto">${list.slice().reverse().map(x => `<div class="between"><span>${isW ? 'Week of ' : ''}${esc(isW ? x.start : x.d)}</span><span class="mono">${isW ? x.kcal + ' kcal (' + x.days + ' days)' : x.lb + ' lb' + (x.bf ? ' · ' + x.bf + '%' : '')}</span></div>`).join('')}</div>
+      ${dup ? '<div class="toggle"><div><b>Replace the ones already here</b><div class="small">Off keeps what you entered.</div></div><button class="sw" id="icOver" data-act="flip"></button></div>' : ''}
+      <button class="btn primary block mt" id="icGo">Import</button>`, bg => {
+      bg.querySelector('#icGo').addEventListener('click', () => { const o = bg.querySelector('#icOver'), c = applyCsv(res, !!o && o.classList.contains('on')); closeSheet(bg); render(); toast(c ? c + ' imported.' : 'Nothing new to import.'); });
+    });
+  };
+  inp.click();
+}
+
 /* ---------- help and updates ---------- */
 const HELP = [
   ['Getting around', `<p><b>Workout</b> is today's session. <b>History</b> lists every workout and every exercise with charts. <b>Body</b> tracks weight, phases and calories. <b>Program</b> is where you pick and edit programs. <b>Settings</b> has plates, bars, timers, backup and updates. The <b>?</b> at the top opens this guide from any screen.</p>`],
-  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Tap <b>&minus;</b> or <b>+</b> beside the reps to change them by one without typing. Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b> (by default 1:00 between warmups, 1:30 after the last warmup, 1:30 after main sets and 1:00 after accessory sets); tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings; 0 turns one off), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. The app shows one exercise at a time: when its last set is checked it moves to the next exercise. Tap a name in the row at the top (or the buttons under the card) to go back or skip ahead, or <b>Show all</b> to see the whole day. The main lift's warmups and work sets are on the same card. Turn this off in Settings, Workout. If you lock your phone during rest, it beeps when you come back. Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
+  ['Logging a workout', `<p>Weights are filled in for you. Do the set, then tap the check box. If you did different weight or reps, change the boxes first (you can also fix them after checking). Tap <b>&minus;</b> or <b>+</b> beside the reps to change them by one without typing. Sets marked <b>AMRAP</b> mean as many reps as you can: type what you got.</p><p>Checking a set starts the rest timer at the bottom on <b>Easy</b> (by default 1:00 between warmups, 1:30 after the last warmup, 1:30 after main sets, 0:45 after accessory sets and 1:00 when you move to a different exercise, whatever the effort); tap <b>Hard</b> or <b>Fail</b> if the set was harder (times are in Settings; 0 turns one off), or +30 / Skip. If you got fewer reps than the target, it switches to Fail by itself. Checked sets lock so they cannot change by accident; tap <b>Edit</b> under a set to change it. The screen scrolls to the next set for you. The app shows one exercise at a time: when its last set is checked it moves to the next exercise. Tap a name in the row at the top (or the buttons under the card) to go back or skip ahead, or <b>Show all</b> to see the whole day; <b>Back to</b> returns you to the set you are on. <b>Options</b> on a card changes its sets, reps and rest times, for this workout or always. The main lift's warmups and work sets are on the same card. Turn this off in Settings, Workout. If you lock your phone or switch apps during rest, it beeps when you come back; turn on <b>Notify me in other apps</b> in Settings for a notification (it can be late). Typing a weight in one set fills it into the sets after it. Tap an exercise name to see its full history. When you are done tap <b>Finish workout</b>; only checked sets are saved. You can close the app mid-workout and pick up where you left off.</p>`],
   ['Training max (TM)', `<p>5/3/1 weights come from a training max, usually 90% of your true 1 rep max. Change it with the <b>training max button</b> in the top card of the Workout screen, the link under the main lift, or in <b>Program</b>. You can type a 1 rep max instead and it uses 90%.</p><p>Changing it updates every set you have not checked yet today, plus all future weeks. After week 4 of each cycle the app suggests new maxes: a lift goes up only if you logged its AMRAP sets and hit the target reps on every one. Skipped lifts hold.</p>`],
   ['Weeks, days and cycles', `<p>5/3/1 runs 4 weeks: 5s, 3s, 5/3/1 and a deload. Finishing a workout moves you to the next day. Tap <b>Change</b> on the Workout screen to jump to any week, day or cycle, for example to skip a deload or redo a missed day.</p>`],
   ['How accessory weights are picked', `<p>Accessories use a rep range like 3 x 8-10. When every set reaches the top of the range, the next workout adds one weight step and shows <b>Go up</b>. If your last session used a very different rep range, the weight is estimated from that set. On straight 5x5 style programs, missing reps twice at the same weight drops it about 10% (<b>Reset</b>). On deload weeks accessories are cut to half the sets (switch in Settings).</p>`],
   ['Programs and templates', `<p>In <b>Program</b>, tap <b>Use</b> to switch programs; each program remembers its own week and day. <b>+ Add program</b> lists your own programs (HulkFit Plan A v2, Plan B v2, Bodybuilder 5/3/1, GreySkull) and well known programs (5/3/1 Boring But Big, First Set Last, GZCLP, PHUL and more) set up for your equipment. Your history and training maxes carry over.</p><p>Tap any exercise in a program to change how it is progressed: rep range, 5/3/1 wave, First Set Last, a fixed % of training max, last set AMRAP, warmups, weight step, order, or remove it. To change an exercise for one day only, use <b>Swap</b> on the Workout screen.</p>`],
-  ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows start with a bumper so the bar sits at the right height. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0 (Settings, Pulley pin plates). Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
-  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. A weekly waist measurement is optional but the best check on fat loss.</p>`],
+  ['Plates and bars', `<p>Each barbell set shows the plates to load per side using only plates you own (Settings, Plates you own). Deadlifts and rows load as much bumper weight as fits, then steel. Each set keeps the plates already on the bar and adds to them, so you are not stripping the bar between sets. Cable exercises show the plates to stack on the pulley's loading pin, which starts at 0, per side or as a single stack (Settings, Pulley pin plates). The weight you log is the total. Tap the bar button on an exercise to change how it is loaded (barbell, hex, EZ, pulley pin, another bar weight, or no plates), for this workout only or always; suggested weights round to what you can load. Dumbbell weights round to 5 lb PowerBlock steps. Default bar weights are in Settings.</p>`],
+  ['Body tab', `<p>Log your morning weight (and body fat from your scale if you like). The trend line smooths out water swings. Pick a phase (cut, maintain, lean gain, recomp) and the app shows if you are on pace, your real maintenance calories after about 2 weeks, training and rest day calorie targets, and an abs weight range estimate. Weekly Cronometer averages make the calorie estimate sharper. <b>Import CSV</b> reads a Cronometer daily nutrition or biometrics export, or any file with dates and weights, and shows a preview before adding anything. A weekly waist measurement is optional but the best check on fat loss.</p>`],
   ['Form videos', `<p>Open an exercise (tap its name) and tap <b>Watch form video</b>; it plays inside the app. If YouTube asks you to sign in or prove you are not a bot, tap <b>Open in the YouTube app</b> instead. If it has none yet, tap <b>Find a form video on YouTube</b>; when you find a good one, copy its link, tap <b>Edit exercise</b> and paste it so it is saved.</p>`],
   ['Backup, restore and merge', `<p>Everything is stored on this phone only. <b>Settings, Back up now</b> saves a file you can keep in Google Drive. The app reminds you when workouts are not backed up. <b>Restore</b> asks whether to <b>Merge</b> (adds anything new, never removes) or <b>Replace</b> (wipes this phone and uses the file). Use Merge unless you are moving to a new phone.</p><p>After each workout the app asks to back up; pick Google Drive in the share menu. Clearing Chrome's <b>Cookies and site data</b> deletes your workouts, so when clearing Chrome tick only <b>Cached images and files</b>. If the app ever cannot read your data, it says so and saves nothing until you choose what to do.</p>`],
   ['Updates', `<p>Tap <b>Check for updates</b> in Settings. If a newer version is online, the app updates and reloads; your data is not touched. You need internet for this, but workouts work fully offline.</p>`],
@@ -1944,23 +2153,30 @@ const actions = {
     if (s.done) {
       if (s.w == null && s.tw != null) s.w = s.tw;
       if (s.r == null) s.r = s.tr;
-      const isLast = L.ex.indexOf(e) === L.ex.length - 1 && e.sets.indexOf(s) === e.sets.length - 1;
-      const nextSet = e.sets[e.sets.indexOf(s) + 1];
-      if (!isLast) startRest(s.warm ? (nextSet && !nextSet.warm ? 'warmLast' : 'warm') : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, missedSet(s) ? 'fail' : null);
+      L.lastEi = +el.dataset.ei;
+      const n = currentSet(), nextSet = e.sets[e.sets.indexOf(s) + 1], miss = missedSet(s) ? 'fail' : null;
+      if (!n) stopRest();
+      else if (exDone(e) && L.ex[n.ei].ex !== e.ex) startRest('between', s, miss);
+      else startRest(s.warm ? (nextSet && !nextSet.warm ? 'warmLast' : 'warm') : (e.main || e.kind === 'fsl' || e.kind === 'bbb') ? 'main' : 'acc', s, miss, e.rest);
       if (s.amrap && s.r != null && s.w) toast('Estimated max ' + Math.round(e1rm(s.w, s.r)) + ' lb');
     }
     let snapped = false;
-    if (s.done && S.settings.focus && focus.ei !== 'all' && exDone(e)) {
-      const n = nextOpen(L, +el.dataset.ei, -1) || nextOpen(L, 0, -1);
-      if (n && n.ei !== +el.dataset.ei) { focus.key = L.key; focus.ei = n.ei; snapped = true; }
+    if (s.done && S.settings.focus && focus.ei !== 'all') {
+      focus.ei = null;                        // back to following along; a manual pick ends when you log a set
+      const n = currentSet(); snapped = exDone(e) && !!n && n.ei !== +el.dataset.ei;
     }
     touchLive(true); render();
-    if (snapped) { focusTop(); toast('Next: ' + exShort(L.ex[focus.ei]), 1800); }
+    if (snapped) { focusTop(); toast('Next: ' + exShort(L.ex[currentSet().ei]), 1800); }
     else if (s.done && S.settings.autoNext) {
       const n = nextOpen(L, +el.dataset.ei, +el.dataset.si) || nextOpen(L, 0, -1);
       const row = n && document.querySelector(`[data-row="${n.ei}-${n.si}"]`);
       if (row) requestAnimationFrame(() => row.scrollIntoView({block:'center', behavior:'smooth'}));
     }
+  },
+  backCur: () => {
+    focus.key = L.key; focus.ei = null; render();
+    const n = currentSet(), row = n && document.querySelector(`[data-row="${n.ei}-${n.si}"]`);
+    if (row) requestAnimationFrame(() => row.scrollIntoView({block:'center', behavior:'smooth'}));
   },
   focusGo: el => {
     const v = el.dataset.i; focus.key = L && L.key;
@@ -1977,12 +2193,14 @@ const actions = {
   },
   lockedTap: () => toast('Finished sets are locked. Tap Edit under the set to change it.', 2600),
   editSet: el => { const {s} = curLiveSet(el); s.edit = !s.edit; touchLive(true); render(); },
+  exOpts: el => exOptsSheet(+el.dataset.ei),
+  importCsv: () => importCsv(),
   pickBar: el => barSheet(el.dataset.ex, +el.dataset.ei),
   testBeep: () => { primeAudio(); beep(); if (navigator.vibrate) navigator.vibrate([400, 150, 400]); },
   addSet: el => { const e = L.ex[+el.dataset.ei]; const last = e.sets[e.sets.length - 1] || {lbl:'0', tr:10}; e.sets.push({lbl:String(e.sets.filter(s => !s.warm).length + 1), tw:last.tw, tr:last.tr, trMin:last.trMin, w:last.w != null ? last.w : last.tw, r:null, done:false}); touchLive(); render(); },
   delSet: el => { const e = L.ex[+el.dataset.ei]; if (e.sets.length > 1) { e.sets.pop(); touchLive(); render(); } },
-  removeExToday: el => { L.ex.splice(+el.dataset.ei, 1); touchLive(); render(); },
-  addExToday: () => pickExercise('Add exercise', id => { const sg = suggestion({ex:id, sets:3, min:8, max:12}); L.ex.push({ex:id, main:false, min:8, max:12, up:sg.up, sets:[1, 2, 3].map(i => ({lbl:String(i), tw:sg.w, tr:12, trMin:8, w:sg.w, r:null, done:false}))}); touchLive(); render(); }),
+  removeExToday: el => { const i = +el.dataset.ei; L.ex.splice(i, 1); if (L.lastEi != null && L.lastEi >= i) L.lastEi = L.lastEi > i ? L.lastEi - 1 : null; focus.ei = focus.ei === 'all' ? 'all' : null; touchLive(); render(); },
+  addExToday: () => pickExercise('Add exercise', id => { const sg = suggestLoad({ex:id, sets:3, min:8, max:12}, S.exercises[id]); L.ex.push({ex:id, kind:'reps', swapped:true, main:false, min:8, max:12, up:sg.up, sets:[1, 2, 3].map(i => ({lbl:String(i), tw:sg.w, tr:12, trMin:8, w:sg.w, r:null, done:false}))}); touchLive(); render(); }),
   finish: () => finishSheet(),
   saveWorkout: () => saveWorkout(),
   discard: () => { if (!confirm('Clear everything entered for this workout?')) return; S.live = null; L = null; stopRest(); keepAwake(false); save(); render(); },
@@ -1994,7 +2212,13 @@ const actions = {
   blkStart: () => { if (!confirm('Start over? What is stored on this phone will be replaced.')) return; guard.blocked = null; guard.allow = true; save(true); tab = 'today'; render(); },
   restorePick: () => restorePick(),
   startFresh: () => { freshProgram(); save(); tab = 'program'; editProgId = S.active; render(); toast('Enter your training maxes to get started.'); },
-  sw: el => { const k = el.dataset.k; S.settings[k] = !S.settings[k]; if ((k === 'warmups' || k === 'deloadAcc') && S.live && !liveStarted(S.live)) S.live = null; if (k === 'awake') keepAwake(S.settings.awake && !!S.live); save(); render(); },
+  sw: async el => {
+    const k = el.dataset.k;
+    if (k === 'notify' && !S.settings.notify) {
+      if (!('Notification' in window)) return toast('This browser does not support notifications.');
+      if (await Notification.requestPermission() !== 'granted') return toast('Notifications are blocked. Allow them for this app in Android settings.', 3500);
+    }
+    S.settings[k] = !S.settings[k]; if ((k === 'warmups' || k === 'deloadAcc') && S.live && !liveStarted(S.live)) S.live = null; if (k === 'awake') keepAwake(S.settings.awake && !!S.live); save(); render(); },
   addPlate: el => { const w = num(prompt('Plate weight in lb (e.g. 1.25)')); if (!w || w <= 0) return; S.settings.plates[el.dataset.k][String(w)] = 2; save(); render(); },
   mergeOpen: () => mergeSheet(),
   resetAll: () => { if (!confirm('Erase ALL workouts, programs and settings on this phone?')) return; if (!confirm('Really erase? Make sure you have a backup.')) return; guard.allow = true; S = normalize(null); save(true); tab = 'today'; render(); },
@@ -2015,7 +2239,7 @@ const actions = {
   checkUpdate: () => checkUpdate(),
   itemOpts: el => itemSheet(S.programs[editProgId], +el.dataset.di, +el.dataset.ii),
   clearMain: el => { const p = S.programs[editProgId]; p.days[+el.dataset.di].main = null; progChanged(p); },
-  swapToday: el => { const e = L.ex[+el.dataset.ei]; pickExercise('Swap ' + exName(e.ex) + ' today', id => { e.ex = id; if (e.kind === 'reps') { const sg = suggestion({ex:id, sets:e.sets.length, min:e.min, max:e.max}); e.up = sg.up; e.sets.forEach(x => { if (!x.done) { x.tw = sg.w; x.w = sg.w; } }); } touchLive(true); render(); toast('Swapped for today only.'); }); },
+  swapToday: el => { const e = L.ex[+el.dataset.ei]; pickExercise('Swap ' + exName(e.ex) + ' today', id => { e.ex = id; if (e.kind === 'reps') { delete e.bar; delete e.rest; delete e.ii; e.swapped = true; const sg = suggestLoad({ex:id, sets:e.sets.length, min:e.min, max:e.max}, S.exercises[id]); e.up = sg.up; e.sets.forEach(x => { if (!x.done) { x.tw = sg.w; x.w = sg.w; } }); } touchLive(true); render(); toast('Swapped for today only.'); }); },
   swapItem: el => { const p = S.programs[editProgId], it = p.days[+el.dataset.di].items[+el.dataset.ii]; pickExercise('Replace ' + exName(it.ex), id => { it.ex = id; progChanged(p); }); },
   bwSave: () => bodySave(),
   bwEdit: el => { bodyLogDate = el.dataset.d; render(); window.scrollTo(0, 0); },
@@ -2159,6 +2383,8 @@ const inputs = {
   rest: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest[el.dataset.k][el.dataset.t] = v; save(); } },
   restWarm: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.warm = v; save(); } },
   restWarmLast: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.warmLast = v; save(); } },
+  restBetween: el => { const v = parseInt(el.value); if (v >= 0) { S.settings.rest.between = v; save(); } },
+  pinSides: el => { S.settings.pinSides = +el.value; if (S.live) { if (liveStarted(S.live)) snapPins(S.live); else S.live = null; } save(); },
   restDef: el => { S.settings.rest.def = el.value; save(); },
   volume: el => { S.settings.volume = el.value; save(); },
   round: el => { S.settings.round = +el.value; if (S.live && !liveStarted(S.live)) S.live = null; save(); },
@@ -2183,7 +2409,7 @@ document.addEventListener('change', e => {
 window.addEventListener('pagehide', () => { if (S) save(true); });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { if (S) save(true); }
-  else { tickRest(); if (rest.missed) { rest.missed = false; restDone(); } if (S && S.live) keepAwake(true); }
+  else { tickRest(); if (rest.missed) { rest.missed = false; if (rest.notified) toast('Rest done. Next set.'); else restDone(); } clearRestNote(); if (S && S.live) keepAwake(true); }
 });
 
 /* ---------- boot ---------- */
