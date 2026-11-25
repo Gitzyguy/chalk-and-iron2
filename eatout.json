@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "updated": "2026-11-25",
- "sheetRevision": 21,
+ "sheetRevision": 24,
  "targets": {
   "protein": 200,
   "fat": 65
@@ -231,7 +231,8 @@
    "notes": "Everything in How to order is counted, salsas included.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Mexican",
@@ -247,7 +248,8 @@
    "notes": "Everything in How to order is counted, salsas included.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Mexican",
@@ -263,7 +265,8 @@
    "notes": "Tortilla alone is 320 kcal. Everything in How to order is counted, salsas included.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Bowls",
@@ -279,7 +282,8 @@
    "notes": "Double protein assumed 2 servings. Tzatziki and yogurt dill are counted.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Bowls",
@@ -295,13 +299,14 @@
    "notes": "Tzatziki and yogurt dill are counted.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Bowls",
    "restaurant": "CAVA",
    "item": "Strawberry Steak Salad",
-   "order": "As is.",
+   "order": "Say \"Strawberry Steak Salad\" and order it as it comes. For more protein, ask to add a second steak (about 170 kcal, 9 g fat).",
    "kcal": 420,
    "p": 32,
    "f": 22,
@@ -311,13 +316,14 @@
    "notes": "Listed as the full curated bowl, dressing included.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Asian",
    "restaurant": "Panda Express",
    "item": "Grilled Teriyaki Chicken (entree)",
-   "order": "One entree portion. Order 2 a la carte for double meat.",
+   "order": "Say \"Grilled Teriyaki Chicken\" as one entree. For double meat, order 2 a la carte.",
    "kcal": 280,
    "p": 38,
    "f": 9,
@@ -327,13 +333,14 @@
    "notes": "Sauce is part of the entree.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Asian",
    "restaurant": "Panda Express",
    "item": "Broccoli Beef (entree)",
-   "order": "One entree portion.",
+   "order": "Say \"Broccoli Beef\" as one entree. Best as the second entree next to Grilled Teriyaki Chicken.",
    "kcal": 190,
    "p": 17,
    "f": 7,
@@ -343,13 +350,14 @@
    "notes": "Sauce is part of the entree.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Panda Express",
    "item": "Super Greens (side)",
-   "order": "Side portion.",
+   "order": "Say \"Super Greens\" as your side instead of rice or chow mein.",
    "kcal": 180,
    "p": 8,
    "f": 9,
@@ -359,13 +367,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Panda Express",
    "item": "Half white rice, half Super Greens (side)",
-   "order": "Ask for half and half.",
+   "order": "Say \"half white rice, half Super Greens\" for the side.",
    "kcal": 375,
    "p": 9.5,
    "f": 4.5,
@@ -375,13 +384,14 @@
    "notes": "Counted as half of each side.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Panda Express",
    "item": "White Steamed Rice (side)",
-   "order": "Full side.",
+   "order": "Say \"White Steamed Rice\" as a full side. Carb option for training days.",
    "kcal": 570,
    "p": 11,
    "f": 0,
@@ -391,13 +401,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Chicken",
    "restaurant": "Raising Cane's",
    "item": "Chicken Finger (1)",
-   "order": "Order a la carte by count. Louisiana hot sauce instead of Cane's sauce.",
+   "order": "Order chicken fingers a la carte by count (for example \"5 fingers\"). Ask for Louisiana hot sauce instead of Cane's sauce.",
    "kcal": 130,
    "p": 12,
    "f": 6,
@@ -407,13 +418,14 @@
    "notes": "Cane's sauce is 190 kcal, 18 g fat.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Raising Cane's",
    "item": "Texas Toast",
-   "order": "One slice.",
+   "order": "Ask for one slice of Texas Toast, or skip it on rest days.",
    "kcal": 150,
    "p": 4,
    "f": 4.5,
@@ -423,13 +435,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Raising Cane's",
    "item": "Coleslaw",
-   "order": "One side.",
+   "order": "Ask for a side of coleslaw.",
    "kcal": 90,
    "p": 1,
    "f": 6,
@@ -439,13 +452,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Bowls",
    "restaurant": "Subway",
    "item": "Sweet Onion Chicken Teriyaki Protein Bowl",
-   "order": "Standard recipe.",
+   "order": "Say \"Sweet Onion Chicken Teriyaki Protein Bowl\". Ask for no cheese and dressing on the side (not counted).",
    "kcal": 470,
    "p": 42,
    "f": 18,
@@ -455,13 +469,14 @@
    "notes": "Listed as Subway's footlong-meat Protein Bowl with no cheese or dressing (corrected Nov 25, 2026; it was noted as including them).",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Subway",
    "item": "Turkey and Ham Protein Pocket",
-   "order": "Standard recipe.",
+   "order": "Say \"Turkey and Ham Protein Pocket\" and order it as it comes (cheese and sauce counted).",
    "kcal": 320,
    "p": 21,
    "f": 11,
@@ -471,13 +486,14 @@
    "notes": "Listed with cheese and sauce.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Subway",
    "item": "Baja Chicken Protein Pocket",
-   "order": "Standard recipe.",
+   "order": "Say \"Baja Chicken Protein Pocket\" and order it as it comes (cheese and sauce counted).",
    "kcal": 330,
    "p": 24,
    "f": 13,
@@ -487,7 +503,8 @@
    "notes": "Listed with cheese and sauce.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
@@ -503,13 +520,14 @@
    "notes": "Built from component estimates.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Jason's Deli",
    "item": "Grilled Chicken Breast Sandwich (regular)",
-   "order": "As is.",
+   "order": "Say \"Grilled Chicken Breast Sandwich\", regular size. Add extra grilled chicken for more protein.",
    "kcal": 420,
    "p": 34,
    "f": 15,
@@ -519,13 +537,14 @@
    "notes": "FatSecret, Aug 2025. Sauce or dressing: not stated by the source.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Jason's Deli",
    "item": "Extra grilled chicken (add-on)",
-   "order": "Add to any sandwich or salad.",
+   "order": "Ask to \"add grilled chicken\" to any sandwich, salad or the salad bar.",
    "kcal": 126,
    "p": 25,
    "f": 2,
@@ -535,13 +554,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Jason's Deli",
    "item": "Steamed veggies (side)",
-   "order": "Side.",
+   "order": "Ask for steamed veggies as your side instead of chips.",
    "kcal": 60,
    "p": 3,
    "f": 1,
@@ -551,13 +571,14 @@
    "notes": "60 kcal from menu; macros estimated.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "54th Street",
    "item": "Traditional House Salad, no croutons",
-   "order": "Dressing on the side (not counted).",
+   "order": "Say \"Traditional House Salad, no croutons\". Ask for the dressing on the side (not counted).",
    "kcal": 200,
    "p": 11,
    "f": 14,
@@ -567,13 +588,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "54th Street",
    "item": "Grilled chicken breast (salad add-on)",
-   "order": "Add to any salad.",
+   "order": "Ask to \"add a grilled chicken breast\" to any salad.",
    "kcal": 280,
    "p": 52,
    "f": 5,
@@ -583,13 +605,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Bowls",
    "restaurant": "54th Street",
    "item": "Protein Power Grain Bowl, chicken",
-   "order": "Simply grilled.",
+   "order": "Say \"Protein Power Grain Bowl with chicken, simply grilled\".",
    "kcal": 600,
    "p": 66,
    "f": 14,
@@ -599,13 +622,14 @@
    "notes": "Menu confirms 66 g protein. Sauce or dressing: not stated by the source.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Grill plates",
    "restaurant": "Chili's",
    "item": "Classic Sirloin 10 oz",
-   "order": "Steak only; pick sides separately.",
+   "order": "Say \"Classic Sirloin, 10 oz\". Counted as the steak only; pick steamed broccoli or black beans instead of loaded mashed potatoes.",
    "kcal": 390,
    "p": 54,
    "f": 18,
@@ -615,13 +639,14 @@
    "notes": "As served on the chain guide.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Topped with garlic butter. Chili's serves it with loaded mashed potatoes (320 kcal) and steamed broccoli (40 kcal), not counted here. Whether the 390 kcal includes the garlic butter is not stated. (from chilis.com, Nov 25, 2026)"
   },
   {
    "type": "Grill plates",
    "restaurant": "Chili's",
    "item": "Guiltless 10 oz Sirloin",
-   "order": "Check whether sides are included.",
+   "order": "Say \"Guiltless 10 oz Sirloin\". It comes with roasted asparagus.",
    "kcal": 450,
    "p": 59,
    "f": 20,
@@ -631,13 +656,14 @@
    "notes": "As served on the chain guide.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Seasoned and topped with cilantro-pesto drizzle, cilantro and pico de gallo, served with roasted asparagus. (from chilis.com, Nov 25, 2026)"
   },
   {
    "type": "Grill plates",
    "restaurant": "Chili's",
    "item": "Margarita Grilled Chicken",
-   "order": "As served, includes its sides.",
+   "order": "Say \"Margarita Grilled Chicken\". Counted as served, with its rice, beans, pico and tortilla strips.",
    "kcal": 640,
    "p": 69,
    "f": 14,
@@ -647,13 +673,14 @@
    "notes": "As served on the chain guide.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Pico, tortilla strips, Mexican rice and black beans. (from chilis.com, Nov 25, 2026)"
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chili's",
    "item": "Steamed broccoli (side)",
-   "order": "Side.",
+   "order": "Ask for steamed broccoli as a side.",
    "kcal": 40,
    "p": 3,
    "f": 0,
@@ -663,13 +690,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chili's",
    "item": "Black beans (side)",
-   "order": "Side.",
+   "order": "Ask for black beans as a side.",
    "kcal": 110,
    "p": 6,
    "f": 0.5,
@@ -679,13 +707,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chili's",
    "item": "Mexican rice (side)",
-   "order": "Side.",
+   "order": "Ask for Mexican rice as a side. Carb option for training days.",
    "kcal": 160,
    "p": 3,
    "f": 4.5,
@@ -695,13 +724,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Freebirds",
    "item": "Lite Chicken Bowl",
-   "order": "As is.",
+   "order": "Say \"Lite Chicken Bowl\" and order it as it comes.",
    "kcal": 292,
    "p": 24,
    "f": 8,
@@ -711,13 +741,14 @@
    "notes": "fastfoodnutrition.org, Freebirds data. Sauce or dressing: not stated by the source.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Freebirds",
    "item": "Chicken Bowl (standard)",
-   "order": "As is.",
+   "order": "Say \"Chicken Bowl\" and order it as it comes. Skip queso and sour cream to keep fat down.",
    "kcal": 520,
    "p": 30,
    "f": 22,
@@ -727,13 +758,14 @@
    "notes": "Protein estimated from calorie split. Sauce or dressing: not stated by the source.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Freebirds",
    "item": "Extra white meat chicken",
-   "order": "Add to any bowl or burrito.",
+   "order": "Ask for \"extra white meat chicken\" on any bowl or burrito.",
    "kcal": 97,
    "p": 19,
    "f": 2.4,
@@ -743,7 +775,8 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
@@ -759,13 +792,14 @@
    "notes": "Salsa is counted (estimate).",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Mexican",
    "restaurant": "Chuy's",
    "item": "Chicken tortilla soup (bowl)",
-   "order": "As is.",
+   "order": "Say \"chicken tortilla soup\", bowl size.",
    "kcal": 250,
    "p": 18,
    "f": 10,
@@ -775,13 +809,14 @@
    "notes": "Chuy's publishes no full nutrition.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chuy's",
    "item": "Side of fajita chicken",
-   "order": "Add-on.",
+   "order": "Ask for a side of fajita chicken. Pair it with corn tortillas and pico.",
    "kcal": 300,
    "p": 45,
    "f": 11,
@@ -791,13 +826,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Chuy's",
    "item": "Chicken Fajitas, trimmed",
-   "order": "Corn tortillas, pico. Skip sour cream, cheese, guac, rice and beans.",
+   "order": "Say \"chicken fajitas\" with corn tortillas and pico. Skip sour cream, cheese, guacamole, rice and beans.",
    "kcal": 670,
    "p": 66,
    "f": 23,
@@ -807,13 +843,14 @@
    "notes": "Full plate about 1,600 kcal. Sauce or dressing: not counted in this estimate beyond pico.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Chuy's",
    "item": "Tacos al Carbon, chicken, trimmed",
-   "order": "Skip rice and beans, side of pico.",
+   "order": "Say \"Tacos al Carbon with chicken\". Skip the rice and beans; ask for a side of pico.",
    "kcal": 640,
    "p": 53,
    "f": 23,
@@ -823,13 +860,14 @@
    "notes": "Sauce or dressing: not counted in this estimate beyond pico.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Chicken",
    "restaurant": "Wings Over",
    "item": "5 Grilled Tenders, dry rub",
-   "order": "Celery, no ranch.",
+   "order": "Say \"5 grilled tenders, dry rub\", with celery. Skip the ranch.",
    "kcal": 450,
    "p": 80,
    "f": 12,
@@ -839,13 +877,14 @@
    "notes": "Official chart not readable here.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Chicken",
    "restaurant": "Wings Over",
    "item": "5 Grilled Tenders, Buffalo",
-   "order": "Celery.",
+   "order": "Say \"5 grilled tenders, Buffalo\", with celery. Skip the ranch.",
    "kcal": 550,
    "p": 80,
    "f": 22,
@@ -855,13 +894,14 @@
    "notes": "Buffalo sauce is counted (estimate).",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Wings Over",
    "item": "Grilled chicken wrap",
-   "order": "As is.",
+   "order": "Say \"grilled chicken wrap\". Ask for sauce on the side.",
    "kcal": 700,
    "p": 45,
    "f": 28,
@@ -871,13 +911,14 @@
    "notes": "Wings Over says wraps run 600 to 800 kcal. Sauce or dressing: not stated by the source.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Mariana's Tacos",
    "item": "8 oz Side Meat, pollo asado",
-   "order": "Build tacos with tortillas.",
+   "order": "Ask for an 8 oz side of pollo asado. Add 3 corn tortillas and pico to build your own tacos.",
    "kcal": 406,
    "p": 56,
    "f": 19,
@@ -887,13 +928,14 @@
    "notes": "USDA-based.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Mariana's Tacos",
    "item": "3 corn tortillas",
-   "order": "Side.",
+   "order": "Ask for 3 corn tortillas on the side.",
    "kcal": 156,
    "p": 4,
    "f": 2,
@@ -903,13 +945,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Mariana's Tacos",
    "item": "Pico de gallo",
-   "order": "Side.",
+   "order": "Ask for a side of pico de gallo.",
    "kcal": 20,
    "p": 0,
    "f": 0,
@@ -919,13 +962,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Mariana's Tacos",
    "item": "3 Soft Tacos, pollo asado, corn",
-   "order": "As is.",
+   "order": "Say \"3 soft tacos, pollo asado, on corn tortillas\". Skip cheese and sour cream.",
    "kcal": 470,
    "p": 46,
    "f": 16,
@@ -935,13 +979,14 @@
    "notes": "Salsas not counted (estimate).",
    "checked": null,
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Mariana's Tacos",
    "item": "#9 Fajita Plate, pollo asado",
-   "order": "As served.",
+   "order": "Say \"#9 Fajita Plate with pollo asado\". Skip cheese, sour cream and guacamole to keep fat down.",
    "kcal": 890,
    "p": 58,
    "f": 29,
@@ -951,13 +996,14 @@
    "notes": "Sauce or dressing: not stated by the source.",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Chick-fil-A",
    "item": "Cool Wrap, no dressing",
-   "order": "Dressing on the side (not counted).",
+   "order": "Say \"Cool Wrap\" and ask for the Avocado Lime Ranch on the side (not counted). Add Zesty Buffalo or 8 ct grilled nuggets for more protein.",
    "kcal": 350,
    "p": 42,
    "f": 13,
@@ -967,13 +1013,14 @@
    "notes": "Listed 660 kcal includes Avocado Lime Ranch. Checked Nov 25, 2026: Chick-fil-A lists the wrap at 660 kcal, 43 g protein, 32 g carbs, 45 g fat with the dressing, and the dressing at 310 kcal, 1 g protein, 3 g carbs, 32 g fat. Their own macros add to more than their calories, so 4P+4C+9F here comes to 401.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Sliced grilled chicken breast with green leaf lettuce and shredded Monterey Jack and Cheddar, rolled in a flaxseed flour flatbread. Chick-fil-A pairs it with Avocado Lime Ranch dressing (not counted here). (from chick-fil-a.com, Nov 25, 2026)"
   },
   {
    "type": "Chicken",
    "restaurant": "Chick-fil-A",
    "item": "8 ct Grilled Nuggets",
-   "order": "As is.",
+   "order": "Say \"8 count Grilled Nuggets\". Pick Zesty Buffalo for the sauce (25 kcal).",
    "kcal": 130,
    "p": 25,
    "f": 3,
@@ -983,13 +1030,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Bite-sized pieces of marinated boneless chicken breast, grilled, with your choice of dipping sauce. (from chick-fil-a.com, Nov 25, 2026)"
   },
   {
    "type": "Chicken",
    "restaurant": "Chick-fil-A",
    "item": "12 ct Grilled Nuggets",
-   "order": "As is.",
+   "order": "Say \"12 count Grilled Nuggets\". Pick Zesty Buffalo for the sauce (25 kcal).",
    "kcal": 200,
    "p": 38,
    "f": 4.5,
@@ -999,29 +1047,31 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Bite-sized pieces of marinated boneless chicken breast, grilled, with your choice of dipping sauce. (from chick-fil-a.com, Nov 25, 2026)"
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Chick-fil-A",
    "item": "Grilled Chicken Sandwich",
-   "order": "As is.",
+   "order": "Say \"Grilled Chicken Sandwich\". It comes with no sauce; skip the Honey Roasted BBQ to keep these numbers.",
    "kcal": 390,
    "p": 28,
    "f": 11,
    "c": 45,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chickfila-nutrition-calculator",
-   "notes": "Standard recipe, so its usual sauce is in the numbers.",
+   "notes": "Comes with no sauce; Honey Roasted BBQ is extra (corrected Nov 25, 2026).",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "None",
+   "comes": "Lemon-herb marinated grilled chicken breast on a toasted multigrain bun with green leaf lettuce and tomato. Chick-fil-A suggests Honey Roasted BBQ sauce, which is extra. (from chick-fil-a.com, Nov 25, 2026)"
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chick-fil-A",
    "item": "Zesty Buffalo sauce",
-   "order": "One packet.",
+   "order": "Ask for Zesty Buffalo sauce with nuggets or the wrap (one packet).",
    "kcal": 25,
    "p": 0,
    "f": 2.5,
@@ -1031,13 +1081,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chick-fil-A",
    "item": "Medium fruit cup",
-   "order": "Side.",
+   "order": "Swap fries for a medium fruit cup.",
    "kcal": 70,
    "p": 1,
    "f": 0,
@@ -1047,13 +1098,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Chick-fil-A",
    "item": "Honey mustard sauce",
-   "order": "One packet.",
+   "order": "Ask for one packet of honey mustard sauce.",
    "kcal": 50,
    "p": 0,
    "f": 0,
@@ -1063,13 +1115,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "McDonald's",
    "item": "Quarter Pounder with Cheese",
-   "order": "As is.",
+   "order": "Say \"Quarter Pounder with Cheese\" and order it as it comes.",
    "kcal": 520,
    "p": 30,
    "f": 26,
@@ -1079,13 +1132,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Breakfast",
    "restaurant": "McDonald's",
    "item": "Egg McMuffin",
-   "order": "As is.",
+   "order": "Say \"Egg McMuffin\" and order it as it comes.",
    "kcal": 310,
    "p": 17,
    "f": 13,
@@ -1095,13 +1149,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "McDonald's",
    "item": "McCrispy",
-   "order": "As is.",
+   "order": "Say \"McCrispy\" and order it as it comes.",
    "kcal": 470,
    "p": 26,
    "f": 20,
@@ -1111,13 +1166,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "McDonald's",
    "item": "Apple slices",
-   "order": "Side.",
+   "order": "Ask for apple slices instead of fries.",
    "kcal": 15,
    "p": 0,
    "f": 0,
@@ -1127,13 +1183,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Whataburger",
    "item": "Cobb Salad with Grilled Chicken",
-   "order": "Light or no dressing.",
+   "order": "Say \"Cobb Salad with grilled chicken\". Ask for the dressing on the side (not counted).",
    "kcal": 430,
    "p": 44,
    "f": 23,
@@ -1143,13 +1200,14 @@
    "notes": "Dressing not counted.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Whataburger",
    "item": "Garden Salad with Grilled Chicken",
-   "order": "Light or no dressing.",
+   "order": "Say \"Garden Salad with grilled chicken\". Ask for the dressing on the side (not counted).",
    "kcal": 290,
    "p": 34,
    "f": 12,
@@ -1159,13 +1217,14 @@
    "notes": "Dressing not counted.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Whataburger",
    "item": "Grilled Chicken Melt",
-   "order": "As is.",
+   "order": "Say \"Grilled Chicken Melt\" and order it as it comes.",
    "kcal": 390,
    "p": 33,
    "f": 11,
@@ -1175,13 +1234,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Whataburger",
    "item": "#11 Grilled Chicken Sandwich",
-   "order": "Whatasauce.",
+   "order": "Say \"#11 Grilled Chicken Sandwich with Whatasauce\". With mayo it is 470 kcal and 20 g fat instead.",
    "kcal": 430,
    "p": 32,
    "f": 14,
@@ -1191,13 +1251,14 @@
    "notes": "Listed with Whatasauce.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Whataburger",
    "item": "Chicken Fajita Taco (#16)",
-   "order": "One taco.",
+   "order": "Say \"#16 Chicken Fajita Taco\" (one taco).",
    "kcal": 340,
    "p": 29,
    "f": 11,
@@ -1207,13 +1268,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Taco Bell",
    "item": "Chicken Soft Taco",
-   "order": "One taco.",
+   "order": "Say \"Chicken Soft Taco\". Two or three make a meal.",
    "kcal": 160,
    "p": 12,
    "f": 5,
@@ -1223,13 +1285,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Taco Bell",
    "item": "Chicken Enchilada Burrito",
-   "order": "As is.",
+   "order": "Say \"Chicken Enchilada Burrito\" and order it as it comes.",
    "kcal": 370,
    "p": 18,
    "f": 11,
@@ -1239,13 +1302,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Mexican",
    "restaurant": "Taco Bell",
    "item": "Burrito Supreme, chicken",
-   "order": "As is.",
+   "order": "Say \"Burrito Supreme with chicken\" and order it as it comes.",
    "kcal": 370,
    "p": 19,
    "f": 11,
@@ -1255,13 +1319,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Wendy's",
    "item": "Parmesan Caesar Salad",
-   "order": "Light or no dressing.",
+   "order": "Say \"Parmesan Caesar Salad\". Ask for the dressing on the side (not counted; the packet is 240 kcal).",
    "kcal": 270,
    "p": 31,
    "f": 11,
@@ -1271,13 +1336,14 @@
    "notes": "Dressing not counted.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Wendy's",
    "item": "Small Chili",
-   "order": "Side.",
+   "order": "Ask for a small chili as a side.",
    "kcal": 280,
    "p": 19,
    "f": 12,
@@ -1287,13 +1353,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Wendy's",
    "item": "Grilled Chicken Ranch Wrap",
-   "order": "As is.",
+   "order": "Say \"Grilled Chicken Ranch Wrap\" and order it as it comes.",
    "kcal": 420,
    "p": 28,
    "f": 16,
@@ -1303,13 +1370,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Chicken",
    "restaurant": "Sonic",
    "item": "Crispy Tenders (5 pc)",
-   "order": "BBQ or no sauce.",
+   "order": "Say \"5 piece Crispy Tenders\". Pick BBQ or no dipping sauce (not counted).",
    "kcal": 430,
    "p": 35,
    "f": 20,
@@ -1319,13 +1387,14 @@
    "notes": "No grilled chicken at Sonic. Dipping sauce not counted.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Sonic",
    "item": "Soft Pretzel Twist",
-   "order": "Side.",
+   "order": "Ask for a Soft Pretzel Twist as a side.",
    "kcal": 250,
    "p": 7,
    "f": 7,
@@ -1335,13 +1404,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "A warm, butter-flavored soft pretzel topped with salt. (from sonicdrivein.com, Nov 25, 2026)"
   },
   {
    "type": "Breakfast",
    "restaurant": "Sonic",
    "item": "Breakfast Burrito, ham",
-   "order": "As is.",
+   "order": "Say \"Breakfast Burrito with ham\" and order it as it comes.",
    "kcal": 440,
    "p": 27,
    "f": 20,
@@ -1351,13 +1421,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Jack in the Box",
    "item": "Garden Salad with Grilled Chicken",
-   "order": "Dressing not counted.",
+   "order": "Say \"Garden Salad with grilled chicken\". Ask for the dressing on the side (not counted).",
    "kcal": 210,
    "p": 25,
    "f": 8,
@@ -1367,13 +1438,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Jack in the Box",
    "item": "Southwest Salad with Grilled Chicken",
-   "order": "Dressing not counted.",
+   "order": "Say \"Southwest Salad with grilled chicken\". Ask for the dressing on the side (not counted).",
    "kcal": 290,
    "p": 30,
    "f": 9,
@@ -1383,13 +1455,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Jack in the Box",
    "item": "Classic Grilled Jack Wrap",
-   "order": "As is.",
+   "order": "Say \"Classic Grilled Jack Wrap\" and order it as it comes.",
    "kcal": 270,
    "p": 15,
    "f": 12,
@@ -1399,13 +1472,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Asian",
    "restaurant": "Jack in the Box",
    "item": "Teriyaki Grilled Chicken Bowl",
-   "order": "As is.",
+   "order": "Say \"Teriyaki Grilled Chicken Bowl\" and order it as it comes.",
    "kcal": 590,
    "p": 28,
    "f": 8,
@@ -1415,13 +1489,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Jack in the Box",
    "item": "Sourdough Grilled Chicken Club",
-   "order": "As is.",
+   "order": "Say \"Sourdough Grilled Chicken Club\" and order it as it comes.",
    "kcal": 500,
    "p": 33,
    "f": 23,
@@ -1431,13 +1506,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Burger King",
    "item": "Flame-Grilled Chicken Sandwich",
-   "order": "As is.",
+   "order": "Say \"Flame-Grilled Chicken Sandwich\" and order it as it comes.",
    "kcal": 410,
    "p": 35,
    "f": 15,
@@ -1447,13 +1523,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Burger King",
    "item": "Hamburger",
-   "order": "As is.",
+   "order": "Say \"Hamburger\" and order it as it comes.",
    "kcal": 260,
    "p": 14,
    "f": 10,
@@ -1463,13 +1540,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Breakfast",
    "restaurant": "First Watch",
    "item": "Power Wrap",
-   "order": "Ask what side it comes with.",
+   "order": "Say \"Power Wrap\". Ask what side it comes with; the side is not counted.",
    "kcal": 500,
    "p": 37,
    "f": 11,
@@ -1479,13 +1557,14 @@
    "notes": "Third-party analysis published by First Watch. As served on First Watch's guide.",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Smoked Ham (side)",
-   "order": "Side.",
+   "order": "Ask for a side of smoked ham.",
    "kcal": 160,
    "p": 20,
    "f": 6,
@@ -1495,13 +1574,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Chicken Apple Sausage Patties (side)",
-   "order": "Side.",
+   "order": "Ask for a side of chicken apple sausage patties.",
    "kcal": 180,
    "p": 16,
    "f": 12,
@@ -1511,13 +1591,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Cup of Fresh, Seasonal Fruit",
-   "order": "Side.",
+   "order": "Ask for a cup of fresh seasonal fruit.",
    "kcal": 80,
    "p": 1,
    "f": 0,
@@ -1527,13 +1608,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Kale Tonic",
-   "order": "Fresh juice.",
+   "order": "Ask for a Kale Tonic (fresh juice).",
    "kcal": 130,
    "p": 4,
    "f": 0,
@@ -1543,13 +1625,14 @@
    "notes": "Matches First Watch's own guide (Nov 25, 2026); earlier copy was from fastfoodnutrition.org, 2021.",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Two Cage-Free Eggs (side)",
-   "order": "Side.",
+   "order": "Ask for two cage-free eggs as a side.",
    "kcal": 190,
    "p": 13,
    "f": 15,
@@ -1559,13 +1642,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "First Watch",
    "item": "Whole Grain Artisan Toast",
-   "order": "Side.",
+   "order": "Ask for a side of whole grain artisan toast.",
    "kcal": 330,
    "p": 8,
    "f": 15,
@@ -1575,13 +1659,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Breakfast",
    "restaurant": "First Watch",
    "item": "The Traditional Breakfast",
-   "order": "As listed, with potatoes and toast.",
+   "order": "Say \"The Traditional Breakfast\". Counted as listed, with potatoes and toast. Building it from sides is leaner.",
    "kcal": 1000,
    "p": 30,
    "f": 59,
@@ -1591,13 +1676,14 @@
    "notes": "Build it from sides instead. As served on First Watch's guide.",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Breakfast",
    "restaurant": "First Watch",
    "item": "Power Breakfast Bowl",
-   "order": "As is.",
+   "order": "Say \"Power Breakfast Bowl\". High fat (63 g); the Power Wrap is the leaner choice.",
    "kcal": 860,
    "p": 33,
    "f": 63,
@@ -1607,13 +1693,14 @@
    "notes": "Avoid: 97% of daily fat. As served on First Watch's guide.",
    "checked": "2026-11-25",
    "verified": "Yes",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Shake Shack",
    "item": "Single Hamburger",
-   "order": "As is.",
+   "order": "Say \"Single Hamburger\" and order it as it comes. Add a burger patty for more protein.",
    "kcal": 370,
    "p": 25,
    "f": 18,
@@ -1623,13 +1710,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Shake Shack",
    "item": "Double Hamburger (Single + extra Burger Patty)",
-   "order": "Order a Single Hamburger and add a patty.",
+   "order": "Say \"Single Hamburger\" and ask to \"add a burger patty\".",
    "kcal": 560,
    "p": 44,
    "f": 30,
@@ -1639,13 +1727,14 @@
    "notes": "Built from Single Hamburger + Burger Patty.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Shake Shack",
    "item": "Chicken Shack",
-   "order": "As is.",
+   "order": "Say \"Chicken Shack\" and order it as it comes.",
    "kcal": 550,
    "p": 33,
    "f": 31,
@@ -1655,13 +1744,14 @@
    "notes": "Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Chicken",
    "restaurant": "Shake Shack",
    "item": "Chicken Shack Lettuce Wrap",
-   "order": "As is.",
+   "order": "Say \"Chicken Shack, lettuce wrap\" instead of the bun.",
    "kcal": 420,
    "p": 27,
    "f": 30,
@@ -1671,13 +1761,14 @@
    "notes": "Cuts carbs, not fat. Standard recipe, so its usual sauce is in the numbers.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Shake Shack",
    "item": "Burger Patty (add-on)",
-   "order": "Add to any burger.",
+   "order": "Ask to \"add a burger patty\" to any burger.",
    "kcal": 190,
    "p": 19,
    "f": 12,
@@ -1687,13 +1778,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Shake Shack",
    "item": "Regular Fries",
-   "order": "Side.",
+   "order": "Ask for regular fries.",
    "kcal": 470,
    "p": 6,
    "f": 22,
@@ -1703,7 +1795,8 @@
    "notes": "Skip on a cut.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
@@ -1719,7 +1812,8 @@
    "notes": "Built from official parts; veggies not counted. HD1 sauce is counted.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Burgers & sandwiches",
@@ -1735,13 +1829,14 @@
    "notes": "Built from official parts; veggies not counted. HD1 sauce is counted.",
    "checked": null,
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Built to order: everything counted is in How to order."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Hopdoddy",
    "item": "Ahi Tuna burger",
-   "order": "As is.",
+   "order": "Say \"Ahi Tuna burger\" and order it as it comes.",
    "kcal": 610,
    "p": 35,
    "f": 27,
@@ -1751,13 +1846,14 @@
    "notes": "Sauce or dressing: not stated (hopdoddy.com could not be read on Nov 25, 2026).",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Hopdoddy",
    "item": "Thunderbird (chicken)",
-   "order": "As is.",
+   "order": "Say \"Thunderbird\" and order it as it comes.",
    "kcal": 770,
    "p": 51,
    "f": 38,
@@ -1767,13 +1863,14 @@
    "notes": "Sauce or dressing: not stated (hopdoddy.com could not be read on Nov 25, 2026).",
    "checked": null,
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Hopdoddy",
    "item": "Extra chicken patty (add-on)",
-   "order": "Add to any burger.",
+   "order": "Ask to \"add a chicken patty\" to any burger.",
    "kcal": 180,
    "p": 31,
    "f": 5,
@@ -1783,13 +1880,14 @@
    "notes": "",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Hopdoddy",
    "item": "Hand-Cut Fries, regular",
-   "order": "Side.",
+   "order": "Ask for regular Hand-Cut Fries.",
    "kcal": 420,
    "p": 4,
    "f": 26,
@@ -1799,13 +1897,14 @@
    "notes": "Skip on a cut.",
    "checked": null,
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Jersey Mike's",
    "item": "#19 BBQ Beef (regular)",
-   "order": "Regular, as listed.",
+   "order": "Say \"#19 BBQ Beef, regular\". BBQ sauce is counted.",
    "kcal": 710,
    "p": 60,
    "f": 11.5,
@@ -1815,13 +1914,14 @@
    "notes": "BBQ sauce included. Official data via NutriScan, Oct 21, 2026.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Bowls",
    "restaurant": "Jersey Mike's",
    "item": "#19 BBQ Beef Sub in a Tub",
-   "order": "Order #19 as a bowl (Sub in a Tub).",
+   "order": "Say \"#19 BBQ Beef as a Sub in a Tub\" (a bowl, no bread). BBQ sauce is counted.",
    "kcal": 400,
    "p": 48.5,
    "f": 8.5,
@@ -1831,13 +1931,14 @@
    "notes": "BBQ sauce included.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Jersey Mike's",
    "item": "#16 Mike's Chicken Philly (regular)",
-   "order": "Regular, as listed.",
+   "order": "Say \"#16 Mike's Chicken Philly, regular\". Ask for no mayo to stay at or under these numbers.",
    "kcal": 680,
    "p": 48.5,
    "f": 21.5,
@@ -1847,13 +1948,14 @@
    "notes": "Sauce or mayo: not stated by Jersey Mike's listing.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Bowls",
    "restaurant": "Jersey Mike's",
    "item": "#16 Chicken Philly Sub in a Tub",
-   "order": "Order #16 as a bowl (Sub in a Tub).",
+   "order": "Say \"#16 Mike's Chicken Philly as a Sub in a Tub\" (a bowl, no bread).",
    "kcal": 380,
    "p": 36.5,
    "f": 19,
@@ -1863,13 +1965,14 @@
    "notes": "Sauce or mayo: not stated by Jersey Mike's listing.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Jersey Mike's",
    "item": "Chips (bag)",
-   "order": "Side.",
+   "order": "Ask for a bag of chips.",
    "kcal": 240,
    "p": 3,
    "f": 16,
@@ -1879,13 +1982,14 @@
    "notes": "Skip on a cut. No baked chips listed.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Firehouse Subs",
    "item": "Firehouse Salad with chicken",
-   "order": "Add chicken. Light Italian on the side (not counted).",
+   "order": "Say \"Firehouse Salad with chicken\". Ask for Light Italian on the side (not counted).",
    "kcal": 350,
    "p": 41,
    "f": 14,
@@ -1895,13 +1999,14 @@
    "notes": "Dressings are listed separately, so likely not included (not stated). Official data via NutriScan.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Salads",
    "restaurant": "Firehouse Subs",
    "item": "Hook & Ladder Salad",
-   "order": "Light Italian on the side (not counted).",
+   "order": "Say \"Hook & Ladder Salad\". Ask for Light Italian on the side (not counted).",
    "kcal": 320,
    "p": 30,
    "f": 13,
@@ -1911,13 +2016,14 @@
    "notes": "fastfoodnutrition.org lists 264 kcal; sources conflict.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "No"
+   "sauce": "No",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Burgers & sandwiches",
    "restaurant": "Firehouse Subs",
    "item": "Chicken sub (medium)",
-   "order": "Medium. Ask for no mayo or cheese (savings not counted).",
+   "order": "Say \"medium Chicken sub\". Ask for no mayo or cheese (the savings are not counted).",
    "kcal": 730,
    "p": 47,
    "f": 35,
@@ -1927,13 +2033,14 @@
    "notes": "Whether listed numbers include mayo and cheese is not stated.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Not stated"
+   "sauce": "Not stated",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Firehouse Subs",
    "item": "Light Italian dressing",
-   "order": "One serving.",
+   "order": "Ask for Light Italian dressing on the side (one serving).",
    "kcal": 90,
    "p": 0,
    "f": 9,
@@ -1943,13 +2050,14 @@
    "notes": "Lowest-fat dressing. Oil and vinegar is 28 g fat.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Firehouse Subs",
    "item": "Chili (6 oz)",
-   "order": "Side.",
+   "order": "Ask for a 6 oz chili as a side.",
    "kcal": 180,
    "p": 11,
    "f": 9,
@@ -1959,13 +2067,14 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Firehouse Subs",
    "item": "Oven Baked Lay's",
-   "order": "Side.",
+   "order": "Ask for Oven Baked Lay's as your chips.",
    "kcal": 130,
    "p": 2,
    "f": 2,
@@ -1975,13 +2084,14 @@
    "notes": "Carb-friendly, low-fat side.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Not listed by the source."
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Smoothie King",
    "item": "Gladiator Vanilla (20 oz)",
-   "order": "20 oz, no enhancers.",
+   "order": "Say \"Gladiator, Vanilla, 20 oz\", with no enhancers.",
    "kcal": 220,
    "p": 45,
    "f": 2.5,
@@ -1991,13 +2101,14 @@
    "notes": "Strawberry and Chocolate are about the same. Official data via NutriScan, Oct 21, 2026.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Gladiator Protein Vanilla blended (Smoothie King lists the protein as the only ingredient). (from smoothieking.com, Nov 25, 2026)"
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Smoothie King",
    "item": "Activator Recovery Strawberry Banana (20 oz)",
-   "order": "20 oz, no enhancers.",
+   "order": "Say \"The Activator Recovery, Strawberry Banana, 20 oz\", with no enhancers.",
    "kcal": 260,
    "p": 26,
    "f": 2.5,
@@ -2007,13 +2118,14 @@
    "notes": "Post-workout carb option.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Bananas, strawberries, apple juice blend, coconut water, protein blend and Gladiator Protein Vanilla. (from smoothieking.com, Nov 25, 2026)"
   },
   {
    "type": "Breakfast",
    "restaurant": "Smoothie King",
    "item": "High Protein Greek Yogurt Honey Berry Bowl",
-   "order": "As is.",
+   "order": "Say \"High Protein Greek Yogurt Honey Berry Bowl\" and order it as it comes.",
    "kcal": 440,
    "p": 32,
    "f": 9,
@@ -2023,13 +2135,14 @@
    "notes": "Standard recipe, honey and toppings included.",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "Yes"
+   "sauce": "Yes",
+   "comes": "Greek nonfat yogurt, Purely Elizabeth granola, diced strawberries, whole blueberries, chia seeds and honey. (from smoothieking.com, Nov 25, 2026)"
   },
   {
    "type": "Sides, add-ons & drinks",
    "restaurant": "Smoothie King",
    "item": "Chicken Bites",
-   "order": "Pair with a Gladiator or Activator.",
+   "order": "Ask for Chicken Bites. Pair with a Gladiator or Activator.",
    "kcal": 140,
    "p": 20,
    "f": 5,
@@ -2039,7 +2152,8 @@
    "notes": "",
    "checked": "2026-11-25",
    "verified": "No",
-   "sauce": "None"
+   "sauce": "None",
+   "comes": "Seared diced chicken breast. (from smoothieking.com, Nov 25, 2026)"
   }
  ],
  "meals": [

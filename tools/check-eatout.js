@@ -51,5 +51,8 @@ const macros = (x, where) => {
   macros(x, w);
 });
 
+const thin = (d.items || []).filter(x => (x.order || '').length < 25).map(x => `${x.restaurant} | ${x.item}`);
+if (thin.length) console.warn(`Warning: ${thin.length} item(s) have short How to order text (under 25 characters):\n- ` + thin.join('\n- '));
+
 if (bad.length) { console.error(bad.length + ' problem(s) in ' + file + ':\n- ' + bad.join('\n- ')); process.exit(1); }
 console.log(`OK: ${d.items.length} items, ${d.meals.length} meals, ${d.restaurants.length} restaurants, updated ${d.updated}, sheet revision ${d.sheetRevision}`);

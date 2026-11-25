@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.8.0
+Version 3.8.1
 
 ## What it does
 
@@ -23,7 +23,7 @@ Version 3.8.0
   - Phases: cut, maintain, lean gain, recomp.
   - Maintenance calories worked out from your data, and calorie targets for each phase.
   - Abs weight range estimate.
-  - **Eating out:** a restaurant guide for Frisco and Plano. Top picks under a fat limit, search, and each restaurant's tested meals, tips and items, shown against today's calories and your 65 g of fat. Updated weekly from the Eat Out Macro Guide Sheet and saved for offline use.
+  - **Eating out:** a restaurant guide for Frisco and Plano. Right under the weigh-in. Top picks under a fat limit, search, and each restaurant's tested meals, tips and items, with tiles for calories, protein, fat and carbs, a Lean score (protein per 100 kcal, higher is leaner) and exactly what to order. Updated weekly from the Eat Out Macro Guide Sheet and saved for offline use.
 - **Exercise library**
   - About 75 exercises for a home gym with a rack, barbell, hex bar, EZ bar, dumbbells, adjustable bench, a cable with low and high pulley, chin-up bar, dips and ab wheel.
   - Each one has a short form cue and a form video or a YouTube search.
@@ -85,6 +85,12 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.8.1**
+  - Eating out sits right under the weigh-in, so Find a meal is one tap away.
+  - Full names, no more cut-off text. Each item shows big tiles for calories, protein, fat and carbs with their share of today, and fat turns gold when it is high.
+  - Lean score explained: grams of protein per 100 kcal, higher is leaner.
+  - Tap an item for exactly what to order, what it comes with (from the chain's own menu where it lists it), whether sauce is counted, what pairs well, notes and the source.
+  - The guide's order text was rewritten for 89 items.
 - **3.8.0**
   - Body tab: new **Eating out** section. Tap Find a meal for top picks under a fat limit (15, 20 or 25 g), search any place or food, or open a restaurant for its tested meals, ordering tip, what to avoid and every item on file.
   - Each row shows calories as a share of today (training or rest day), protein, fat against your 65 g and carbs. Tap it for how to order, notes, whether sauce is counted, and the source.
