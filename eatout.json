@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "updated": "2026-11-25",
- "sheetRevision": 24,
+ "updated": "2026-11-26",
+ "sheetRevision": 25,
  "targets": {
   "protein": 200,
   "fat": 65
@@ -228,7 +228,7 @@
    "c": 36,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Everything in How to order is counted, salsas included.",
+   "notes": "Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
@@ -245,7 +245,7 @@
    "c": 72,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Everything in How to order is counted, salsas included.",
+   "notes": "Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
@@ -262,7 +262,7 @@
    "c": 81,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Tortilla alone is 320 kcal. Everything in How to order is counted, salsas included.",
+   "notes": "Tortilla alone is 320 kcal. Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
