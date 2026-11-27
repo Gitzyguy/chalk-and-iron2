@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "updated": "2026-11-25",
- "sheetRevision": 24,
+ "updated": "2026-11-27",
+ "sheetRevision": 26,
  "targets": {
   "protein": 200,
   "fat": 65
@@ -214,6 +214,14 @@
    "avoid": "Keto Champ (33 g fat), The Hulk (690 to 820 kcal), Peanut Power Plus, Daily Warrior, Protein Boxes (27 to 31 g fat), 32 and 44 oz sizes.",
    "tip": "Gladiator is 45 g protein for 220 kcal. Pick Activator Recovery after training when you want carbs. Enhancers are not counted.",
    "source": "https://nutriscan.app/calculators/smoothieking-nutrition-calculator"
+  },
+  {
+   "name": "In-N-Out",
+   "type": "Fast food",
+   "data": "Official via NutriScan",
+   "avoid": "French Fries (360 kcal, 15 g fat), shakes (590 to 610 kcal, 30 to 31 g fat), spread (100 kcal, 9 g fat a packet), Animal Style and extra patties (no official numbers).",
+   "tip": "Ask for mustard and ketchup instead of spread: it saves 50 to 60 kcal and 6 to 7 g fat per burger. No item reaches 40 g protein, so plan a protein-heavy meal elsewhere that day.",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator"
   }
  ],
  "items": [
@@ -228,7 +236,7 @@
    "c": 36,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Everything in How to order is counted, salsas included.",
+   "notes": "Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
@@ -245,7 +253,7 @@
    "c": 72,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Everything in How to order is counted, salsas included.",
+   "notes": "Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
@@ -262,7 +270,7 @@
    "c": 81,
    "data": "Official",
    "source": "https://nutriscan.app/calculators/chipotle-nutrition-calculator",
-   "notes": "Tortilla alone is 320 kcal. Everything in How to order is counted, salsas included.",
+   "notes": "Tortilla alone is 320 kcal. Everything in the order is counted, salsas included.",
    "checked": null,
    "verified": "No",
    "sauce": "Yes",
@@ -2154,6 +2162,91 @@
    "verified": "No",
    "sauce": "None",
    "comes": "Seared diced chicken breast. (from smoothieking.com, Nov 25, 2026)"
+  },
+  {
+   "type": "Burgers & sandwiches",
+   "restaurant": "In-N-Out",
+   "item": "Double-Double, mustard and ketchup",
+   "order": "Say \"Double-Double with mustard and ketchup instead of spread\". Add onion if you like.",
+   "kcal": 550,
+   "p": 34,
+   "f": 27,
+   "c": 41,
+   "data": "Official",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator",
+   "notes": "Official data via NutriScan, Oct 14, 2026. Mustard and ketchup counted.",
+   "checked": "2026-11-27",
+   "verified": "No",
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
+  },
+  {
+   "type": "Burgers & sandwiches",
+   "restaurant": "In-N-Out",
+   "item": "Double-Double Protein Style",
+   "order": "Say \"Double-Double, Protein Style\" (lettuce instead of the bun). Ask for mustard and ketchup instead of spread to cut fat (savings not counted).",
+   "kcal": 460,
+   "p": 30,
+   "f": 32,
+   "c": 12,
+   "data": "Official",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator",
+   "notes": "Official data via NutriScan, Oct 14, 2026. Spread is counted.",
+   "checked": "2026-11-27",
+   "verified": "No",
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
+  },
+  {
+   "type": "Burgers & sandwiches",
+   "restaurant": "In-N-Out",
+   "item": "Cheeseburger, mustard and ketchup",
+   "order": "Say \"Cheeseburger with mustard and ketchup instead of spread\".",
+   "kcal": 380,
+   "p": 20,
+   "f": 15,
+   "c": 39,
+   "data": "Official",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator",
+   "notes": "Official data via NutriScan, Oct 14, 2026. Mustard and ketchup counted.",
+   "checked": "2026-11-27",
+   "verified": "No",
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
+  },
+  {
+   "type": "Burgers & sandwiches",
+   "restaurant": "In-N-Out",
+   "item": "Hamburger, mustard and ketchup",
+   "order": "Say \"Hamburger with mustard and ketchup instead of spread\". Two make a meal (600 kcal, 32 g protein, 20 g fat).",
+   "kcal": 300,
+   "p": 16,
+   "f": 10,
+   "c": 38,
+   "data": "Official",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator",
+   "notes": "Official data via NutriScan, Oct 14, 2026. Mustard and ketchup counted.",
+   "checked": "2026-11-27",
+   "verified": "No",
+   "sauce": "Yes",
+   "comes": "Not listed by the source."
+  },
+  {
+   "type": "Sides, add-ons & drinks",
+   "restaurant": "In-N-Out",
+   "item": "Fuji Apple Fruit Crisps",
+   "order": "Ask for Fuji Apple Fruit Crisps instead of fries.",
+   "kcal": 40,
+   "p": 0,
+   "f": 0,
+   "c": 10,
+   "data": "Official",
+   "source": "https://nutriscan.app/calculators/innout-nutrition-calculator",
+   "notes": "Official data via NutriScan, Oct 14, 2026.",
+   "checked": "2026-11-27",
+   "verified": "No",
+   "sauce": "None",
+   "comes": "Not listed by the source."
   }
  ],
  "meals": [
@@ -2904,6 +2997,28 @@
    "c": 34,
    "data": "Official",
    "notes": ""
+  },
+  {
+   "restaurant": "In-N-Out",
+   "rank": "1",
+   "order": "Double-Double with mustard and ketchup instead of spread + Fuji Apple Fruit Crisps.",
+   "kcal": 590,
+   "p": 34,
+   "f": 27,
+   "c": 51,
+   "data": "Official (chain guide via NutriScan, Oct 2026)",
+   "notes": "No In-N-Out order reaches 40 g protein; best options shown."
+  },
+  {
+   "restaurant": "In-N-Out",
+   "rank": "2",
+   "order": "2 Hamburgers with mustard and ketchup instead of spread.",
+   "kcal": 600,
+   "p": 32,
+   "f": 20,
+   "c": 76,
+   "data": "Official (chain guide via NutriScan, Oct 2026)",
+   "notes": "No In-N-Out order reaches 40 g protein; best options shown."
   }
  ]
 }

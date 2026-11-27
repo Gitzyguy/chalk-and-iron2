@@ -2,7 +2,7 @@
 
 A workout tracker for 5/3/1 and other strength programs. It installs on your phone like an app, works offline, and keeps all your data on your phone.
 
-Version 3.8.1
+Version 3.8.2
 
 ## What it does
 
@@ -23,7 +23,7 @@ Version 3.8.1
   - Phases: cut, maintain, lean gain, recomp.
   - Maintenance calories worked out from your data, and calorie targets for each phase.
   - Abs weight range estimate.
-  - **Eating out:** a restaurant guide for Frisco and Plano. Right under the weigh-in. Top picks under a fat limit, search, and each restaurant's tested meals, tips and items, with tiles for calories, protein, fat and carbs, a Lean score (protein per 100 kcal, higher is leaner) and exactly what to order. Updated weekly from the Eat Out Macro Guide Sheet and saved for offline use.
+  - **Eating out:** a restaurant guide for Frisco and Plano. Right under the weigh-in. Top picks under a fat limit, search, and each restaurant's tested meals, tips and items, with tiles for calories, protein, fat and carbs, a Lean score (protein per 100 kcal, higher is leaner) and exactly what to order. Star foods to keep them in Favorites. Updated weekly from the Eat Out Macro Guide Sheet and saved for offline use.
 - **Exercise library**
   - About 75 exercises for a home gym with a rack, barbell, hex bar, EZ bar, dumbbells, adjustable bench, a cable with low and high pulley, chin-up bar, dips and ab wheel.
   - Each one has a short form cue and a form video or a YouTube search.
@@ -85,6 +85,10 @@ The version number is shown in Settings and at the end of the help guide. Downlo
 
 ## Version history
 
+- **3.8.2**
+  - Favorites: tap ☆ on any food or meal in Eating out. Favorites show first in Find a meal, the Eating out bar shows how many you have, and they are saved in your backups.
+  - Lean score explained: each item's details show its own math (protein ÷ calories × 100), and a How it's calculated button explains the scale.
+  - Item details: the link now reads Details, and the confusing "Built to order" line is gone (the order already lists everything).
 - **3.8.1**
   - Eating out sits right under the weigh-in, so Find a meal is one tap away.
   - Full names, no more cut-off text. Each item shows big tiles for calories, protein, fat and carbs with their share of today, and fat turns gold when it is high.
